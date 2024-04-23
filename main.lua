@@ -39,40 +39,9 @@ end
 function love.draw()
   love.graphics.clear()
 
-  if input.isActive("continuous action") then
-    love.graphics.setColor(1, 0, 0)
-  else
-    love.graphics.setColor(1, 1, 1)
+  if input.isActive("test rumble") then
+    input.setGamepadRumble(0, 1, 0.15)
   end
-  love.graphics.circle("fill", 100, 100, 50)
-
-  if input.isActive("press action") then
-    love.graphics.setColor(1, 0, 0)
-  else
-    love.graphics.setColor(1, 1, 1)
-  end
-  love.graphics.circle("fill", 250, 100, 50)
-
-  if input.isActive("release action") then
-    love.graphics.setColor(1, 0, 0)
-  else
-    love.graphics.setColor(1, 1, 1)
-  end
-  love.graphics.circle("fill", 400, 100, 50)
-
-  if input.isActive("multiple keys") then
-    love.graphics.setColor(1, 0, 0)
-  else
-    love.graphics.setColor(1, 1, 1)
-  end
-  love.graphics.circle("fill", 550, 100, 50)
-
-  if input.isActive("chord action") then
-    love.graphics.setColor(1, 0, 0)
-  else
-    love.graphics.setColor(1, 1, 1)
-  end
-  love.graphics.circle("fill", 700, 100, 50)
 
   if input.gamepadConnected then
     local leftStick = input.getStickVector("left")

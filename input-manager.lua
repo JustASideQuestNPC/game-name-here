@@ -19,6 +19,7 @@ local HIGH_DEADZONE = settings.gamepadHighDeadzone
 -- the active gamepad (if any)
 local gamepad
 local _gamepadConnected = false
+local _vibrationSupported = false
 
 -- which input type was last used, either "keyboard" or "gamepad"
 local _currentInputType = "keyboard"
@@ -94,13 +95,14 @@ local function initGamepad()
     print("Is gamepad: "..tostring(gamepad:isGamepad()))
     if gamepad:isGamepad() then
       _gamepadConnected = true
+      _vibrationSupported = gamepad:isVibrationSupported()
       print("ID: "..gamepad:getID()..
           "\nName: "..gamepad:getName()..
           "\nGUID: "..gamepad:getGUID()..
           "\nDevice Info: "..gamepad:getDeviceInfo()..
           "\nAxis count: "..gamepad:getAxisCount()..
           "\nButton count: "..gamepad:getButtonCount()..
-          "\nSupports vibration: "..tostring(gamepad:isVibrationSupported()))
+          "\nSupports vibration: "..tostring(_vibrationSupported))
     end
   end
 end
@@ -260,6 +262,16 @@ local function getStickVector(stick)
   return v
 end
 
+---Sets the vibration of the gamepad, if possible.
+---@param left number Strength of the left motor. Must be in the range [0, 1].
+---@param right number Strength of the right motor. Must be in the range [0, 1].
+---@param duration number Duration of the rumble in seconds. < 0 means infinite duration.
+local function setGamepadRumble(left, right, duration)
+  if _gamepadConnected and _vibrationSupported then
+    gamepad:setVibration(left, right, duration)
+  end
+end
+
 ---Updates the internal state when a key is pressed. Call in `love.keypressed()`.
 ---@param key string
 local function keyPressed(key)
@@ -342,6 +354,7 @@ return {
   isActive = isActive,
   getAxisValue = getAxisValue,
   getStickVector = getStickVector,
+  setGamepadRumble = setGamepadRumble,
   keyPressed = keyPressed,
   keyReleased = keyReleased,
   mousePressed = mousePressed,

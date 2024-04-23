@@ -13,33 +13,11 @@ return {
 
   keybinds = {
     {
-      name = "continuous action",
-      keys = {"space"},
-      gamepadButtons = {"a"}
-    },
-    {
-      name = "press action",
-      keys = {"space"},
+      name = "test rumble",
+      keys = {"a"},
       gamepadButtons = {"a"},
       mode = "press"
     },
-    {
-      name = "release action",
-      keys = {"space"},
-      gamepadButtons = {"a"},
-      mode = "release"
-    },
-    {
-      name = "multiple keys",
-      keys = {"lshift", "left mouse"},
-      gamepadButtons = {"left trigger", "right trigger"},
-    },
-    {
-      name = "chord action",
-      keys = {"lshift", "left mouse"},
-      gamepadButtons = {"left trigger", "right trigger"},
-      chord = true
-    }
   },
 
   -- gamepad analog values lower than this are clamped to 0
