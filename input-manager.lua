@@ -131,6 +131,8 @@ end
 
 ---Returns whether the named action is currently active.
 ---@param name string
+---@return boolean
+---@nodiscard
 local function isActive(name)
   if activeActions[name].active > 0 then
     table.insert(clearedActions, name)
@@ -139,25 +141,25 @@ local function isActive(name)
   return false
 end
 
----Updates the internal state when a key is pressed. Call in love.keypressed().
+---Updates the internal state when a key is pressed. Call in `love.keypressed()`.
 ---@param key string
 local function keyPressed(key)
   keyStates[key] = true
 end
 
----Updates the internal state when a key is released. Call in love.keyreleased().
+---Updates the internal state when a key is released. Call in `love.keyreleased()`.
 ---@param key string
 local function keyReleased(key)
   keyStates[key] = false
 end
 
----Updates the internal state when a mouse button is pressed. Call in love.mousepressed().
+---Updates the internal state when a mouse button is pressed. Call in `love.mousepressed()`.
 ---@param button integer
 local function mousePressed(button)
   keyStates[mouseButtonNames[button]] = true
 end
 
----Updates the internal state when a mouse button is released. Call in love.mousereleased().
+---Updates the internal state when a mouse button is released. Call in `love.mousereleased()`.
 ---@param button integer
 local function mouseReleased(button)
   keyStates[mouseButtonNames[button]] = false

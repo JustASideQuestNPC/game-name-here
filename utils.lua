@@ -1,9 +1,11 @@
 -- Various utility functions
 
 ---Interpolates values in args into a string. To interpolate a value, surround its name in curly
----brackets.
+---brackets and give it an entry in `args`.
 ---@param str string
 ---@param args table
+---@return string
+---@nodiscard
 local function stringFormat(str, args)
   local formatted = {} -- table because it makes building the string *way* faster
 
@@ -35,6 +37,8 @@ end
 ---Returns whether a predicate function returns true for every item in an array.
 ---@param arr table
 ---@param predicate function
+---@return boolean
+---@nodiscard
 local function arrayEvery(arr, predicate)
   for _, item in ipairs(arr) do
     if not predicate(item) then
@@ -47,6 +51,8 @@ end
 ---Returns whether a predicate function returns true for at least one item in an array.
 ---@param arr table
 ---@param predicate function
+---@return boolean
+---@nodiscard
 local function arrayAny(arr, predicate)
   for _, item in ipairs(arr) do
     if predicate(item) then
