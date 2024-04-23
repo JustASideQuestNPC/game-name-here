@@ -1,39 +1,5 @@
 -- Various utility functions
 
----Interpolates values in args into a string. To interpolate a value, surround its name in curly
----brackets and give it an entry in `args`.
----@param str string
----@param args table
----@return string
----@nodiscard
-local function stringFormat(str, args)
-  local formatted = {} -- table because it makes building the string *way* faster
-
-  local parsingName = false
-  local nameBuffer = {} -- for parsing value names
-
-  for char in str:gmatch(".") do
-    if parsingName then
-      if char == '}' then
-        local key = table.concat(nameBuffer)
-        table.insert(formatted, args[key])
-        nameBuffer = {}
-        parsingName = false
-      else
-        table.insert(nameBuffer, char)
-      end
-    else
-      if char == '{' then
-        parsingName = true
-      else
-        table.insert(formatted, char)
-      end
-    end
-  end
-
-  return table.concat(formatted)
-end
-
 ---Returns whether a predicate function returns true for every item in an array.
 ---@param arr table
 ---@param predicate function
@@ -62,8 +28,31 @@ local function arrayAny(arr, predicate)
   return false
 end
 
+---Interpolates between two numbers.
+---@param start number
+---@param stop number
+---@param amount number The amount to interpolate by. 0 returns start, and 1 returns stop.
+---@return number
+---@nodiscard
+local function lerp(start, stop, amount)
+  return start * (1 - amount) + stop * amount
+end
+
+---Maps a value between two ranges.
+---@param value number
+---@param inputStart number
+---@param inputEnd number
+---@param outputStart number
+---@param outputEnd number
+---@return number
+---@nodiscard
+local function map(value, inputStart, inputEnd, outputStart, outputEnd)
+  return outputStart + ((outputEnd - outputStart) / (inputEnd - inputStart)) * (value - inputStart)
+end
+
 return {
-  stringFormat = stringFormat,
   arrayEvery = arrayEvery,
-  arrayAny = arrayAny
+  arrayAny = arrayAny,
+  lerp = lerp,
+  map = map
 }

@@ -30,7 +30,19 @@ local Vector2 = {}
 ---@nodiscard
 function Vector2.new(x, y)
   local v = {x = x or 0, y = y or 0}
-  setmetatable(v, Vector2) -- gives v all the Vector methods
+  setmetatable(v, {
+    __index = Vector2,
+    __add = Vector2.__add,
+    __sub = Vector2.__sub,
+    __mul = Vector2.__mul,
+    __div = Vector2.__div,
+    __unm = Vector2.__unm,
+    __eq = Vector2.__eq,
+    __ne = Vector2.__ne,
+    __lt = Vector2.__lt,
+    __le = Vector2.__le,
+    __tostring = Vector2.__tostring
+  }) -- gives v all the Vector methods
   return v
 end
 
@@ -187,7 +199,7 @@ end
 ---Static method that interpolates between two vectors and returns a new vector.
 ---@param v1 Vector2
 ---@param v2 Vector2
----@param amount any The amount to interpolate by. 0 returns v1, and 1 returns v2.
+---@param amount number The amount to interpolate by. 0 returns v1, and 1 returns v2.
 ---@return Vector2
 ---@nodiscard
 function Vector2.lerp(v1, v2, amount)
@@ -234,5 +246,7 @@ function Vector2.__le(a, b)
 end
 
 function Vector2.__tostring(v)
-  return "("..v.x..", "..v.y..")"
+  return string.format("(%.2f, %.2f)", v.x, v.y)
 end
+
+return Vector2
