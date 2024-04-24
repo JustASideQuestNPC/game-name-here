@@ -247,12 +247,12 @@ end
 local function getStickVector(stick)
   local v
   if stick == "left" then
-    v = Vector2.new(
+    v = Vector2:new(
       gamepadAxisValues["left stick x"],
       gamepadAxisValues["left stick y"]
     )
   else
-    v = Vector2.new(
+    v = Vector2:new(
       gamepadAxisValues["right stick x"],
       gamepadAxisValues["right stick y"]
     )

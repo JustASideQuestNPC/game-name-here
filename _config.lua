@@ -16,5 +16,12 @@ return {
       gamepadButtons = {"a"},
       mode = "press"
     },
-  }
+  },
+
+  -- size of the input buffer in seconds
+  inputBufferSize = 0.5,
+  -- gamepad analog values lower than this are clamped to 0
+  gamepadLowDeadzone = 0.1,
+  -- gamepad analog values higher than this are clamped to 1
+  gamepadHighDeadzone = 0.95
 }
