@@ -1,13 +1,13 @@
 -- Manages keyboard and mouse input.
-local utils    = require("utils")
-local settings = require("_settings")
-local Vector2  = require("vector2")-- hack to remove the prefix
+local utils    = require("lib.utils")
+local config = require("_config")
+local Vector2  = require("lib.vector2")-- hack to remove the prefix
 
-local BUFFER_SIZE = settings.inputBufferSize -- size of the input buffer in seconds
+local BUFFER_SIZE = config.inputBufferSize -- size of the input buffer in seconds
 -- gamepad analog values lower than this are clamped to 0
-local LOW_DEADZONE = settings.gamepadLowDeadzone
+local LOW_DEADZONE = config.gamepadLowDeadzone
 -- gamepad analog values higher than this are clamped to 1
-local HIGH_DEADZONE = settings.gamepadHighDeadzone
+local HIGH_DEADZONE = config.gamepadHighDeadzone
 
 ---@class ActionConfig An object with data for an input action.
 ---@field name string

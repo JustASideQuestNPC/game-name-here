@@ -1,7 +1,7 @@
-local input    = require("input-manager")
-local settings = require("_settings")
-local Vector2  = require("vector2")
-local utils    = require("utils")
+local input    = require("lib.input-manager")
+local settings = require("_config")
+local Vector2  = require("lib.vector2")
+local utils    = require("lib.utils")
 
 -- called once on program start
 function love.load()
