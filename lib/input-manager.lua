@@ -1,13 +1,13 @@
 -- Manages keyboard and mouse input.
-local utils    = require("lib.utils")
-local config = require("_config")
-local Vector2  = require("lib.vector2")-- hack to remove the prefix
+local utils   = require "lib.utils"
+local config  = require "_config"
+local Vector2 = require "lib.vector2"
 
-local BUFFER_SIZE = config.inputBufferSize -- size of the input buffer in seconds
+local BUFFER_SIZE = config.input.bufferSize -- size of the input buffer in seconds
 -- gamepad analog values lower than this are clamped to 0
-local LOW_DEADZONE = config.gamepadLowDeadzone
+local LOW_DEADZONE = config.input.lowDeadzone
 -- gamepad analog values higher than this are clamped to 1
-local HIGH_DEADZONE = config.gamepadHighDeadzone
+local HIGH_DEADZONE = config.input.highDeadzone
 
 ---@class ActionConfig An object with data for an input action.
 ---@field name string
@@ -247,12 +247,12 @@ end
 local function getStickVector(stick)
   local v
   if stick == "left" then
-    v = Vector2:new(
+    v = Vector2.new(
       gamepadAxisValues["left stick x"],
       gamepadAxisValues["left stick y"]
     )
   else
-    v = Vector2:new(
+    v = Vector2.new(
       gamepadAxisValues["right stick x"],
       gamepadAxisValues["right stick y"]
     )

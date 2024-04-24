@@ -1,4 +1,5 @@
 -- A 2D vector class for doing 2D vector things.
+local utils = require "lib.utils"
 
 ---@class Vector2
 ---@field x number
@@ -15,6 +16,7 @@
 ---@field dot function
 ---@field angleTo function
 ---@field lerp function
+---@field damp function
 ---@operator add(Vector2) : Vector2
 ---@operator sub(Vector2) : Vector2
 ---@operator mul(number) : Vector2
@@ -199,14 +201,25 @@ end
 ---Static method that interpolates between two vectors and returns a new vector.
 ---@param v1 Vector2
 ---@param v2 Vector2
----@param amount number The amount to interpolate by. 0 returns v1, and 1 returns v2.
+---@param t number The amount to interpolate by. 0 returns v1, and 1 returns v2.
 ---@return Vector2
 ---@nodiscard
-function Vector2.lerp(v1, v2, amount)
+function Vector2.lerp(v1, v2, t)
   return Vector2.new(
-    v1.x * (1 - amount) + v2.x * amount,
-    v1.y * (1 - amount) + v2.y * amount
+    utils.lerp(v1.x, v2.x, t),
+    utils.lerp(v1.y, v2.y, t)
   )
+end
+
+---Framerate-independent version of `lerp()` using delta time
+---@param v1 Vector2
+---@param v2 Vector2
+---@param t number The amount to interpolate by. 0 returns v1, and 1 returns v2.
+---@param dt number The current delta time; makes the result framerate-independent.
+---@return Vector2
+---@nodiscard
+function Vector2.damp(v1, v2, t, dt)
+  return Vector2.lerp(v1, v2, math.exp(-t * dt))
 end
 
 function Vector2.__add(a, b)

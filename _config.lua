@@ -9,19 +9,22 @@ return {
     msaaSamples = 8,    -- number of samples for antialiasing
   },
 
-  keybinds = {
-    {
-      name = "test rumble",
-      keys = {"a"},
-      gamepadButtons = {"a"},
-      mode = "press"
+  input = {
+    keybinds = {
+      {
+        name = "test rumble",
+        keys = {"a"},
+        gamepadButtons = {"a"},
+        mode = "press"
+      },
     },
+
+    bufferSize = 0.5,   -- size of the input buffer in seconds
+    lowDeadzone = 0.1,  -- gamepad analog values lower than this are clamped to 0
+    highDeadzone = 0.95 -- gamepad analog values higher than this are clamped to 1
   },
 
-  -- size of the input buffer in seconds
-  inputBufferSize = 0.5,
-  -- gamepad analog values lower than this are clamped to 0
-  gamepadLowDeadzone = 0.1,
-  -- gamepad analog values higher than this are clamped to 1
-  gamepadHighDeadzone = 0.95
+  engine = {
+    cameraTightness = 1.0 -- determines how quickly the camera moves
+  }
 }
