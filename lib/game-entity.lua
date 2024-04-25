@@ -3,12 +3,10 @@ local utils = require "lib.utils"
 
 ---@enum EntityTag
 local EntityTag = {
-  -- engine tags
   USES_RAW_DELTA_TIME = 0, -- Entity always recieves the raw delta time regardless of multiplier.
   USES_SCREEN_SPACE_COORDS = 1, -- Entity ignores camera position when being drawn.
 
-  -- entity types
-  BACKGROUD_GRID = 2
+  BACKGROUND_GRID = 2 -- Level/room background.
 }
 
 ---@class GameEntity
@@ -46,7 +44,23 @@ function GameEntity:hasTag(tag)
   return utils.arrayFind(self.tags, tag) ~= 0
 end
 
+---Generates a new class that extends GameEntity.
+---@param tags? EntityTag[]
+---@param displayLayer? integer
+---@return table
+local function EntityClass(tags, displayLayer)
+  local class = {
+    tags = tags or {},
+    displayLayer = displayLayer or 0
+  }
+  setmetatable(class, {
+    __index = GameEntity
+  })
+  return class
+end
+
 return {
   GameEntity = GameEntity,
-  EntityTag = EntityTag
+  EntityTag = EntityTag,
+  EntityClass = EntityClass
 }

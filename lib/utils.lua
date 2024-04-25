@@ -93,6 +93,16 @@ local function map(value, inputStart, inputEnd, outputStart, outputEnd)
   return outputStart + ((outputEnd - outputStart) / (inputEnd - inputStart)) * (value - inputStart)
 end
 
+---Clamps a value between a minimum and a maximum.
+---@param value number
+---@param min number
+---@param max number
+---@return number
+---@nodiscard
+local function clamp(value, min, max)
+  return math.min(math.max(value, min), max)
+end
+
 return {
   arrayEvery = arrayEvery,
   arrayAny = arrayAny,
@@ -101,4 +111,5 @@ return {
   lerp = lerp,
   damp = damp,
   map = map,
+  clamp = clamp
 }

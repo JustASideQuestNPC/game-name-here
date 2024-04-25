@@ -8,6 +8,7 @@ local EntityTag = require("lib.game-entity").EntityTag
 local CAMERA_TIGHTNESS = math.exp(config.engine.cameraTightness)
 local ROOM_WIDTH = config.gameplay.roomWidth
 local ROOM_HEIGHT = config.gameplay.roomHeight
+local CAMERA_MARGIN = config.engine.cameraMargin
 
 ---@type GameEntity[] All entities currently being updated and drawn.
 local entities = {}
@@ -126,7 +127,13 @@ local function update(dt)
   end)
 
   -- clamp camera position and target to within the boundary
-  
+  local xOffset = love.graphics.getWidth() / 2 - CAMERA_MARGIN
+  local yOffset = love.graphics.getHeight() / 2 - CAMERA_MARGIN
+
+  cameraPos.x = utils.clamp(cameraPos.x, xOffset, ROOM_WIDTH - xOffset)
+  cameraPos.y = utils.clamp(cameraPos.y, yOffset, ROOM_HEIGHT - yOffset)
+  cameraTarget.x = utils.clamp(cameraTarget.x, xOffset, ROOM_WIDTH - xOffset)
+  cameraTarget.y = utils.clamp(cameraTarget.y, yOffset, ROOM_HEIGHT - yOffset)
 
   -- update the camera position
   cameraPos = Vector2.damp(cameraPos, cameraTarget, CAMERA_TIGHTNESS, dt)

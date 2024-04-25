@@ -4,15 +4,16 @@ local utils = require "lib.utils"
 ---@class Vector2
 ---@field x number
 ---@field y number
+---@field new fun(x?: number, y?:number): Vector2
 ---@field coords fun(self): number, number
 ---@field copy fun(self): Vector2
----@field normalize fun(self): Vector2
+---@field normalize fun(self)
 ---@field angle fun(self, degrees?: boolean): number
 ---@field setAngle fun(self, theta: number, degrees?: boolean)
 ---@field rotate fun(self, theta: number, degrees?: boolean): number
 ---@field mag fun(self): number
 ---@field magSq fun(self): number
----@field setMag fun(self, newMag: number): number
+---@field setMag fun(self, newMag: number)
 ---@field addMag fun(self, value: number): number
 ---@field dot fun(self, vec: Vector2): number
 ---@field angleTo fun(self, vec: Vector2, degrees?: boolean): number
@@ -23,7 +24,6 @@ local utils = require "lib.utils"
 ---@operator mul(number): Vector2
 ---@operator div(number): Vector2
 ---@operator unm : Vector2
-
 local Vector2 = {}
 
 ---Constructs a new Vector2.

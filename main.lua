@@ -42,7 +42,7 @@ end
 
 ---Called once per frame to draw the game
 function love.draw()
-  love.graphics.clear()
+  love.graphics.clear(love.math.colorFromBytes(50, 49, 59))
   engine.draw()
 end
 

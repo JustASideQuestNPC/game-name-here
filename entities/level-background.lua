@@ -1,19 +1,18 @@
+-- Simple level/room background.
+
 local e = require "lib.game-entity"
-local GameEntity, EntityTag = e.GameEntity, e.EntityTag
+local EntityClass, EntityTag = e.EntityClass, e.EntityTag
 
 ---@class LevelBackground: GameEntity
 ---@field new fun():LevelBackground
 ---@field draw fun(self)
-local LevelBackground = {}
-setmetatable(LevelBackground, {
-  __index = GameEntity
-})
+local LevelBackground = EntityClass(
+  {EntityTag.BACKGROUND_GRID},
+  -1
+)
 
 function LevelBackground.new()
-  local instance = {
-    tags = {EntityTag.BACKGROUD_GRID},
-    displayLayer = -1
-  }
+  local instance = {}
   setmetatable(instance, {
     __index = LevelBackground
   })
