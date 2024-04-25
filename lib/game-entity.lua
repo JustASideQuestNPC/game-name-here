@@ -8,7 +8,7 @@ local EntityTag = {
 }
 
 ---@class GameEntity
----@field tags table
+---@field tags EntityTag[]
 ---@field displayLayer integer
 ---@field deleted boolean
 ---@field markForDelete boolean
@@ -21,7 +21,7 @@ local EntityTag = {
 local GameEntity = {}
 
 ---Constructs a new GameEntity
----@param tags table?
+---@param tags EntityTag[]?
 ---@param displayLayer integer?
 ---@return GameEntity
 function GameEntity.new(tags, displayLayer)

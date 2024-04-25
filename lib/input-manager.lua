@@ -16,37 +16,38 @@ local HIGH_DEADZONE = config.input.highDeadzone
 ---@field mode string Optional, defaults to "continuous".
 ---@field chord boolean Optional, defaults to false.
 
--- the active gamepad (if any)
+--  the active gamepad (if any)
 local gamepad
 local _gamepadConnected = false
 local _vibrationSupported = false
 
--- which input type was last used, either "keyboard" or "gamepad"
+-- Which input type was last used, either "keyboard" or "gamepad"
 local _currentInputType = "keyboard"
 
--- all managed actions
+---@type table[] All currently managed actions.
 local activeActions = {}
 
--- the state of every key and mouse button
+---@type table<string, boolean> The state of every key and mouse button
 local keyStates = {}
 -- makes keys that have never been pressed default to false (instead of nil)
 setmetatable(keyStates, {
   __index = function() return false end
 })
 
--- the state of all gamepad buttons
+---@type table<string, boolean> The state of all gamepad buttons.
 local gamepadButtonStates = {}
 setmetatable(gamepadButtonStates, {
   __index = function() return false end
 })
 
--- the position of all gamepad axes
+---@type table<string, number> The position of all gamepad axes.
 local gamepadAxisValues = {}
 setmetatable(gamepadAxisValues, {
   __index = function() return 0 end
 })
 
-local clearedActions = {} -- which actions should be reset on the next update
+---@type table[] Which actions should be reset on the next update.
+local clearedActions = {}
 
 --lookup table for converting love2d mouse button names into ones used by action configs 
 local mouseButtonNames = {
@@ -116,7 +117,7 @@ local function addAction(actionConfig)
   local gamepadButtons = actionConfig.gamepadButtons or {}
   local mode = actionConfig.mode or "continuous"
   local chord = actionConfig.chord or false
-  
+
   -- object to hold the action's methods
   local action = {
     keys = keys,

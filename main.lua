@@ -29,47 +29,65 @@ function love.load()
   input.addActionList(config.input.keybinds)
 end
 
--- called once per frame to update the game
+---Called once per frame to update the game.
+---@param dt number The time between the previous two frames in seconds.
 function love.update(dt)
   input.update(dt)
 end
 
--- called once per frame to draw the game
+---Called once per frame to draw the game
 function love.draw()
   love.graphics.clear()
 end
 
--- called when a key is pressed
+---Called when a key is pressed.
+---@param key string
 function love.keypressed(key)
   input.keyPressed(key)
 end
 
--- called when a key is released
+---Called when a key is released.
+---@param key string
 function love.keyreleased(key)
   input.keyReleased(key)
 end
 
--- called when the mouse is pressed
+---Called when the mouse is pressed.
+---@param x number The x position of the mouse in pixels.
+---@param y number The y position of the mouse in pixels.
+---@param button integer The button index that was pressed.
+---@param istouch boolean Whether the button press originated from a touchscreen press.
 function love.mousepressed(x, y, button, istouch)
   input.mousePressed(button)
 end
 
--- called when the mouse is released
+---Called when the mouse is released.
+---@param x number The x position of the mouse in pixels.
+---@param y number The y position of the mouse in pixels.
+---@param button integer The button index that was release.
+---@param istouch boolean Whether the button release originated from a touchscreen touch-released
 function love.mousereleased(x, y, button, istouch)
   input.mouseReleased(button)
 end
 
--- called when a gamepad button is pressed
+---Called when a gamepad button is pressed.
+---@param joystick table The joystick/gamepad object.
+---@param button string The button that was pressed.
 function love.gamepadpressed(joystick, button)
   input.gamepadPressed(button)
 end
 
--- called when a gamepad button is released
+---Called when a gamepad button is released.
+---@param joystick table The joystick/gamepad object.
+---@param button string The button that was released.
 function love.gamepadreleased(joystick, button)
   input.gamepadReleased(button)
 end
 
--- called when a gamepad axis is moved
+---Called when a gamepad axis is moved.
+---@param joystick table The joystick/gamepad object.
+---@param axis string The axis that was moved.
+---@param value number The new axis value.
 function love.gamepadaxis(joystick, axis, value)
   input.gamepadAxis(axis, value)
 end

@@ -1,8 +1,9 @@
 -- Various utility functions
 
 ---Returns whether a predicate function returns true for every item in an array.
----@param arr table
----@param predicate function
+---@generic T
+---@param arr T[]
+---@param predicate fun(item: T): boolean
 ---@return boolean
 ---@nodiscard
 local function arrayEvery(arr, predicate)
@@ -15,8 +16,9 @@ local function arrayEvery(arr, predicate)
 end
 
 ---Returns whether a predicate function returns true for at least one item in an array.
----@param arr table
----@param predicate function
+---@generic T
+---@param arr T[]
+---@param predicate fun(item: T): boolean
 ---@return boolean
 ---@nodiscard
 local function arrayAny(arr, predicate)
@@ -29,8 +31,9 @@ local function arrayAny(arr, predicate)
 end
 
 ---Returns the first index of a value in an array, or 0 if the value is not in the array.
----@param arr any
----@param value any
+---@generic T
+---@param arr T[]
+---@param value T
 ---@return integer
 local function arrayFind(arr, value)
   for i, v in ipairs(arr) do
@@ -43,8 +46,9 @@ local function arrayFind(arr, value)
 end
 
 ---Returns a copy of an array containing only items that a predicate function returns true for.
----@param arr table
----@param predicate function
+---@generic T
+---@param arr T[]
+---@param predicate fun(item: T): boolean
 ---@return table
 local function arrayFilter(arr, predicate)
   local filtered = {}
