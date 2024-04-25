@@ -4,6 +4,7 @@ local utils = require "lib.utils"
 ---@class Vector2
 ---@field x number
 ---@field y number
+---@field coords function
 ---@field copy function
 ---@field normalize function
 ---@field angle function
@@ -71,6 +72,13 @@ end
 ---@nodiscard
 function Vector2:copy()
   return Vector2.new(self.x, self.y)
+end
+
+---Returns the vector's coordinates as an unpacked pair of numbers.
+---@return number, number
+---@nodiscard
+function Vector2:coords()
+  return self.x, self.y
 end
 
 ---Sets the vector's length to 1. Has no effect if the vector has length 0.
