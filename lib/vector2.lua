@@ -4,24 +4,24 @@ local utils = require "lib.utils"
 ---@class Vector2
 ---@field x number
 ---@field y number
----@field coords function
----@field copy function
----@field normalize function
----@field angle function
----@field setAngle function
----@field rotate function
----@field mag function
----@field magSq function
----@field setMag function
----@field addMag function
----@field dot function
----@field angleTo function
----@field lerp function
----@field damp function
----@operator add(Vector2) : Vector2
----@operator sub(Vector2) : Vector2
----@operator mul(number) : Vector2
----@operator div(number) : Vector2
+---@field coords fun(self): number, number
+---@field copy fun(self): Vector2
+---@field normalize fun(self): Vector2
+---@field angle fun(self, degrees?: boolean): number
+---@field setAngle fun(self, theta: number, degrees?: boolean)
+---@field rotate fun(self, theta: number, degrees?: boolean): number
+---@field mag fun(self): number
+---@field magSq fun(self): number
+---@field setMag fun(self, newMag: number): number
+---@field addMag fun(self, value: number): number
+---@field dot fun(self, vec: Vector2): number
+---@field angleTo fun(self, vec: Vector2, degrees?: boolean): number
+---@field lerp fun(v1: Vector2, v2: Vector2, t: number): Vector2
+---@field damp fun(v1: Vector2, v2: Vector2, t: number, dt: number): Vector2
+---@operator add(Vector2): Vector2
+---@operator sub(Vector2): Vector2
+---@operator mul(number): Vector2
+---@operator div(number): Vector2
 ---@operator unm : Vector2
 
 local Vector2 = {}

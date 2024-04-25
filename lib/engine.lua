@@ -6,6 +6,8 @@ local EntityTag = require("lib.game-entity").EntityTag
 
 -- camera tightness gets run through exp() to make the value less sensitive to tuning
 local CAMERA_TIGHTNESS = math.exp(config.engine.cameraTightness)
+local ROOM_WIDTH = config.gameplay.roomWidth
+local ROOM_HEIGHT = config.gameplay.roomHeight
 
 ---@type GameEntity[] All entities currently being updated and drawn.
 local entities = {}
@@ -93,7 +95,7 @@ end
 ---@return table
 local function getTagged(tag)
   return utils.arrayFilter(entities, function (entity)
-    return entity.hasTag(tag)
+    return entity:hasTag(tag)
   end)
 end
 
@@ -123,6 +125,9 @@ local function update(dt)
     return entity.markForDelete
   end)
 
+  -- clamp camera position and target to within the boundary
+  
+
   -- update the camera position
   cameraPos = Vector2.damp(cameraPos, cameraTarget, CAMERA_TIGHTNESS, dt)
 end
@@ -138,7 +143,7 @@ local function draw()
   for _, i in ipairs(layerIndexes) do
     local layer = displayLayers[i]
     for _, entity in ipairs(layer) do
-      if entity.hasTag(EntityTag.USES_SCREEN_SPACE_COORDS) then
+      if entity:hasTag(EntityTag.USES_SCREEN_SPACE_COORDS) then
         love.graphics.translate(-renderPos.x, -renderPos.y)
         entity.draw()
         love.graphics.translate(renderPos.x, renderPos.y)
@@ -187,7 +192,7 @@ end
 ---@nodiscard
 local function screenPosToWorldPos(pos)
   local converted = pos.copy()
-  converted.sub(renderPos)
+  converted = converted - renderPos
   return converted
 end
 
@@ -198,7 +203,7 @@ end
 ---@nodiscard
 local function worldPosToScreenPos(pos)
   local converted = pos.copy()
-  converted.add(renderPos)
+  converted = converted + renderPos
   return converted
 end
 
@@ -250,6 +255,7 @@ return {
   getCameraTarget = getCameraTarget,
   screenPosToWorldPos = screenPosToWorldPos,
   worldPosToScreenPos = worldPosToScreenPos,
+  numEntities = numEntities,
   deltaTime = deltaTime,
   deltaTimeRaw = deltaTimeRaw,
   getDeltaTimeMultiplier = getDeltaTimeMultiplier,

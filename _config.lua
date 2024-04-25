@@ -26,5 +26,10 @@ return {
 
   engine = {
     cameraTightness = 1.0 -- determines how quickly the camera moves
+  },
+
+  gameplay = {
+    roomWidth = 1500, -- width of the playable area in pixels
+    roomHeight = 900  -- height of the playable area in pixels
   }
 }

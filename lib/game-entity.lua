@@ -3,8 +3,12 @@ local utils = require "lib.utils"
 
 ---@enum EntityTag
 local EntityTag = {
+  -- engine tags
   USES_RAW_DELTA_TIME = 0, -- Entity always recieves the raw delta time regardless of multiplier.
-  USES_SCREEN_SPACE_COORDS = 1 -- Entity ignores camera position when being drawn.
+  USES_SCREEN_SPACE_COORDS = 1, -- Entity ignores camera position when being drawn.
+
+  -- entity types
+  BACKGROUD_GRID = 2
 }
 
 ---@class GameEntity
@@ -12,30 +16,12 @@ local EntityTag = {
 ---@field displayLayer integer
 ---@field deleted boolean
 ---@field markForDelete boolean
----@field update function
----@field draw function
----@field setup function
----@field delete function
----@field hasTag function
-
+---@field update fun(self, dt: number)
+---@field draw fun(self)
+---@field setup fun(self)
+---@field delete fun(self)
+---@field hasTag fun(self, tag: EntityTag): boolean
 local GameEntity = {}
-
----Constructs a new GameEntity
----@param tags EntityTag[]?
----@param displayLayer integer?
----@return GameEntity
-function GameEntity.new(tags, displayLayer)
-  local entity = {}
-  setmetatable(entity, {
-    __index = GameEntity
-  })
-
-  entity.tags = tags or {}
-  entity.displayLayer = displayLayer or 1
-  entity.markForDelete = false
-
-  return entity
-end
 
 ---Called once per frame in update(), and is passed the current delta time. This base class method
 ---does nothing and must be overriden.

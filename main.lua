@@ -1,9 +1,10 @@
 local input  = require "lib.input-manager"
 local config = require "_config"
+local engine = require "lib.engine"
+local LevelBackground = require "entities.level-background"
 
 -- called once on program start
 function love.load()
-
   -- convert some graphics configs from human-readable formats into the love2d format
   if config.graphics.vsync == "adaptive" then
     config.graphics.vsync = -1 -- adaptive vsync where supported
@@ -27,17 +28,22 @@ function love.load()
   -- set up input
   input.initGamepad()
   input.addActionList(config.input.keybinds)
+
+  -- start the game engine
+  engine.addEntity(LevelBackground.new())
 end
 
 ---Called once per frame to update the game.
 ---@param dt number The time between the previous two frames in seconds.
 function love.update(dt)
   input.update(dt)
+  engine.update(dt)
 end
 
 ---Called once per frame to draw the game
 function love.draw()
   love.graphics.clear()
+  engine.draw()
 end
 
 ---Called when a key is pressed.
