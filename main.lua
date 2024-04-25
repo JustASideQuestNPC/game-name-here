@@ -77,6 +77,16 @@ function love.gamepadpressed(joystick, button)
   input.gamepadPressed(button)
 end
 
+---Called when the mouse is moved.
+---@param x number The x position of the mouse in pixels.
+---@param y number The y position of the mouse in pixels.
+---@param dx number The x movement since `love.mousemoved()` was last called, in pixels.
+---@param dy number The y movement since `love.mousemoved()` was last called, in pixels.
+---@param istouch boolean Whether the mouse movement originated from a touchscreen movement.
+function love.mousemoved(x, y, dx, dy, istouch)
+  input.mouseMoved(x, y, dx, dy)
+end
+
 ---Called when a gamepad button is released.
 ---@param joystick table The joystick/gamepad object.
 ---@param button string The button that was released.

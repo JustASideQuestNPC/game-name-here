@@ -87,6 +87,9 @@ local gamepadAxisNames = {
   triggerright = "right trigger"
 }
 
+local mousePos = Vector2.new() -- Current mouse position.
+local mouseDelta = Vector2.new() -- How far the mouse has moved since the last mouse movement event.
+
 -- Checks whether a gamepad is connected and runs some setup if it is.
 local function initGamepad()
   if love.joystick.getJoystickCount() > 0 then
@@ -263,6 +266,20 @@ local function getStickVector(stick)
   return v
 end
 
+---Returns the current position of the mouse.
+---@return Vector2
+---@nodiscard
+local function getMousePos()
+  return mousePos.copy()
+end
+
+---Returns how far the mouse has moved since the last mouse movement event.
+---@return Vector2
+---@nodiscard
+local function getMouseDelta()
+  return mouseDelta.copy()
+end
+
 ---Sets the vibration of the gamepad, if possible.
 ---@param left number Strength of the left motor. Must be in the range [0, 1].
 ---@param right number Strength of the right motor. Must be in the range [0, 1].
@@ -297,6 +314,18 @@ end
 ---@param button integer
 local function mouseReleased(button)
   keyStates[mouseButtonNames[button]] = false
+end
+
+---Updates the internal state when the mouse is moved. Call in `love.mousemoved()`.
+---@param x number
+---@param y number
+---@param dx number
+---@param dy number
+local function mouseMoved(x, y, dx, dy)
+  mousePos.x = x
+  mousePos.y = y
+  mouseDelta.x = x
+  mouseDelta.y = y
 end
 
 ---Updates the internal state when a gamepad button is pressed. Call in `love.gamepadpressed()`.
@@ -355,11 +384,14 @@ return {
   isActive = isActive,
   getAxisValue = getAxisValue,
   getStickVector = getStickVector,
+  getMousePos = getMousePos,
+  getMouseDelta = getMouseDelta,
   setGamepadRumble = setGamepadRumble,
   keyPressed = keyPressed,
   keyReleased = keyReleased,
   mousePressed = mousePressed,
   mouseReleased = mouseReleased,
+  mouseMoved = mouseMoved,
   gamepadPressed = gamepadPressed,
   gamepadReleased = gamepadReleased,
   gamepadAxis = gamepadAxis,
