@@ -12,6 +12,7 @@ local displayLayers = {} -- All entities, separated into their different display
 local layerIndexes = {} -- Indexes of all active display layers.
 local cameraPos = Vector2.new(0, 0) -- The current position of the camera.
 local cameraTarget = Vector2.new(0, 0) -- The position the camera is trying to reach.
+local renderPos = Vector2.new(0, 0) -- Where to translate when rendering.
 local deltaTimeMultiplier = 1 -- "Speed of time"
 local lastDt = 0 -- Last delta time passed to `update()`
 
@@ -77,7 +78,23 @@ local function removeIf(predicate)
   layerIndexes = activeLayers
 end
 
----Updates all entities. Should be called once in `update()` and passed the current delta time.
+---Returns an array containing all entities that a predicate function returns true for.
+---@param predicate function
+---@return table
+local function getIf(predicate)
+  return utils.arrayFilter(entities, predicate)
+end
+
+---Returns an array containing all entities that have a certain tag.
+---@param tag EntityTag
+---@return table
+local function getTagged(tag)
+  return utils.arrayFilter(entities, function (entity)
+    return entity.hasTag(tag)
+  end)
+end
+
+---Updates all entities. Should be called once in `love.update()` and passed the current delta time.
 ---@param dt number
 local function update(dt)
   lastDt = dt
@@ -103,20 +120,35 @@ local function update(dt)
   cameraPos = Vector2.damp(cameraPos, cameraTarget, CAMERA_TIGHTNESS, dt)
 end
 
+---Draws all entities. Should be called once in `love.draw()`.
 local function draw()
   -- find how much to translate by
-  local renderX = -(cameraPos.x - love.graphics.getWidth() / 2)
-  local renderY = -(cameraPos.y - love.graphics.getHeight() / 2)
+  renderPos.x = -(cameraPos.x - love.graphics.getWidth() / 2)
+  renderPos.y = -(cameraPos.y - love.graphics.getHeight() / 2)
 
   love.graphics.push()
-
+  love.graphics.translate(renderPos.x, renderPos.y)
+  for _, i in ipairs(layerIndexes) do
+    local layer = displayLayers[i]
+    for _, entity in ipairs(layer) do
+      if entity.hasTag(EntityTag.USES_SCREEN_SPACE_COORDS) then
+        love.graphics.translate(-renderPos.x, -renderPos.y)
+        entity.draw()
+        love.graphics.translate(renderPos.x, renderPos.y)
+      else
+        entity.draw()
+      end
+    end
+  end
   love.graphics.pop()
 end
 
 return {
   removeAll = removeAll,
   removeIf = removeIf,
+  getIf = getIf,
+  getTagged = getTagged,
   addEntity = addEntity,
   update = update,
-  draw = draw()
+  draw = draw,
 }
