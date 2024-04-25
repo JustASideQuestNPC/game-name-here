@@ -7,14 +7,17 @@ local EntityTag = require("lib.game-entity").EntityTag
 -- camera tightness gets run through exp() to make the value less sensitive to tuning
 local CAMERA_TIGHTNESS = math.exp(config.engine.cameraTightness)
 
-local entities = {} -- All entities currently being updated and drawn.
-local displayLayers = {} -- All entities, separated into their different display layers.
-local layerIndexes = {} -- Indexes of all active display layers.
+---@type GameEntity[] All entities currently being updated and drawn.
+local entities = {}
+---@type table<integer, GameEntity[]> All entities, separated into their different display layers.
+local displayLayers = {}
+---@type integer[] Indexes of all active display layers.
+local layerIndexes = {}
 local cameraPos = Vector2.new(0, 0) -- The current position of the camera.
 local cameraTarget = Vector2.new(0, 0) -- The position the camera is trying to reach.
 local renderPos = Vector2.new(0, 0) -- Where to translate when rendering.
-local deltaTimeMultiplier = 1 -- "Speed of time"
-local lastDt = 0 -- Last delta time passed to `update()`
+local deltaTimeMultiplier = 1.0 -- "Speed of time"
+local lastDt = 0.0 -- Last delta time passed to `update()`
 
 ---Adds an entity to the engine, calls its `setup()` method (if it has one), then returns it.
 ---@param entity GameEntity
@@ -98,6 +101,10 @@ end
 ---@param dt number
 local function update(dt)
   lastDt = dt
+  -- do nothing if the entire engine is paused
+  if dt == 0 then return end
+
+  local adjustedDt = dt * deltaTimeMultiplier
 
   -- update all entities
   for _, entity in ipairs(entities) do
@@ -105,8 +112,8 @@ local function update(dt)
     if not entity.markForDelete then
       if entity:hasTag(EntityTag.USES_RAW_DELTA_TIME) then
         entity:update(dt)
-      else
-        entity:update(dt * deltaTimeMultiplier)
+      elseif adjustedDt ~= 0 then
+        entity:update(adjustedDt)
       end
     end
   end
@@ -143,6 +150,92 @@ local function draw()
   love.graphics.pop()
 end
 
+---Returns a Vector2 with the current position of the camera.
+---@return Vector2
+---@nodiscard
+local function getCameraPos()
+  return cameraPos.copy()
+end
+
+---Returns a Vector2 with the current position of the camera target.
+---@return Vector2
+---@nodiscard
+local function getCameraTarget()
+  return cameraTarget.copy()
+end
+
+---Sets the position of the camera.
+---@param pos Vector2
+---@param noTargetUpdate? boolean [false] If true, the position of the camera target is not updated.
+local function setCameraPos(pos, noTargetUpdate)
+  cameraPos = pos.copy()
+  if not noTargetUpdate then
+    cameraTarget = pos.copy()
+  end
+end
+
+---Sets the position of the camera target.
+---@param pos Vector2
+local function setCameraTarget(pos)
+  cameraTarget = pos.copy()
+end
+
+---Converts a position in screen space (relative to the top left corner of the canvas) to a position
+---in world space (relative to the position of the camera).
+---@param pos Vector2
+---@return Vector2
+---@nodiscard
+local function screenPosToWorldPos(pos)
+  local converted = pos.copy()
+  converted.sub(renderPos)
+  return converted
+end
+
+---Converts a position in world space (relative to the position of the camera) to a position in
+---screen space (relative to the top left corner of the canvas).
+---@param pos Vector2
+---@return Vector2
+---@nodiscard
+local function worldPosToScreenPos(pos)
+  local converted = pos.copy()
+  converted.add(renderPos)
+  return converted
+end
+
+---Returns the number of currently active entities.
+---@return number
+---@nodiscard
+local function numEntities()
+  return #entities
+end
+
+---Returns the current delta time, scaled to the current multiplier.
+---@return number
+---@nodiscard
+local function deltaTime()
+  return lastDt * deltaTimeMultiplier
+end
+
+---Returns the current unscaled delta time.
+---@return number
+---@nodiscard
+local function deltaTimeRaw()
+  return lastDt
+end
+
+---Returns the current delta time multiplier ("speed of time").
+---@return number
+---@nodiscard
+local function getDeltaTimeMultiplier()
+  return deltaTimeMultiplier
+end
+
+---Sets the current delta time multiplier ("speed of").
+---@param m number
+local function setDeltaTimeMultiplier(m)
+  deltaTimeMultiplier = m
+end
+
 return {
   removeAll = removeAll,
   removeIf = removeIf,
@@ -151,4 +244,14 @@ return {
   addEntity = addEntity,
   update = update,
   draw = draw,
+  setCameraPos = setCameraPos,
+  setCameraTarget = setCameraTarget,
+  getCameraPos = getCameraPos,
+  getCameraTarget = getCameraTarget,
+  screenPosToWorldPos = screenPosToWorldPos,
+  worldPosToScreenPos = worldPosToScreenPos,
+  deltaTime = deltaTime,
+  deltaTimeRaw = deltaTimeRaw,
+  getDeltaTimeMultiplier = getDeltaTimeMultiplier,
+  setDeltaTimeMultiplier = setDeltaTimeMultiplier
 }
