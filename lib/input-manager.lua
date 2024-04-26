@@ -9,13 +9,6 @@ local LOW_DEADZONE = config.input.lowDeadzone
 -- gamepad analog values higher than this are clamped to 1
 local HIGH_DEADZONE = config.input.highDeadzone
 
----@class ActionConfig An object with data for an input action.
----@field name string
----@field keys table
----@field gamepadButtons table
----@field mode string Optional, defaults to "continuous".
----@field chord boolean Optional, defaults to false.
-
 --  the active gamepad (if any)
 local gamepad
 local _gamepadConnected = false
@@ -110,6 +103,13 @@ local function initGamepad()
     end
   end
 end
+
+---@class ActionConfig An object with data for an input action.
+---@field name string
+---@field keys string[]
+---@field gamepadButtons string[]
+---@field mode string Optional, defaults to "continuous".
+---@field chord boolean Optional, defaults to false.
 
 ---Adds an action to the input manager
 ---@param actionConfig ActionConfig
