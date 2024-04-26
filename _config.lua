@@ -12,12 +12,29 @@ return {
   input = {
     keybinds = {
       {
-        name = "test rumble",
-        keys = {"a"},
-        gamepadButtons = {"a"},
-        mode = "press"
+        name = "move up",
+        keys = {"up", "w"},
+        gamepadButtons = {"dpad up"}
+      },
+      {
+        name = "move down",
+        keys = {"down", "s"},
+        gamepadButtons = {"dpad down"}
+      },
+      {
+        name = "move left",
+        keys = {"left", "a"},
+        gamepadButtons = {"dpad left"}
+      },
+      {
+        name = "move right",
+        keys = {"right", "d"},
+        gamepadButtons = {"dpad right"}
       },
     },
+
+    -- if true, the left and right thumbsticks are swapped
+    invertThumbsticks = false,
 
     bufferSize = 0.5,   -- size of the input buffer in seconds
     lowDeadzone = 0.1,  -- gamepad analog values lower than this are clamped to 0
@@ -25,12 +42,19 @@ return {
   },
 
   engine = {
-    cameraTightness = 1.0, -- determines how quickly the camera moves
-    cameraMargin = 50
+    cameraTightness = 2.5, -- determines how quickly the camera moves
   },
 
+  -- general gameplay configs
   gameplay = {
-    roomWidth = 1500, -- width of the playable area in pixels
-    roomHeight = 900, -- height of the playable area in pixels
+    roomWidth = 2400, -- width of the playable area in pixels
+    roomHeight = 1500, -- height of the playable area in pixels
+  },
+
+  -- entity-specific settings
+  entities = {
+    player = {
+      runSpeed = 450, -- pixels per second
+    }
   }
 }

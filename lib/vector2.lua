@@ -1,4 +1,5 @@
 -- A 2D vector class for doing 2D vector things.
+
 local utils = require "lib.utils"
 
 ---@class Vector2
@@ -17,6 +18,7 @@ local utils = require "lib.utils"
 ---@field addMag fun(self, value: number): number
 ---@field dot fun(self, vec: Vector2): number
 ---@field angleTo fun(self, vec: Vector2, degrees?: boolean): number
+---@field limit fun(self, max: number)
 ---@field lerp fun(v1: Vector2, v2: Vector2, t: number): Vector2
 ---@field damp fun(v1: Vector2, v2: Vector2, t: number, dt: number): Vector2
 ---@operator add(Vector2): Vector2
@@ -161,24 +163,26 @@ function Vector2:magSq()
   return self.x^2 + self.y^2
 end
 
----Sets the length of the vector.
+---Sets the length of the vector. Has no effect on vectors of length 0
 ---@param newMag number
 function Vector2:setMag(newMag)
   local m = self:mag()
-  self.x = self.x * newMag / m
-  self.y = self.y * newMag / m
+  if m > 0 then
+    self.x = self.x * newMag / m
+    self.y = self.y * newMag / m
+  end
 end
 
----Adds a value to the length of the vector.
+---Adds a value to the length of the vector. Has no effect on vectors of length 0.
 ---@param value number
 ---@return number newMag The new length of the vector.
 function Vector2:addMag(value)
   local m = self:mag()
   local newMag = m + value
-
-  self.x = self.x * newMag / m
-  self.y = self.y * newMag / m
-
+  if m > 0 then
+    self.x = self.x * newMag / m
+    self.y = self.y * newMag / m
+  end
   return newMag
 end
 
@@ -206,6 +210,14 @@ function Vector2:angleTo(vec, degrees)
   return math.acos(d / (m1 * m2))
 end
 
+---Limits the vector to a maximum length.
+---@param max number
+function Vector2:limit(max)
+  if self:magSq() > max^2 then
+    self:setMag(max)
+  end
+end
+
 ---Static method that interpolates between two vectors and returns a new vector.
 ---@param v1 Vector2
 ---@param v2 Vector2
@@ -227,7 +239,7 @@ end
 ---@return Vector2
 ---@nodiscard
 function Vector2.damp(v1, v2, t, dt)
-  return Vector2.lerp(v1, v2, math.exp(-t * dt))
+  return Vector2.lerp(v1, v2, 1 - math.exp(-t * dt))
 end
 
 function Vector2.__add(a, b)

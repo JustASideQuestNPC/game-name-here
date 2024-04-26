@@ -3,10 +3,11 @@ local utils = require "lib.utils"
 
 ---@enum EntityTag
 local EntityTag = {
-  USES_RAW_DELTA_TIME = 0, -- Entity always recieves the raw delta time regardless of multiplier.
-  USES_SCREEN_SPACE_COORDS = 1, -- Entity ignores camera position when being drawn.
+  USES_RAW_DELTA_TIME = "uses raw delta time",
+  USES_SCREEN_SPACE_COORDS = "uses screen space coordinates",
 
-  BACKGROUND_GRID = 2 -- Level/room background.
+  LEVEL_BACKGROUND = "level background",
+  PLAYER = "player"
 }
 
 ---@class GameEntity
@@ -49,13 +50,9 @@ end
 ---@param displayLayer? integer
 ---@return table
 local function EntityClass(tags, displayLayer)
-  local class = {
-    tags = tags or {},
-    displayLayer = displayLayer or 0
-  }
-  setmetatable(class, {
-    __index = GameEntity
-  })
+  local class = utils.construct(GameEntity)
+  class.tags = tags or {}
+  class.displayLayer = displayLayer or 0
   return class
 end
 

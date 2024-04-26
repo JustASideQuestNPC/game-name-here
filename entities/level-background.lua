@@ -1,28 +1,24 @@
 -- Simple level/room background.
-
-local e = require "lib.game-entity"
-local EntityClass, EntityTag = e.EntityClass, e.EntityTag
+local utils = require "lib.utils"
+local temp  = require "lib.game-entity"
+local EntityClass, EntityTag = temp.EntityClass, temp.EntityTag
 
 ---@class LevelBackground: GameEntity
 ---@field new fun():LevelBackground
 ---@field draw fun(self)
 local LevelBackground = EntityClass(
-  {EntityTag.BACKGROUND_GRID},
+  {EntityTag.LEVEL_BACKGROUND},
   -1
 )
 
 function LevelBackground.new()
-  local instance = {}
-  setmetatable(instance, {
-    __index = LevelBackground
-  })
-  return instance
+  return utils.construct(LevelBackground)
 end
 
 function LevelBackground:draw()
   local blue = true -- which color to draw
-  for x = 0, 1500, 300 do
-    for y = 0, 900, 300 do
+  for x = 0, 2400, 300 do
+    for y = 0, 1500, 300 do
       if blue then
         love.graphics.setColor(love.math.colorFromBytes(133, 218, 235))
       else

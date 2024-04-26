@@ -5,10 +5,9 @@ local config    = require "_config"
 local EntityTag = require("lib.game-entity").EntityTag
 
 -- camera tightness gets run through exp() to make the value less sensitive to tuning
-local CAMERA_TIGHTNESS = math.exp(config.engine.cameraTightness)
+local CAMERA_TIGHTNESS = config.engine.cameraTightness
 local ROOM_WIDTH = config.gameplay.roomWidth
 local ROOM_HEIGHT = config.gameplay.roomHeight
-local CAMERA_MARGIN = config.engine.cameraMargin
 
 ---@type GameEntity[] All entities currently being updated and drawn.
 local entities = {}
@@ -16,9 +15,9 @@ local entities = {}
 local displayLayers = {}
 ---@type integer[] Indexes of all active display layers.
 local layerIndexes = {}
-local cameraPos = Vector2.new(0, 0) -- The current position of the camera.
-local cameraTarget = Vector2.new(0, 0) -- The position the camera is trying to reach.
-local renderPos = Vector2.new(0, 0) -- Where to translate when rendering.
+local cameraPos = Vector2.new() -- The current position of the camera.
+local cameraTarget = Vector2.new() -- The position the camera is trying to reach.
+local renderPos = Vector2.new() -- Where to translate when rendering.
 local deltaTimeMultiplier = 1.0 -- "Speed of time"
 local lastDt = 0.0 -- Last delta time passed to `update()`
 
@@ -26,7 +25,8 @@ local lastDt = 0.0 -- Last delta time passed to `update()`
 ---@param entity GameEntity
 ---@return GameEntity
 local function addEntity(entity)
-  entity.setup() -- may or may not do something
+  entity:setup() -- may or may not do something
+  entity.markForDelete = false
   entities[#entities+1] = entity
 
   -- if a display layer already exists for the entity, just add it to that layer
@@ -46,9 +46,9 @@ local function addEntity(entity)
 end
 
 ---Removes all entities.
----@param noDelete? boolean [false] If true, entities' `delete()` methods are not called.
-local function removeAll(noDelete)
-  if not noDelete then
+---@param noDeleteMethod? boolean [false] If true, entities' `delete()` methods are not called.
+local function removeAll(noDeleteMethod)
+  if not noDeleteMethod then
     for _, entity in ipairs(entities) do
       entity.deleted = true
       entity.delete()
@@ -64,7 +64,7 @@ end
 ---@param predicate function
 local function removeIf(predicate)
   local function filterFunction(entity)
-    if not predicate(entity) then
+    if predicate(entity) then
       entity.deleted = true
       entity:delete() -- may or may not do something
       return false -- arrayFilter() removes items that a predicate returns *false* for
@@ -108,7 +108,6 @@ local function update(dt)
   if dt == 0 then return end
 
   local adjustedDt = dt * deltaTimeMultiplier
-
   -- update all entities
   for _, entity in ipairs(entities) do
     -- skip entities that need to be deleted
@@ -127,8 +126,8 @@ local function update(dt)
   end)
 
   -- clamp camera position and target to within the boundary
-  local xOffset = love.graphics.getWidth() / 2 - CAMERA_MARGIN
-  local yOffset = love.graphics.getHeight() / 2 - CAMERA_MARGIN
+  local xOffset = love.graphics.getWidth() / 2
+  local yOffset = love.graphics.getHeight() / 2
 
   cameraPos.x = utils.clamp(cameraPos.x, xOffset, ROOM_WIDTH - xOffset)
   cameraPos.y = utils.clamp(cameraPos.y, yOffset, ROOM_HEIGHT - yOffset)
@@ -152,10 +151,10 @@ local function draw()
     for _, entity in ipairs(layer) do
       if entity:hasTag(EntityTag.USES_SCREEN_SPACE_COORDS) then
         love.graphics.translate(-renderPos.x, -renderPos.y)
-        entity.draw()
+        entity:draw()
         love.graphics.translate(renderPos.x, renderPos.y)
       else
-        entity.draw()
+        entity:draw()
       end
     end
   end
@@ -166,30 +165,30 @@ end
 ---@return Vector2
 ---@nodiscard
 local function getCameraPos()
-  return cameraPos.copy()
+  return cameraPos:copy()
 end
 
 ---Returns a Vector2 with the current position of the camera target.
 ---@return Vector2
 ---@nodiscard
 local function getCameraTarget()
-  return cameraTarget.copy()
+  return cameraTarget:copy()
 end
 
 ---Sets the position of the camera.
 ---@param pos Vector2
 ---@param noTargetUpdate? boolean [false] If true, the position of the camera target is not updated.
 local function setCameraPos(pos, noTargetUpdate)
-  cameraPos = pos.copy()
+  cameraPos = pos:copy()
   if not noTargetUpdate then
-    cameraTarget = pos.copy()
+    cameraTarget = pos:copy()
   end
 end
 
 ---Sets the position of the camera target.
 ---@param pos Vector2
 local function setCameraTarget(pos)
-  cameraTarget = pos.copy()
+  cameraTarget = pos:copy()
 end
 
 ---Converts a position in screen space (relative to the top left corner of the canvas) to a position
@@ -198,7 +197,7 @@ end
 ---@return Vector2
 ---@nodiscard
 local function screenPosToWorldPos(pos)
-  local converted = pos.copy()
+  local converted = pos:copy()
   converted = converted - renderPos
   return converted
 end
@@ -209,7 +208,7 @@ end
 ---@return Vector2
 ---@nodiscard
 local function worldPosToScreenPos(pos)
-  local converted = pos.copy()
+  local converted = pos:copy()
   converted = converted + renderPos
   return converted
 end

@@ -78,7 +78,7 @@ end
 ---@return number
 ---@nodiscard
 local function damp(a, b, t, dt)
-  return lerp(a, b, math.exp(-t * dt))
+  return lerp(a, b, 1 - math.exp(-t * dt))
 end
 
 ---Maps a value between two ranges.
@@ -103,6 +103,17 @@ local function clamp(value, min, max)
   return math.min(math.max(value, min), max)
 end
 
+---Creates an empty instance of a class.
+---@param class table
+---@return table
+local function construct(class)
+  local instance = {}
+  setmetatable(instance, {
+    __index = class
+  })
+  return instance
+end
+
 return {
   arrayEvery = arrayEvery,
   arrayAny = arrayAny,
@@ -111,5 +122,6 @@ return {
   lerp = lerp,
   damp = damp,
   map = map,
-  clamp = clamp
+  clamp = clamp,
+  construct = construct
 }
