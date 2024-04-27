@@ -15,9 +15,9 @@ local entities = {}
 local displayLayers = {}
 ---@type integer[] Indexes of all active display layers.
 local layerIndexes = {}
-local cameraPos = Vector2.new() -- The current position of the camera.
-local cameraTarget = Vector2.new() -- The position the camera is trying to reach.
-local renderPos = Vector2.new() -- Where to translate when rendering.
+local cameraPos = Vector2() -- The current position of the camera.
+local cameraTarget = Vector2() -- The position the camera is trying to reach.
+local renderPos = Vector2() -- Where to translate when rendering.
 local deltaTimeMultiplier = 1.0 -- "Speed of time"
 local lastDt = 0.0 -- Last delta time passed to `update()`
 

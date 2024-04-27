@@ -10,17 +10,19 @@ local EntityTag = {
   PLAYER = "player"
 }
 
----@class GameEntity
+---@class GameEntity: Class
 ---@field tags EntityTag[]
 ---@field displayLayer integer
 ---@field deleted boolean
 ---@field markForDelete boolean
+---@field construct fun(): GameEntity
+---@field new fun(): GameEntity
 ---@field update fun(self, dt: number)
 ---@field draw fun(self)
 ---@field setup fun(self)
 ---@field delete fun(self)
 ---@field hasTag fun(self, tag: EntityTag): boolean
-local GameEntity = {}
+local GameEntity = utils.class()
 
 ---Called once per frame in update(), and is passed the current delta time. This base class method
 ---does nothing and must be overriden.

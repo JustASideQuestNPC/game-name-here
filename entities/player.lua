@@ -6,7 +6,7 @@ local input   = require "lib.input-manager"
 local Vector2 = require "lib.vector2"
 local engine  = require "lib.engine"
 local temp    = require "lib.game-entity"
-local EntityClass, EntityTag = temp.EntityClass, temp.EntityTag
+local GameEntity, EntityTag = temp.GameEntity, temp.EntityTag
 
 local INVERT_THUMBSTICKS = config.input.invertThumbsticks
 local RUN_SPEED = config.entities.player.runSpeed
@@ -17,16 +17,14 @@ local RUN_SPEED = config.entities.player.runSpeed
 ---@field new fun(x: number, y: number): Player
 ---@field update fun(self, dt: number)
 ---@field draw fun(self)
-local Player = EntityClass(
-  {EntityTag.PLAYER}
+local Player = utils.class(
+  GameEntity, function (instance, x, y)
+    instance.tags = {EntityTag.PLAYER}
+    instance.displayLayer = -1
+    instance.position = Vector2(x, y)
+    instance.velocity = Vector2(0, 0)
+  end
 )
-
-function Player.new(x, y)
-  local instance = utils.construct(Player)
-  instance.position = Vector2.new(x, y)
-  instance.velocity = Vector2.new(0, 0)
-  return instance
-end
 
 function Player:draw()
   love.graphics.push()
@@ -61,7 +59,7 @@ function Player:update(dt)
     self.velocity = moveDir
     self.velocity:setMag(RUN_SPEED)
   else
-    self.velocity = Vector2.new()
+    self.velocity = Vector2()
   end
 end
 

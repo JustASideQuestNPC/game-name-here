@@ -1,19 +1,17 @@
 -- Simple level/room background.
 local utils = require "lib.utils"
 local temp  = require "lib.game-entity"
-local EntityClass, EntityTag = temp.EntityClass, temp.EntityTag
+local GameEntity, EntityTag = temp.GameEntity, temp.EntityTag
 
 ---@class LevelBackground: GameEntity
 ---@field new fun():LevelBackground
 ---@field draw fun(self)
-local LevelBackground = EntityClass(
-  {EntityTag.LEVEL_BACKGROUND},
-  -1
+local LevelBackground = utils.class(
+  GameEntity, function (instance)
+    instance.tags = {EntityTag.LEVEL_BACKGROUND}
+    instance.displayLayer = -1
+  end
 )
-
-function LevelBackground.new()
-  return utils.construct(LevelBackground)
-end
 
 function LevelBackground:draw()
   local blue = true -- which color to draw

@@ -1,5 +1,60 @@
 -- Various utility functions
 
+---@class Class
+---@field inheritsFrom fun(base): Class
+---@operator call: Class
+
+---Generates a class.
+---@generic C
+---@param base C
+---@param init fun(instance, ...)
+---@return C
+---@overload fun(init: fun(instance, ...)): Class
+---@overload fun(): Class
+local function class(base, init)
+  local c = {} -- a new class instance
+  if not init and type(base) == 'function' then
+    init = base
+    base = nil
+  elseif type(base) == 'table' then
+    -- our new class is a shallow copy of the base class!
+    for i,v in pairs(base) do
+      c[i] = v
+    end
+    c._base = base
+  end
+  -- the class will be the metatable for all its objects,
+  -- and they will look up their methods in it.
+  c.__index = c
+
+  -- expose a constructor which can be called by <classname>(<args>)
+  local mt = {}
+  mt.__call = function(class_tbl, ...)
+  local obj = {}
+  setmetatable(obj, c)
+  if init then
+    init(obj,...)
+  else
+    -- make sure that any stuff from the base class is initialized!
+    if base and base.init then
+    base.init(obj, ...)
+    end
+  end
+  return obj
+  end
+  c.init = init
+  c.inheritsFrom = function(self, _base)
+    local m = getmetatable(self)
+    while m do 
+      if m == _base then return true end
+      m = m._base
+    end
+    return false
+  end
+  setmetatable(c, mt)
+  return c
+end
+
 ---Returns whether a predicate function returns true for every item in an array.
 ---@generic T
 ---@param arr T[]
@@ -103,17 +158,6 @@ local function clamp(value, min, max)
   return math.min(math.max(value, min), max)
 end
 
----Creates an empty instance of a class.
----@param class table
----@return table
-local function construct(class)
-  local instance = {}
-  setmetatable(instance, {
-    __index = class
-  })
-  return instance
-end
-
 return {
   arrayEvery = arrayEvery,
   arrayAny = arrayAny,
@@ -123,5 +167,5 @@ return {
   damp = damp,
   map = map,
   clamp = clamp,
-  construct = construct
+  class = class
 }

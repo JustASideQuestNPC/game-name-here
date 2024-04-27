@@ -31,8 +31,8 @@ function love.load()
   input.addActionList(config.input.keybinds)
 
   -- start the game engine
-  engine.addEntity(LevelBackground.new())
-  engine.addEntity(Player.new(200, 200))
+  engine.addEntity(LevelBackground())
+  engine.addEntity(Player(200, 200))
 end
 
 ---Called once per frame to update the game.

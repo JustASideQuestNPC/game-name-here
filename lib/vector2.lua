@@ -21,12 +21,17 @@ local utils = require "lib.utils"
 ---@field limit fun(self, max: number)
 ---@field lerp fun(v1: Vector2, v2: Vector2, t: number): Vector2
 ---@field damp fun(v1: Vector2, v2: Vector2, t: number, dt: number): Vector2
+---@operator call: Vector2
 ---@operator add(Vector2): Vector2
 ---@operator sub(Vector2): Vector2
 ---@operator mul(number): Vector2
 ---@operator div(number): Vector2
----@operator unm : Vector2
-local Vector2 = {}
+---@operator unm: Vector2
+local Vector2 = setmetatable({}, { 
+  __call = function(v, ...) return v.new(...) end})
+local Vector2Metatable = {
+  __index = Vector2
+}
 
 ---Constructs a new Vector2.
 ---@param x? number [0]
@@ -35,19 +40,7 @@ local Vector2 = {}
 ---@nodiscard
 function Vector2.new(x, y)
   local v = {x = x or 0, y = y or 0}
-  setmetatable(v, {
-    __index = Vector2,
-    __add = Vector2.__add,
-    __sub = Vector2.__sub,
-    __mul = Vector2.__mul,
-    __div = Vector2.__div,
-    __unm = Vector2.__unm,
-    __eq = Vector2.__eq,
-    __ne = Vector2.__ne,
-    __lt = Vector2.__lt,
-    __le = Vector2.__le,
-    __tostring = Vector2.__tostring
-  }) -- gives v all the Vector methods
+  setmetatable(v, Vector2Metatable) -- gives v all the Vector methods
   return v
 end
 
@@ -242,43 +235,43 @@ function Vector2.damp(v1, v2, t, dt)
   return Vector2.lerp(v1, v2, 1 - math.exp(-t * dt))
 end
 
-function Vector2.__add(a, b)
+function Vector2Metatable.__add(a, b)
   return Vector2.new(a.x + b.x, a.y + b.y)
 end
 
-function Vector2.__sub(a, b)
+function Vector2Metatable.__sub(a, b)
   return Vector2.new(a.x - b.x, a.y - b.y)
 end
 
-function Vector2.__mul(vec, scalar)
+function Vector2Metatable.__mul(vec, scalar)
   return Vector2.new(vec.x * scalar, vec.y * scalar)
 end
 
-function Vector2.__div(vec, scalar)
+function Vector2Metatable.__div(vec, scalar)
   return Vector2.new(vec.x / scalar, vec.y / scalar)
 end
 
-function Vector2.__unm(v)
+function Vector2Metatable.__unm(v)
   return Vector2.new(-v.x, -v.y)
 end
 
-function Vector2.__eq(a, b)
+function Vector2Metatable.__eq(a, b)
   return a.x == b.x and a.y == b.y
 end
 
-function Vector2.__ne(a, b)
+function Vector2Metatable.__ne(a, b)
   return not a == b
 end
 
-function Vector2.__lt(a, b)
+function Vector2Metatable.__lt(a, b)
   return a.magSq() < b.magSq()
 end
 
-function Vector2.__le(a, b)
+function Vector2Metatable.__le(a, b)
   return a.magSq() <= b.magSq()
 end
 
-function Vector2.__tostring(v)
+function Vector2Metatable.__tostring(v)
   return string.format("(%.2f, %.2f)", v.x, v.y)
 end
 

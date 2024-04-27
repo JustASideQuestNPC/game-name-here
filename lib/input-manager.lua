@@ -80,8 +80,8 @@ local gamepadAxisNames = {
   triggerright = "right trigger"
 }
 
-local mousePos = Vector2.new() -- Current mouse position.
-local mouseDelta = Vector2.new() -- How far the mouse has moved since the last mouse movement event.
+local mousePos = Vector2() -- Current mouse position.
+local mouseDelta = Vector2() -- How far the mouse has moved since the last mouse movement event.
 
 -- Checks whether a gamepad is connected and runs some setup if it is.
 local function initGamepad()
@@ -251,12 +251,12 @@ end
 local function getStickVector(stick)
   local v
   if stick == "left" then
-    v = Vector2.new(
+    v = Vector2(
       gamepadAxisValues["left stick x"],
       gamepadAxisValues["left stick y"]
     )
   else
-    v = Vector2.new(
+    v = Vector2(
       gamepadAxisValues["right stick x"],
       gamepadAxisValues["right stick y"]
     )
@@ -273,7 +273,7 @@ end
 ---@param right string
 ---@return Vector2
 local function getDpadVector(up, down, left, right)
-  local dir = Vector2.new()
+  local dir = Vector2()
   if isActive(up) then
     dir.y = dir.y - 1
   end
