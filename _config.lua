@@ -48,7 +48,7 @@ return {
   },
 
   engine = {
-    cameraTightness = 2.5, -- determines how quickly the camera moves
+    cameraTightness = 4, -- determines how quickly the camera moves
   },
 
   -- general gameplay configs
@@ -61,10 +61,10 @@ return {
   entities = {
     player = {
       runSpeed = 450, -- pixels per second
-      dashSpeed = 1500, -- pixels per second
+      dashSpeed = 1600, -- pixels per second
       dashDuration = 0.075, -- seconds
-      maxConsecutiveDashes = 2,
-      dashRefreshDuration = 0.2 -- seconds
+      maxConsecutiveDashes = 3,
+      dashRefreshDuration = 0.25 -- seconds
     }
   }
 }

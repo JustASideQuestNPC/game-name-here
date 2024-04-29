@@ -18,6 +18,7 @@ local INVERT_THUMBSTICKS = config.input.invertThumbsticks
 ---@field DASH_REFRESH_DURATION number how many seconds before all dashes are replenished
 ---@field position Vector2
 ---@field velocity Vector2
+---@field angle number
 ---@field remainingDashes integer
 ---@field dashTimer number
 ---@field dashRefreshTimer number
@@ -38,6 +39,7 @@ local Player = utils.class(
 
     instance.position = Vector2(x, y)
     instance.velocity = Vector2(0, 0)
+    instance.angle = 0
 
     instance.remainingDashes = instance.MAX_CONSECUTIVE_DASHES
     instance.dashTimer = 0
@@ -49,13 +51,14 @@ function Player:draw()
   love.graphics.push()
   -- makes (0, 0) our current position
   love.graphics.translate(self.position.x, self.position.y)
+  love.graphics.rotate(self.angle)
 
   -- placeholder sprite
   love.graphics.setColor(love.math.colorFromBytes(50, 49, 59))
   love.graphics.circle("fill", 0, 0, 35)
-  love.graphics.setColor(1, 1, 1)
+  love.graphics.setColor(love.math.colorFromBytes(202, 96, 174))
   love.graphics.setLineWidth(4)
-  love.graphics.line(0, 0, 0, -35)
+  love.graphics.line(0, 0, 200, 0)
 
   love.graphics.pop()
 end
@@ -64,6 +67,26 @@ function Player:update(dt)
   -- move at the beginning of the update to prevent some issues with collisions
   self.position = self.position + self.velocity * dt
   engine.setCameraTarget(self.position)
+
+  -- find aim direction
+  if input.currentInputType() == "gamepad" then
+    local lookVector
+    if INVERT_THUMBSTICKS then
+      lookVector = input.getStickVector("left")
+    else
+      lookVector = input.getStickVector("right")
+    end
+
+    -- prevents a lot of weird and unfun control issues
+    if lookVector:magSq() > 0.9 then
+      self.angle = lookVector:angle()
+    end
+
+  else
+    local mpos = engine.screenPosToWorldPos(input.getMousePos())
+    local delta = mpos - self.position
+    self.angle = delta:angle()
+  end
 
   -- if we're dashing, ignore movement input and update the timer
   if self.dashTimer > 0 then
@@ -78,7 +101,7 @@ function Player:update(dt)
       end
     end
 
-    -- find what direction (if any) we're moving and looking
+    -- find what direction we're moving
     local moveDir
     if input.currentInputType() == "gamepad" then
       if INVERT_THUMBSTICKS then
@@ -96,7 +119,7 @@ function Player:update(dt)
       if input.isActive("dash") and self.remainingDashes > 0 then
         self:beginDash(moveDir)
       else
-        self.velocity:setMag(self.RUN_SPEED)
+        self.velocity = moveDir * self.RUN_SPEED
       end
     else
       -- has the same effect as setting x and y to 0

@@ -7,12 +7,13 @@ local Player = require "entities.player"
 -- called once on program start
 function love.load()
   -- convert some graphics configs from human-readable formats into the love2d format
+  local vsync
   if config.graphics.vsync == "adaptive" then
-    config.graphics.vsync = -1 -- adaptive vsync where supported
+    vsync = -1 -- adaptive vsync where supported
   elseif config.graphics.vsync == false then
-    config.graphics.vsync = 0 -- vsync disabled
+    vsync = 0 -- vsync disabled
   else
-    config.graphics.vsync = 1 -- vsync enabled
+    vsync = 1 -- vsync enabled
   end
 
   -- start love2d 
@@ -21,7 +22,7 @@ function love.load()
     config.graphics.height,
     { -- flags
       fullscreen = config.graphics.fullscreen,
-      vsync = config.graphics.vsync,
+      vsync = vsync,
       msaa = config.graphics.msaaSamples
     }
   )

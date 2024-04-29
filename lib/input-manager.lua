@@ -244,7 +244,7 @@ local function getAxisValue(name)
   return gamepadAxisValues[name]
 end
 
----Returns the position of a stick as a normalized Vector2.
+---Returns the position of a stick as a *non-normalized* Vector2.
 ---@param stick string
 ---@return Vector2
 ---@nodiscard
@@ -262,8 +262,9 @@ local function getStickVector(stick)
     )
   end
 
-  return v:normalize()
+  return v
 end
+
 
 ---Returns a normalized vector constructed using 4 actions.
 ---@param up string
@@ -293,7 +294,7 @@ end
 ---@return Vector2
 ---@nodiscard
 local function getMousePos()
-  return mousePos.copy()
+  return mousePos:copy()
 end
 
 ---Returns how far the mouse has moved since the last mouse movement event.

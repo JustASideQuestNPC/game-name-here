@@ -163,6 +163,7 @@ end
 ---@param y number
 ---@param x number
 ---@return number
+---@nodiscard
 local function atan2(y, x)
   -- Does anyone know who decided that math.atan was a drop-in replacement for atan2? I'd like to
   -- speak to them using a large blunt object (for legal reasons, this is a joke).

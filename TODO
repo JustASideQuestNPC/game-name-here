@@ -1,5 +1,5 @@
-- Finalize movement (dashing + aiming)
 - Actual player/background sprites
+- Collisions
 - Melee and ranged attacks
 - Some kind of 4th (utility?) ability
 - Basic enemies

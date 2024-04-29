@@ -27,7 +27,7 @@ local utils = require "lib.utils"
 ---@operator mul(number): Vector2
 ---@operator div(number): Vector2
 ---@operator unm: Vector2
-local Vector2 = setmetatable({}, { 
+local Vector2 = setmetatable({}, {
   __call = function(v, ...) return v.new(...) end})
 local Vector2Metatable = {
   __index = Vector2
@@ -97,9 +97,9 @@ function Vector2:angle(degrees)
   end
 
   if degrees then
-    return math.deg(math.atan(self.y, self.x))
+    return math.deg(utils.atan2(self.y, self.x))
   end
-  return math.atan(self.y, self.x)
+  return utils.atan2(self.y, self.x)
 end
 
 ---Sets the angle of the vector. Has no effect on vectors with length 0.
