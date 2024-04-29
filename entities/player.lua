@@ -108,8 +108,7 @@ end
 function Player:beginDash(dashVector)
   self.remainingDashes = self.remainingDashes - 1
 
-  dashVector:setMag(self.DASH_SPEED)
-  self.velocity = dashVector
+  self.velocity = dashVector:setMag(self.DASH_SPEED)
   self.dashTimer = self.DASH_DURATION
 end
 

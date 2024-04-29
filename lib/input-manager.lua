@@ -262,8 +262,7 @@ local function getStickVector(stick)
     )
   end
 
-  v:normalize()
-  return v
+  return v:normalize()
 end
 
 ---Returns a normalized vector constructed using 4 actions.
@@ -273,22 +272,21 @@ end
 ---@param right string
 ---@return Vector2
 local function getDpadVector(up, down, left, right)
-  local dir = Vector2()
+  local v = Vector2()
   if isActive(up) then
-    dir.y = dir.y - 1
+    v.y = v.y - 1
   end
   if isActive(down) then
-    dir.y = dir.y + 1
+    v.y = v.y + 1
   end
   if isActive(left) then
-    dir.x = dir.x - 1
+    v.x = v.x - 1
   end
   if isActive(right) then
-    dir.x = dir.x + 1
+    v.x = v.x + 1
   end
 
-  dir:normalize()
-  return dir
+  return v:normalize()
 end
 
 ---Returns the current position of the mouse.
