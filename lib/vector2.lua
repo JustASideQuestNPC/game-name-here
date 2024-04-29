@@ -8,17 +8,17 @@ local utils = require "lib.utils"
 ---@field new fun(x?: number, y?:number): Vector2
 ---@field coords fun(self): number, number
 ---@field copy fun(self): Vector2
----@field normalize fun(self)
+---@field normalize fun(self): self
 ---@field angle fun(self, degrees?: boolean): number
----@field setAngle fun(self, theta: number, degrees?: boolean)
+---@field setAngle fun(self, theta: number, degrees?: boolean): self
 ---@field rotate fun(self, theta: number, degrees?: boolean): number
 ---@field mag fun(self): number
 ---@field magSq fun(self): number
----@field setMag fun(self, newMag: number)
+---@field setMag fun(self, newMag: number): self
 ---@field addMag fun(self, value: number): number
 ---@field dot fun(self, vec: Vector2): number
 ---@field angleTo fun(self, vec: Vector2, degrees?: boolean): number
----@field limit fun(self, max: number)
+---@field limit fun(self, max: number): self
 ---@field lerp fun(v1: Vector2, v2: Vector2, t: number): Vector2
 ---@field damp fun(v1: Vector2, v2: Vector2, t: number, dt: number): Vector2
 ---@operator call: Vector2
@@ -78,13 +78,13 @@ end
 
 ---Sets the vector's length to 1. Has no effect if the vector has length 0.
 function Vector2:normalize()
-  if self.x == 0 and self.y == 0 then
-    return
+  if self.x ~= 0 or self.y ~= 0 then
+    local m = self:mag()
+    self.x = self.x / m
+    self.y = self.y / m
   end
 
-  local m = self:mag()
-  self.x = self.x / m
-  self.y = self.y / m
+  return self
 end
 
 ---Returns the angle of the vector, or 0 if the vector has length 0.
@@ -106,17 +106,17 @@ end
 ---@param theta number The new angle.
 ---@param degrees? boolean [false] Whether to use degrees or radians.
 function Vector2:setAngle(theta, degrees)
-  if self.x == 0 and self.y == 0 then
-    return
+  if self.x ~= 0 or self.y ~= 0 then
+    if degrees then
+      theta = math.rad(theta)
+    end
+  
+    local m = self:mag()
+    self.x = math.cos(theta) * m
+    self.y = math.sin(theta) * m
   end
 
-  if degrees then
-    theta = math.rad(theta)
-  end
-
-  local m = self:mag()
-  self.x = math.cos(theta) * m
-  self.y = math.sin(theta) * m
+  return self
 end
 
 ---Rotates the vector by a certain angle. Has no effect on vectors with length 0.
@@ -164,6 +164,8 @@ function Vector2:setMag(newMag)
     self.x = self.x * newMag / m
     self.y = self.y * newMag / m
   end
+
+  return self
 end
 
 ---Adds a value to the length of the vector. Has no effect on vectors of length 0.
@@ -209,6 +211,8 @@ function Vector2:limit(max)
   if self:magSq() > max^2 then
     self:setMag(max)
   end
+
+  return self
 end
 
 ---Static method that interpolates between two vectors and returns a new vector.
