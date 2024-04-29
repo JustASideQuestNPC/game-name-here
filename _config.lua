@@ -31,6 +31,12 @@ return {
         keys = {"right", "d"},
         gamepadButtons = {"dpad right"}
       },
+      {
+        name = "dash",
+        keys = {"space"},
+        gamepadButtons = {"left bumper"},
+        mode = "press"
+      }
     },
 
     -- if true, the left and right thumbsticks are swapped
@@ -55,6 +61,10 @@ return {
   entities = {
     player = {
       runSpeed = 450, -- pixels per second
+      dashSpeed = 1500, -- pixels per second
+      dashDuration = 0.075, -- seconds
+      maxConsecutiveDashes = 2,
+      dashRefreshDuration = 0.2 -- seconds
     }
   }
 }

@@ -54,20 +54,20 @@ local mouseButtonNames = {
 -- lookup table for converting love2d gamepad button names into ones used by action configs
 local gamepadButtonNames = {
   a = "a", -- x on playstation controllers
-  b = "b",
-  x = "x",
-  y = "y",
+  b = "b", -- circle on playstation controllers
+  x = "x", -- square on playstation controllers
+  y = "y", -- triangle on playstation controllers
   dpup = "dpad up",
   dpdown = "dpad down",
   dpleft = "dpad left",
   dpright = "dpad right",
   back = "share",
-  guide = "home",
+  guide = "home", -- PS/Xbox logo button
   start = "options",
-  leftstick = "left stick click",
-  rightstick = "right stick click",
-  leftshoulder = "left bumper",
-  rightshoulder = "right bumper"
+  leftstick = "left stick click", -- l3 on playstation controllers
+  rightstick = "right stick click", -- r3 on playstation controllers
+  leftshoulder = "left bumper", -- l1 on playstation controllers
+  rightshoulder = "right bumper" -- r1 on playstation controllers
 }
 
 -- lookup table for converting love2d gamepad axis names into ones used by action configs
@@ -363,6 +363,7 @@ end
 ---Updates the internal state when a gamepad button is released. Call in `love.gamepadreleased()`.
 ---@param button string
 local function gamepadReleased(button)
+  _currentInputType = "gamepad"
   gamepadButtonStates[gamepadButtonNames[button]] = false
 end
 
@@ -370,8 +371,6 @@ end
 ---@param axis string
 ---@param value number
 local function gamepadAxis(axis, value)
-  _currentInputType = "gamepad"
-
   axis = gamepadAxisNames[axis]
 
   -- apply deadzones
@@ -393,7 +392,11 @@ local function gamepadAxis(axis, value)
     end
   end
 
-  gamepadAxisValues[axis] = value
+  -- prevents some really weird issues when trying to use a keyboard while a gamepad is connected
+  if gamepadAxisValues[axis] ~= value then
+    gamepadAxisValues[axis] = value
+    _currentInputType = "gamepad"
+  end
 
   -- triggers also activate a button on a full pull
   if axis == "left trigger" or axis == "right trigger" then
