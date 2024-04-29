@@ -158,6 +158,29 @@ local function clamp(value, min, max)
   return math.min(math.max(value, min), max)
 end
 
+---Returns the *real* arctangent of y/x, because some idiot at Lua headquarters decided that nobody
+---actually wanted to aim things at the mouse without writing their own freaking trig functions.
+---@param y number
+---@param x number
+---@return number
+local function atan2(y, x)
+  -- Does anyone know who decided that math.atan was a drop-in replacement for atan2? I'd like to
+  -- speak to them using a large blunt object (for legal reasons, this is a joke).
+  if x > 0 then
+    return math.atan(y / x)
+  elseif x < 0 and y >= 0 then
+    return math.atan(y / x) + math.pi
+  elseif x < 0 and y < 0 then
+    return math.atan(y / x) - math.pi
+  elseif x == 0 and y > 0 then
+    return math.pi / 2
+  elseif x == 0 and y < 0 then
+    return -math.pi / 2
+  else
+    return 0
+  end
+end
+
 return {
   arrayEvery = arrayEvery,
   arrayAny = arrayAny,
@@ -167,5 +190,6 @@ return {
   damp = damp,
   map = map,
   clamp = clamp,
-  class = class
+  class = class,
+  atan2 = atan2
 }
