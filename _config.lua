@@ -33,8 +33,14 @@ return {
       },
       {
         name = "dash",
-        keys = {"space"},
+        keys = {"right mouse"},
         gamepadButtons = {"left bumper"},
+        mode = "press"
+      },
+      {
+        name = "melee",
+        keys = {"v"},
+        gamepadButtons = {"x"},
         mode = "press"
       }
     },
@@ -64,7 +70,11 @@ return {
       dashSpeed = 1600, -- pixels per second
       dashDuration = 0.075, -- seconds
       maxConsecutiveDashes = 3,
-      dashRefreshDuration = 0.25 -- seconds
+      dashRefreshDuration = 0.25, -- seconds
+
+      meleeComboLength = 4, -- final hit is the spin attack
+      meleeJabAngleSize = 105, -- degrees
+      meleeSpinEndLag = 0.25, -- seconds
     }
   }
 }

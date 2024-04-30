@@ -18,7 +18,7 @@ function LevelBackground:draw()
   for x = 0, 2400, 300 do
     for y = 0, 1500, 300 do
       if blue then
-        love.graphics.setColor(love.math.colorFromBytes(133, 218, 235))
+        love.graphics.setColor(love.math.colorFromBytes(243, 167, 135))
       else
         love.graphics.setColor(1, 1, 1)
       end
