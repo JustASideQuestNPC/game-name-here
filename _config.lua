@@ -73,7 +73,7 @@ return {
       dashRefreshDuration = 0.25, -- seconds
 
       meleeComboLength = 4, -- final hit is the spin attack
-      meleeJabAngleSize = 105, -- degrees
+      meleeJabAngleSize = 120, -- degrees
       meleeSpinEndLag = 0.25, -- seconds
     }
   }

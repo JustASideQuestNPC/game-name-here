@@ -239,6 +239,11 @@ function Player:beginDash(dashVector)
 
   self.velocity = dashVector:setMag(self.DASH_SPEED)
   self.dashTimer = self.DASH_DURATION
+
+  self.isMeleeing = false
+  self.meleeCooldown = 0
+  self.meleeComboPosition = 0
+  self.meleeSwipeDirection = 1
 end
 
 return Player
