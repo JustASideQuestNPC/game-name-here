@@ -265,7 +265,6 @@ local function getStickVector(stick)
   return v
 end
 
-
 ---Returns a normalized vector constructed using 4 actions.
 ---@param up string
 ---@param down string
@@ -314,10 +313,15 @@ local function setGamepadRumble(left, right, duration)
   end
 end
 
+local function setCurrentInputType(type)
+  _currentInputType = type
+  love.mouse.setVisible(type == "keyboard")
+end
+
 ---Updates the internal state when a key is pressed. Call in `love.keypressed()`.
 ---@param key string
 local function keyPressed(key)
-  _currentInputType = "keyboard"
+  setCurrentInputType("keyboard")
   keyStates[key] = true
 end
 
@@ -330,7 +334,7 @@ end
 ---Updates the internal state when a mouse button is pressed. Call in `love.mousepressed()`.
 ---@param button integer
 local function mousePressed(button)
-  _currentInputType = "keyboard"
+  setCurrentInputType("keyboard")
   keyStates[mouseButtonNames[button]] = true
 end
 
@@ -346,6 +350,7 @@ end
 ---@param dx number
 ---@param dy number
 local function mouseMoved(x, y, dx, dy)
+  setCurrentInputType("keyboard")
   mousePos.x = x
   mousePos.y = y
   mouseDelta.x = x
@@ -355,14 +360,14 @@ end
 ---Updates the internal state when a gamepad button is pressed. Call in `love.gamepadpressed()`.
 ---@param button string
 local function gamepadPressed(button)
-  _currentInputType = "gamepad"
+  setCurrentInputType("gamepad")
   gamepadButtonStates[gamepadButtonNames[button]] = true
 end
 
 ---Updates the internal state when a gamepad button is released. Call in `love.gamepadreleased()`.
 ---@param button string
 local function gamepadReleased(button)
-  _currentInputType = "gamepad"
+  setCurrentInputType("gamepad")
   gamepadButtonStates[gamepadButtonNames[button]] = false
 end
 
@@ -394,7 +399,7 @@ local function gamepadAxis(axis, value)
   -- prevents some really weird issues when trying to use a keyboard while a gamepad is connected
   if gamepadAxisValues[axis] ~= value then
     gamepadAxisValues[axis] = value
-    _currentInputType = "gamepad"
+    setCurrentInputType("gamepad")
   end
 
   -- triggers also activate a button on a full pull

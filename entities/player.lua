@@ -5,6 +5,7 @@ local utils   = require "lib.utils"
 local input   = require "lib.input-manager"
 local Vector2 = require "lib.vector2"
 local engine  = require "lib.engine"
+local Sprite  = require "lib.sprite"
 local temp    = require "lib.game-entity"
 local GameEntity, EntityTag = temp.GameEntity, temp.EntityTag
 
@@ -16,6 +17,7 @@ local INVERT_THUMBSTICKS = config.input.invertThumbsticks
 ---@field DASH_DURATION number dash duration in seconds
 ---@field MAX_CONSECUTIVE_DASHES integer how many dashes can be performed in quick succession
 ---@field DASH_REFRESH_DURATION number how many seconds before all dashes are replenished
+---@field sprite Sprite
 ---@field position Vector2
 ---@field velocity Vector2
 ---@field angle number
@@ -37,6 +39,8 @@ local Player = utils.class(
     instance.MAX_CONSECUTIVE_DASHES = config.entities.player.maxConsecutiveDashes
     instance.DASH_REFRESH_DURATION = config.entities.player.dashRefreshDuration
 
+    instance.sprite = Sprite("player")
+
     instance.position = Vector2(x, y)
     instance.velocity = Vector2(0, 0)
     instance.angle = 0
@@ -49,16 +53,10 @@ local Player = utils.class(
 
 function Player:draw()
   love.graphics.push()
-  -- makes (0, 0) our current position
   love.graphics.translate(self.position.x, self.position.y)
-  love.graphics.rotate(self.angle)
+  love.graphics.rotate(self.angle + math.pi / 2)
 
-  -- placeholder sprite
-  love.graphics.setColor(love.math.colorFromBytes(50, 49, 59))
-  love.graphics.circle("fill", 0, 0, 35)
-  love.graphics.setColor(love.math.colorFromBytes(202, 96, 174))
-  love.graphics.setLineWidth(4)
-  love.graphics.line(0, 0, 200, 0)
+  self.sprite:draw(0, 0)
 
   love.graphics.pop()
 end

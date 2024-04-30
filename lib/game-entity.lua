@@ -15,7 +15,6 @@ local EntityTag = {
 ---@field displayLayer integer
 ---@field deleted boolean
 ---@field markForDelete boolean
----@field construct fun(): GameEntity
 ---@field new fun(): GameEntity
 ---@field update fun(self, dt: number)
 ---@field draw fun(self)
