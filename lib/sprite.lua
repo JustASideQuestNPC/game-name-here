@@ -73,6 +73,8 @@ function Sprite:setAlign(xAlign, yAlign)
 end
 
 function Sprite:draw(x, y)
+  -- apparently color affects images for some reason
+  love.graphics.setColor(1, 1, 1)
   love.graphics.draw(self.image, x + self.xOffset, y + self.yOffset)
 end
 

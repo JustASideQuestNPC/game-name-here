@@ -7,7 +7,8 @@ local EntityTag = {
   USES_SCREEN_SPACE_COORDS = "uses screen space coordinates",
 
   LEVEL_BACKGROUND = "level background",
-  PLAYER = "player"
+  PLAYER = "player",
+  WALL = "wall"
 }
 
 ---@class GameEntity: Class

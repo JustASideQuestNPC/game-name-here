@@ -1,5 +1,6 @@
 -- Player character.
 
+local HC      = require "hardon-collider"
 local config  = require "_config"
 local utils   = require "lib.utils"
 local input   = require "lib.input-manager"
@@ -21,6 +22,7 @@ local MELEE_SPIN_END_LAG = config.entities.player.meleeSpinEndLag
 ---@field MAX_CONSECUTIVE_DASHES integer how many dashes can be performed in quick succession
 ---@field DASH_REFRESH_DURATION number how many seconds before all dashes are replenished
 ---@field sprite Sprite
+---@field hitbox table
 ---@field position Vector2
 ---@field velocity Vector2
 ---@field angle number
@@ -43,7 +45,7 @@ local MELEE_SPIN_END_LAG = config.entities.player.meleeSpinEndLag
 local Player = utils.class(
   GameEntity, function (instance, x, y)
     instance.tags = {EntityTag.PLAYER}
-    instance.displayLayer = -1
+    instance.displayLayer = 1
 
     instance.RUN_SPEED = config.entities.player.runSpeed
     instance.DASH_SPEED = config.entities.player.dashSpeed
@@ -52,6 +54,15 @@ local Player = utils.class(
     instance.DASH_REFRESH_DURATION = config.entities.player.dashRefreshDuration
 
     instance.sprite = Sprite("player")
+    instance.hitbox = HC.polygon(
+        0, -25,
+       20,  -5,
+       20,  18,
+       13,  25,
+      -13,  25,
+      -20,  18,
+      -20,  -5
+    )
 
     instance.position = Vector2(x, y)
     instance.velocity = Vector2(0, 0)
@@ -78,7 +89,7 @@ function Player:draw()
   love.graphics.translate(self.position.x, self.position.y)
   love.graphics.rotate(self.angle + math.pi / 2)
 
-  self.sprite:draw(0, 0)
+  self.sprite:draw(0, -4)
 
   -- draw melee positions
   love.graphics.rotate(-(self.angle + math.pi / 2))
@@ -89,11 +100,25 @@ function Player:draw()
   end
 
   love.graphics.pop()
+
 end
 
 function Player:update(dt)
   -- move at the beginning of the update to prevent some issues with collisions
   self.position = self.position + self.velocity * dt
+  self.hitbox:moveTo(self.position:coords())
+  self.hitbox:setRotation(self.angle + math.pi / 2)
+
+  -- check for collisions with walls
+  local walls = engine.getTagged(EntityTag.WALL)
+  for _, wall in ipairs(walls) do
+    local collides, dx, dy = self.hitbox:collidesWith(wall.hitbox)
+    if collides then
+      self.position = self.position + Vector2(dx, dy)
+      self.hitbox:moveTo(self.position:coords())
+    end
+  end
+
   engine.setCameraTarget(self.position)
 
   -- find aim direction
@@ -145,13 +170,14 @@ function Player:update(dt)
     end
 
     -- update velocity
-    if moveDir:magSq() > 0 then
-      self.velocity = moveDir
-      if input.isActive("dash") and self.remainingDashes > 0 then
+    if input.isActive("dash") and self.remainingDashes > 0 then
+      if moveDir:magSq() > 0 then
         self:beginDash(moveDir)
       else
-        self.velocity = moveDir * self.RUN_SPEED
+        self:beginDash(Vector2.fromPolar(self.angle, 1))
       end
+    elseif moveDir:magSq() > 0 then
+      self.velocity = moveDir * self.RUN_SPEED
     else
       -- has the same effect as setting x and y to 0
       self.velocity = Vector2()
@@ -180,6 +206,7 @@ function Player:update(dt)
     end
   end
 
+  -- update melee attack
   if self.meleeCooldown > 0 then
     self.meleeCooldown = self.meleeCooldown - dt
     if self.meleeCooldown <= 0 then
@@ -188,7 +215,6 @@ function Player:update(dt)
     end
   end
 
-  -- update melee attack
   if self.isMeleeing then
     local step = (math.pi * 4 * dt * self.meleeSwipeDirection)
     if self.meleeComboPosition == MELEE_COMBO_LENGTH then

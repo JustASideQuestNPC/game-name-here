@@ -1,8 +1,10 @@
 local input  = require "lib.input-manager"
 local config = require "_config"
 local engine = require "lib.engine"
+
 local LevelBackground = require "entities.level-background"
 local Player = require "entities.player"
+local Wall = require "entities.wall"
 
 -- called once on program start
 function love.load()
@@ -33,7 +35,11 @@ function love.load()
 
   -- start the game engine
   engine.addEntity(LevelBackground())
-  engine.addEntity(Player(200, 200))
+  engine.addEntity(Wall(0, 0, config.gameplay.roomWidth, 50))
+  engine.addEntity(Wall(0, config.gameplay.roomHeight - 50, config.gameplay.roomWidth, 50))
+  engine.addEntity(Wall(0, 0, 50, config.gameplay.roomHeight))
+  engine.addEntity(Wall(config.gameplay.roomWidth - 50, 0, 50, config.gameplay.roomHeight))
+  engine.addEntity(Player(200, 300))
 end
 
 ---Called once per frame to update the game.
