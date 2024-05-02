@@ -4,8 +4,6 @@ local temp  = require "lib.game-entity"
 local GameEntity, EntityTag = temp.GameEntity, temp.EntityTag
 
 ---@class LevelBackground: GameEntity
----@field new fun():LevelBackground
----@field draw fun(self)
 local LevelBackground = utils.class(
   GameEntity, function (instance)
     instance.tags = {EntityTag.LEVEL_BACKGROUND}

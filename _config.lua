@@ -42,6 +42,22 @@ return {
         keys = {"v"},
         gamepadButtons = {"x"},
         mode = "press"
+      },
+      {
+        name = "aim",
+        keys = {"left mouse"},
+        gamepadButtons = {},
+      },
+      {
+        name = "auto fire",
+        keys = {"f"},
+        gamepadButtons = {"right bumper"}
+      },
+      {
+        name = "aim release",
+        keys = {"left mouse"},
+        gamepadButtons = {},
+        mode = "release"
       }
     },
 
@@ -66,7 +82,7 @@ return {
   -- entity-specific settings
   entities = {
     player = {
-      runSpeed = 450, -- pixels per second
+      runSpeed = 300, -- pixels per second
       dashSpeed = 1600, -- pixels per second
       dashDuration = 0.075, -- seconds
       maxConsecutiveDashes = 3,
@@ -75,6 +91,16 @@ return {
       meleeComboLength = 4, -- final hit is the spin attack
       meleeJabAngleSize = 120, -- degrees
       meleeSpinEndLag = 0.25, -- seconds
+
+      initialBulletSpread = 45, -- degrees
+      aimSpeed = 45, -- degrees per second
+      aimSpeedWhileFiring = 15, -- degrees per second
+      unAimSpeed = 30, -- degrees per second
+      shotChargeTime = 0.5, -- seconds
+
+      bulletVelocity = 1100, -- pixels per second
+      bulletRange = 750, -- pixels
+      fireRate = 450, -- rounds per minute
     }
   }
 }

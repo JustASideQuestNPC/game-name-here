@@ -11,12 +11,10 @@ local GameEntity, EntityTag = temp.GameEntity, temp.EntityTag
 ---@field width number
 ---@field height number
 ---@field hitbox table
----@field new fun(x: number, y: number, w: number, h: number): Wall
----@field draw fun(self)
 local Wall = utils.class(
   GameEntity, function (instance, x, y, w, h)
     instance.tags = {EntityTag.WALL}
-    instance.displayLayer = 1
+    instance.displayLayer = 2
 
     instance.x = x
     instance.y = y

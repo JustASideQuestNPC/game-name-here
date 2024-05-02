@@ -3,12 +3,13 @@ local utils = require "lib.utils"
 
 ---@enum EntityTag
 local EntityTag = {
-  USES_RAW_DELTA_TIME = "uses raw delta time",
-  USES_SCREEN_SPACE_COORDS = "uses screen space coordinates",
+  USES_RAW_DELTA_TIME = 0,
+  USES_SCREEN_SPACE_COORDS = 1,
 
-  LEVEL_BACKGROUND = "level background",
-  PLAYER = "player",
-  WALL = "wall"
+  LEVEL_BACKGROUND = 2,
+  PLAYER = 3,
+  WALL = 4,
+  PLAYER_BULLET = 5
 }
 
 ---@class GameEntity: Class

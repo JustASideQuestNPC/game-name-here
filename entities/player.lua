@@ -11,16 +11,66 @@ local temp    = require "lib.game-entity"
 local GameEntity, EntityTag = temp.GameEntity, temp.EntityTag
 
 local INVERT_THUMBSTICKS = config.input.invertThumbsticks
+
 local MELEE_COMBO_LENGTH = config.entities.player.meleeComboLength
 local MELEE_JAB_ANGLE_SIZE = math.rad(config.entities.player.meleeJabAngleSize)
 local MELEE_SPIN_END_LAG = config.entities.player.meleeSpinEndLag
 
+local INITIAL_BULLET_SPREAD = math.rad(config.entities.player.initialBulletSpread) / 2
+local UNAIM_SPEED = math.rad(config.entities.player.unAimSpeed)
+
+---@class PlayerBullet: GameEntity
+---@field position Vector2
+---@field velocity Vector2
+---@field damage number
+---@field maxDistance number
+---@field distanceTraveled number
+---@field charged boolean
+local PlayerBullet = utils.class(
+  GameEntity, function (instance, position, velocity, damage, maxDistance, charged)
+    instance.tags = {EntityTag.PLAYER_BULLET}
+    instance.displayLayer = 0
+
+    instance.position = position:copy()
+    instance.velocity = velocity:copy()
+    instance.damage = damage
+    instance.maxDistance = maxDistance
+    instance.distanceTraveled = 0
+    instance.charged = charged
+  end
+)
+
+function PlayerBullet:draw()
+  if self.charged then
+    love.graphics.setColor(love.math.colorFromBytes(255, 93, 204))
+    love.graphics.circle("fill", self.position.x, self.position.y, 15)
+  else
+    love.graphics.setColor(love.math.colorFromBytes(202, 96, 174))
+    love.graphics.circle("fill", self.position.x, self.position.y, 10)
+  end
+end
+
+function PlayerBullet:update(dt)
+  local step = self.velocity * dt
+  self.position = self.position + step
+  self.distanceTraveled = self.distanceTraveled + step:mag()
+  if self.distanceTraveled > self.maxDistance then
+    self.markForDelete = true
+  end
+end
+
 ---@class Player: GameEntity
----@field RUN_SPEED number normal running speed in pixels per second
----@field DASH_SPEED number dash speed in pixels per second
----@field DASH_DURATION number dash duration in seconds
+---@field RUN_SPEED number pixels per second
+---@field DASH_SPEED number pixels per second
+---@field DASH_DURATION number seconds
 ---@field MAX_CONSECUTIVE_DASHES integer how many dashes can be performed in quick succession
 ---@field DASH_REFRESH_DURATION number how many seconds before all dashes are replenished
+---@field AIM_SPEED number radians per second
+---@field AIM_SPEED_WHILE_FIRING number radians per second
+---@field BULLET_VELOCITY number pixels per second
+---@field BULLET_RANGE number pixels
+---@field SHOT_DELAY number seconds between shots
+---@field SHOT_CHARGE_DELAY number seconds
 ---@field sprite Sprite
 ---@field hitbox table
 ---@field position Vector2
@@ -38,9 +88,10 @@ local MELEE_SPIN_END_LAG = config.entities.player.meleeSpinEndLag
 ---@field isMeleeing boolean
 ---@field meleeSwipeDirection integer
 ---@field meleeComboPosition integer
----@field new fun(x: number, y: number): Player
----@field update fun(self, dt: number)
----@field draw fun(self)
+---@field currentBulletSpread number
+---@field isAiming boolean
+---@field shotTimer number
+---@field shotChargeTimer number
 ---@field beginDash fun(self, dashVector: Vector2)
 local Player = utils.class(
   GameEntity, function (instance, x, y)
@@ -52,6 +103,12 @@ local Player = utils.class(
     instance.DASH_DURATION = config.entities.player.dashDuration
     instance.MAX_CONSECUTIVE_DASHES = config.entities.player.maxConsecutiveDashes
     instance.DASH_REFRESH_DURATION = config.entities.player.dashRefreshDuration
+    instance.AIM_SPEED = math.rad(config.entities.player.aimSpeed)
+    instance.AIM_SPEED_WHILE_FIRING = math.rad(config.entities.player.aimSpeedWhileFiring)
+    instance.BULLET_VELOCITY = config.entities.player.bulletVelocity
+    instance.BULLET_RANGE = config.entities.player.bulletRange
+    instance.SHOT_DELAY = 1 / (config.entities.player.fireRate / 60)
+    instance.SHOT_CHARGE_DELAY = config.entities.player.shotChargeTime
 
     instance.sprite = Sprite("player")
     instance.hitbox = HC.polygon(
@@ -81,6 +138,11 @@ local Player = utils.class(
     instance.isMeleeing = false
     instance.meleeSwipeDirection = 1
     instance.meleeComboPosition = 0
+
+    instance.currentBulletSpread = INITIAL_BULLET_SPREAD
+    instance.isAiming = false
+    instance.shotTimer = 0
+    instance.shotChargeTimer = 0
   end
 )
 
@@ -88,6 +150,26 @@ function Player:draw()
   love.graphics.push()
   love.graphics.translate(self.position.x, self.position.y)
   love.graphics.rotate(self.angle + math.pi / 2)
+
+  -- draw aim direction
+  if self.currentBulletSpread < INITIAL_BULLET_SPREAD then
+    if self.shotChargeTimer <= 0 then
+      love.graphics.setColor(love.math.colorFromBytes(255, 93, 204))
+      utils.dottedLine(0, 0, 0, -self.BULLET_RANGE, 5, 20)
+    else
+      love.graphics.setColor(love.math.colorFromBytes(202, 96, 174))
+      love.graphics.push()
+
+      love.graphics.rotate(-self.currentBulletSpread)
+      utils.dottedLine(0, 0, 0, -self.BULLET_RANGE, 5, 20)
+
+      love.graphics.rotate(self.currentBulletSpread * 2)
+      utils.dottedLine(0, 0, 0, -self.BULLET_RANGE, 5, 20)
+
+      love.graphics.pop()
+    end
+  end
+  
 
   self.sprite:draw(0, -4)
 
@@ -122,6 +204,7 @@ function Player:update(dt)
   engine.setCameraTarget(self.position)
 
   -- find aim direction
+  self.isAiming = false
   local setAngleFromMovement = false
   if input.currentInputType() == "gamepad" then
     local lookVector
@@ -132,8 +215,12 @@ function Player:update(dt)
     end
 
     -- prevents a lot of weird and unfun control issues
-    if lookVector:magSq() > 0.9 then
-      self.angle = lookVector:angle()
+    if lookVector:magSq() > 0.25 then
+      self.isAiming = not self.isMeleeing
+      local lookAngle = lookVector:angle()
+      if math.abs(lookAngle - self.angle) > 0.02 then
+        self.angle = lookVector:angle()
+      end
     else
       setAngleFromMovement = true
     end
@@ -142,6 +229,50 @@ function Player:update(dt)
     local mpos = engine.screenPosToWorldPos(input.getMousePos())
     local delta = mpos - self.position
     self.angle = delta:angle()
+
+    self.isAiming = (input.isActive("aim") or input.isActive("aim release")) and not self.isMeleeing
+  end
+
+  -- update ranged attack
+  if self.shotTimer > 0 then
+    self.shotTimer = self.shotTimer - dt
+  end
+
+  if self.isAiming then
+    if (input.isActive("auto fire") or input.isActive("aim release")) and
+        self.shotTimer <= 0 and self.dashTimer <= 0 then
+      self.shotTimer = self.SHOT_DELAY
+
+      local bulletAngle = self.angle + utils.randFloat(-self.currentBulletSpread,
+        self.currentBulletSpread)
+      local bulletVelocity
+      if self.shotChargeTimer <= 0 then
+        bulletVelocity = Vector2.fromPolar(bulletAngle, self.BULLET_VELOCITY * 1.5)
+      else
+        bulletVelocity = Vector2.fromPolar(bulletAngle, self.BULLET_VELOCITY)
+      end
+
+      engine.addEntity(PlayerBullet(
+        self.position, bulletVelocity + self.velocity, 0,
+        self.BULLET_RANGE, self.shotChargeTimer < 0
+      ))
+      self.shotChargeTimer = self.SHOT_CHARGE_DELAY
+    end
+
+    if self.currentBulletSpread > 0 then
+      self.shotChargeTimer = self.SHOT_CHARGE_DELAY
+      if self.shotTimer > 0 then
+        self.currentBulletSpread = math.max(
+          self.currentBulletSpread - self.AIM_SPEED_WHILE_FIRING * dt, 0)
+      else
+        self.currentBulletSpread = math.max(self.currentBulletSpread - self.AIM_SPEED * dt, 0)
+      end
+    elseif self.shotChargeTimer > 0 and self.shotTimer <= 0 then
+      self.shotChargeTimer = self.shotChargeTimer - dt
+    end
+  elseif self.currentBulletSpread < INITIAL_BULLET_SPREAD and self.shotTimer <= 0 then
+    self.currentBulletSpread = math.min(
+      self.currentBulletSpread + UNAIM_SPEED * dt, INITIAL_BULLET_SPREAD)
   end
 
   -- if we're dashing, ignore control input and update the timer

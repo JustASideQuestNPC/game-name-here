@@ -182,6 +182,37 @@ local function atan2(y, x)
   end
 end
 
+---Draws a dotted line.
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@param dotRadius number
+---@param dotSpacing number
+local function dottedLine(x1, y1, x2, y2, dotRadius, dotSpacing)
+  -- i'd do this with vectors, but that creates an import loop and crashes everything
+  local length = math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2)
+  local angle = atan2(y2 - y1, x2 - x1)
+
+  love.graphics.push()
+  love.graphics.translate(x1, y1)
+  love.graphics.rotate(angle)
+
+  for x = 0, length, dotSpacing do
+    love.graphics.circle("fill", x, 0, dotRadius)
+  end
+
+  love.graphics.pop()
+end
+
+---Returns a random floating-point number in the range [min, max).
+---@param min number
+---@param max number
+---@return number
+local function randFloat(min, max)
+  return (math.random() * (max - min)) + min
+end
+
 return {
   arrayEvery = arrayEvery,
   arrayAny = arrayAny,
@@ -192,5 +223,7 @@ return {
   map = map,
   clamp = clamp,
   class = class,
-  atan2 = atan2
+  atan2 = atan2,
+  dottedLine = dottedLine,
+  randFloat = randFloat
 }
