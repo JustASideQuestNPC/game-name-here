@@ -3,9 +3,9 @@ local utils = require "lib.utils"
 
 ---@alias Image table not actually a table but it keeps my linter happy
 
----@type table<string, string> File paths for all sprite names.
+---@type table<string, string|Image> File paths for all sprite names.
 local SPRITE_PATHS = {
-  ["player"] = "assets/player.png"
+  ["player"] = "assets/entities/player.png"
 }
 
 ---@type table<string, Image> All currently loaded images.
@@ -23,26 +23,38 @@ local spriteImages = {}
 ---@field setAlign fun(self, xAlign: string, yAlign: string)
 ---@field draw fun(self, x: number, y: number)
 local Sprite = utils.class(
-  function (instance, name)
+  function (instance, name, fromPath, defaultPath)
     -- if the image is loaded, grab a reference to it
     if spriteImages[name] ~= nil then
       instance.image = spriteImages[name]
     else
       -- throw an error if the sprite name doesn't exist
-      if SPRITE_PATHS[name] == nil then
-        error("The sprite \""..name.."\" has no associated path!")
+      if SPRITE_PATHS[name] == nil and not fromPath then
+        if love.filesystem.getInfo(defaultPath) then
+          instance.image = love.graphics.newImage(defaultPath)
+          SPRITE_PATHS[defaultPath] = instance.image
+        else
+          error("The sprite \""..name.."\" has no associated path!")
+        end
       else
-        local path = SPRITE_PATHS[name]
+        local path
+        if fromPath then
+          path = name
+        else
+          path = SPRITE_PATHS[name]
+        end
+
         if love.filesystem.getInfo(path) then
           instance.image = love.graphics.newImage(path)
+          SPRITE_PATHS[name] = instance.image
         else
           -- throw an error if the image doesn't exist
           error("The image \""..path.."\" does not exist!")
         end
       end
     end
-    -- sprites default to being center aligned
 
+    -- sprites default to being center aligned
     instance.width, instance.height = instance.image:getDimensions()
     instance.xAlign = "center" -- horizontal alignment edge
     instance.yAlign = "center" -- vertical alignment edge

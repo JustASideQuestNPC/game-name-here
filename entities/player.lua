@@ -1,7 +1,7 @@
 -- Player character.
 
 local HC      = require "hardon-collider"
-local config  = require "_config"
+local config  = require "_game-config"
 local utils   = require "lib.utils"
 local input   = require "lib.input-manager"
 local Vector2 = require "lib.vector2"
@@ -42,10 +42,10 @@ local PlayerBullet = utils.class(
 
 function PlayerBullet:draw()
   if self.charged then
-    love.graphics.setColor(love.math.colorFromBytes(255, 93, 204))
+    love.graphics.setColor(love.math.colorFromBytes(133, 218, 235))
     love.graphics.circle("fill", self.position.x, self.position.y, 15)
   else
-    love.graphics.setColor(love.math.colorFromBytes(202, 96, 174))
+    love.graphics.setColor(love.math.colorFromBytes(95, 161, 231))
     love.graphics.circle("fill", self.position.x, self.position.y, 10)
   end
 end
@@ -154,10 +154,10 @@ function Player:draw()
   -- draw aim direction
   if self.currentBulletSpread < INITIAL_BULLET_SPREAD then
     if self.shotChargeTimer <= 0 then
-      love.graphics.setColor(love.math.colorFromBytes(255, 93, 204))
+      love.graphics.setColor(love.math.colorFromBytes(133, 218, 235))
       utils.dottedLine(0, 0, 0, -self.BULLET_RANGE, 5, 20)
     else
-      love.graphics.setColor(love.math.colorFromBytes(202, 96, 174))
+      love.graphics.setColor(love.math.colorFromBytes(95, 161, 231))
       love.graphics.push()
 
       love.graphics.rotate(-self.currentBulletSpread)

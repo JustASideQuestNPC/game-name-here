@@ -1,4 +1,5 @@
--- Filename starts with an underscore so it's always at the top of the list in my editor.
+-- Gameplay configs and anything else I don't want player's touching. The filename starts with an
+-- underscore so it's always at the top of the list in my editor.
 
 return {
   graphics = {

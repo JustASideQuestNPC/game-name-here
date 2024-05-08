@@ -9,7 +9,8 @@ local EntityTag = {
   LEVEL_BACKGROUND = 2,
   PLAYER = 3,
   WALL = 4,
-  PLAYER_BULLET = 5
+  PLAYER_BULLET = 5,
+  HUD = 6
 }
 
 ---@class GameEntity: Class

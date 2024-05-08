@@ -1,7 +1,9 @@
 -- Manages keyboard and mouse input.
 local utils   = require "lib.utils"
-local config  = require "_config"
+local config  = require "_game-config"
 local Vector2 = require "lib.vector2"
+local Sprite  = require "lib.sprite"
+local keyboardIconPaths, gamepadIconPaths = require "lib.input-sprite-paths"
 
 local BUFFER_SIZE = config.input.bufferSize -- size of the input buffer in seconds
 -- gamepad analog values lower than this are clamped to 0
@@ -13,6 +15,7 @@ local HIGH_DEADZONE = config.input.highDeadzone
 local gamepad
 local _gamepadConnected = false
 local _vibrationSupported = false
+local _gamepadType = "xbox" -- xbox or ps
 
 -- Which input type was last used, either "keyboard" or "gamepad"
 local _currentInputType = "keyboard"
@@ -62,7 +65,6 @@ local gamepadButtonNames = {
   dpleft = "dpad left",
   dpright = "dpad right",
   back = "share",
-  guide = "home", -- PS/Xbox logo button
   start = "options",
   leftstick = "left stick click", -- l3 on playstation controllers
   rightstick = "right stick click", -- r3 on playstation controllers
@@ -93,13 +95,18 @@ local function initGamepad()
     if gamepad:isGamepad() then
       _gamepadConnected = true
       _vibrationSupported = gamepad:isVibrationSupported()
+      local name = gamepad:getName():lower() ---@type string
       print("ID: "..gamepad:getID()..
-          "\nName: "..gamepad:getName()..
+          "\nName: ".. name..
           "\nGUID: "..gamepad:getGUID()..
           "\nDevice Info: "..gamepad:getDeviceInfo()..
           "\nAxis count: "..gamepad:getAxisCount()..
           "\nButton count: "..gamepad:getButtonCount()..
           "\nSupports vibration: "..tostring(_vibrationSupported))
+
+      if name:find("ps3") or name:find("ps4") or name:find("ps5") then
+        _gamepadType = "ps"
+      end
     end
   end
 end
@@ -318,6 +325,39 @@ local function setCurrentInputType(type)
   love.mouse.setVisible(type == "keyboard")
 end
 
+local function getActionIcon(name)
+  if _currentInputType == "keyboard" then
+    local keyName = activeActions[name].keys[1]
+    local path
+    if keyboardIconPaths[keyName] ~= nil then
+      path = "assets/icons/keyboard"..keyboardIconPaths[keyName]
+    else
+      path = "assets/icons/keyboard/kb_"..keyName..".png"
+    end
+    return Sprite(path, true, "assets/icons/keyboard/kb_blank_square.png")
+  else
+    local filename = gamepadIconPaths[activeActions[name].gamepadButtons[1]]
+    local path = "assets/icons/".._gamepadType.."/".._gamepadType.."_"..filename
+    return Sprite(path, true)
+  end
+end
+
+local function getKeyboardIcon(name)
+  local path
+  if keyboardIconPaths[name] ~= nil then
+    path = "assets/icons/keyboard"..keyboardIconPaths[name]
+  else
+    path = "assets/icons/keyboard/kb_"..name..".png"
+  end
+  return Sprite(path, true, "assets/icons/keyboard/kb_blank_square.png")
+end
+
+local function getGamepadIcon(name)
+  local filename = gamepadIconPaths[activeActions[name].gamepadButtons[1]]
+  local path = "assets/icons/".._gamepadType.."/".._gamepadType.."_"..filename
+  return Sprite(path, true)
+end
+
 ---Updates the internal state when a key is pressed. Call in `love.keypressed()`.
 ---@param key string
 local function keyPressed(key)
@@ -419,6 +459,9 @@ return {
   getDpadVector = getDpadVector,
   getMousePos = getMousePos,
   getMouseDelta = getMouseDelta,
+  getActionIcon = getActionIcon,
+  getKeyboardIcon = getKeyboardIcon,
+  getGamepadIcon = getGamepadIcon,
   setGamepadRumble = setGamepadRumble,
   keyPressed = keyPressed,
   keyReleased = keyReleased,

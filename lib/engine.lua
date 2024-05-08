@@ -1,7 +1,7 @@
 -- Game engine that manages all entities
 local Vector2   = require "lib.vector2"
 local utils     = require "lib.utils"
-local config    = require "_config"
+local config    = require "_game-config"
 local EntityTag = require("lib.game-entity").EntityTag
 
 -- camera tightness gets run through exp() to make the value less sensitive to tuning

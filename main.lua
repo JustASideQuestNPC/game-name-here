@@ -1,5 +1,5 @@
 local input  = require "lib.input-manager"
-local config = require "_config"
+local config = require "_game-config"
 local engine = require "lib.engine"
 
 local LevelBackground = require "entities.level-background"
