@@ -47,4 +47,7 @@ local gamepadPaths = {
   ["options"] = "start"
 }
 
-return keyboardPaths, gamepadPaths
+return {
+  keyboardPaths = keyboardPaths,
+  gamepadPaths = gamepadPaths
+}

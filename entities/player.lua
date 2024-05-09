@@ -1,23 +1,21 @@
 -- Player character.
 
-local HC      = require "hardon-collider"
-local config  = require "_game-config"
-local utils   = require "lib.utils"
-local input   = require "lib.input-manager"
-local Vector2 = require "lib.vector2"
-local engine  = require "lib.engine"
-local Sprite  = require "lib.sprite"
-local temp    = require "lib.game-entity"
+local HC           = require "hardon-collider"
+local playerConfig = require "_game-config".entities.player
+local utils        = require "lib.utils"
+local input        = require "lib.input"
+local Vector2      = require "lib.vector2"
+local engine       = require "lib.engine"
+local Sprite       = require "lib.sprite"
+local temp         = require "lib.game-entity"
 local GameEntity, EntityTag = temp.GameEntity, temp.EntityTag
 
-local INVERT_THUMBSTICKS = config.input.invertThumbsticks
+local MELEE_COMBO_LENGTH = playerConfig.meleeComboLength
+local MELEE_JAB_ANGLE_SIZE = math.rad(playerConfig.meleeJabAngleSize)
+local MELEE_SPIN_END_LAG = playerConfig.meleeSpinEndLag
 
-local MELEE_COMBO_LENGTH = config.entities.player.meleeComboLength
-local MELEE_JAB_ANGLE_SIZE = math.rad(config.entities.player.meleeJabAngleSize)
-local MELEE_SPIN_END_LAG = config.entities.player.meleeSpinEndLag
-
-local INITIAL_BULLET_SPREAD = math.rad(config.entities.player.initialBulletSpread) / 2
-local UNAIM_SPEED = math.rad(config.entities.player.unAimSpeed)
+local INITIAL_BULLET_SPREAD = math.rad(playerConfig.initialBulletSpread) / 2
+local UNAIM_SPEED = math.rad(playerConfig.unAimSpeed)
 
 ---@class PlayerBullet: GameEntity
 ---@field position Vector2
@@ -98,17 +96,17 @@ local Player = utils.class(
     instance.tags = {EntityTag.PLAYER}
     instance.displayLayer = 1
 
-    instance.RUN_SPEED = config.entities.player.runSpeed
-    instance.DASH_SPEED = config.entities.player.dashSpeed
-    instance.DASH_DURATION = config.entities.player.dashDuration
-    instance.MAX_CONSECUTIVE_DASHES = config.entities.player.maxConsecutiveDashes
-    instance.DASH_REFRESH_DURATION = config.entities.player.dashRefreshDuration
-    instance.AIM_SPEED = math.rad(config.entities.player.aimSpeed)
-    instance.AIM_SPEED_WHILE_FIRING = math.rad(config.entities.player.aimSpeedWhileFiring)
-    instance.BULLET_VELOCITY = config.entities.player.bulletVelocity
-    instance.BULLET_RANGE = config.entities.player.bulletRange
-    instance.SHOT_DELAY = 1 / (config.entities.player.fireRate / 60)
-    instance.SHOT_CHARGE_DELAY = config.entities.player.shotChargeTime
+    instance.RUN_SPEED = playerConfig.runSpeed
+    instance.DASH_SPEED = playerConfig.dashSpeed
+    instance.DASH_DURATION = playerConfig.dashDuration
+    instance.MAX_CONSECUTIVE_DASHES = playerConfig.maxConsecutiveDashes
+    instance.DASH_REFRESH_DURATION = playerConfig.dashRefreshDuration
+    instance.AIM_SPEED = math.rad(playerConfig.aimSpeed)
+    instance.AIM_SPEED_WHILE_FIRING = math.rad(playerConfig.aimSpeedWhileFiring)
+    instance.BULLET_VELOCITY = playerConfig.bulletVelocity
+    instance.BULLET_RANGE = playerConfig.bulletRange
+    instance.SHOT_DELAY = 1 / (playerConfig.fireRate / 60)
+    instance.SHOT_CHARGE_DELAY = playerConfig.shotChargeTime
 
     instance.sprite = Sprite("player")
     instance.hitbox = HC.polygon(
@@ -207,12 +205,7 @@ function Player:update(dt)
   self.isAiming = false
   local setAngleFromMovement = false
   if input.currentInputType() == "gamepad" then
-    local lookVector
-    if INVERT_THUMBSTICKS then
-      lookVector = input.getStickVector("left")
-    else
-      lookVector = input.getStickVector("right")
-    end
+    local lookVector = input.getStickVector("right")
 
     -- prevents a lot of weird and unfun control issues
     if lookVector:magSq() > 0.25 then
@@ -291,11 +284,7 @@ function Player:update(dt)
     -- find what direction we're moving
     local moveDir
     if input.currentInputType() == "gamepad" then
-      if INVERT_THUMBSTICKS then
-        moveDir = input.getStickVector("right")
-      else
-        moveDir = input.getStickVector("left")
-      end
+      moveDir = input.getStickVector("left")
     else
       moveDir = input.getDpadVector("move up", "move down", "move left", "move right")
     end

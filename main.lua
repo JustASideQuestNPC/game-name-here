@@ -1,10 +1,11 @@
-local input  = require "lib.input-manager"
+local input  = require "lib.input"
 local config = require "_game-config"
 local engine = require "lib.engine"
 
 local LevelBackground = require "entities.level-background"
 local Player = require "entities.player"
 local Wall = require "entities.wall"
+local TutorialOverlay = require "entities.tutorial-overlay"
 
 -- called once on program start
 function love.load()
@@ -28,10 +29,15 @@ function love.load()
       msaa = config.graphics.msaaSamples
     }
   )
+  love.window.setTitle("[GAME NAME HERE]")
+
+  local font = love.graphics.newFont("assets/fonts/RedHatDisplay-Regular.ttf", 30)
+  love.graphics.setFont(font)
 
   -- set up input
   input.initGamepad()
   input.addActionList(config.input.keybinds)
+  input.setSwapThumbsticks(config.input.swapThumbsticks)
 
   -- start the game engine
   engine.addEntity(LevelBackground())
@@ -40,6 +46,7 @@ function love.load()
   engine.addEntity(Wall(0, 0, 50, config.gameplay.roomHeight))
   engine.addEntity(Wall(config.gameplay.roomWidth - 50, 0, 50, config.gameplay.roomHeight))
   engine.addEntity(Player(200, 300))
+  engine.addEntity(TutorialOverlay())
 end
 
 ---Called once per frame to update the game.

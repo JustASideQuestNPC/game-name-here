@@ -3,7 +3,8 @@ local utils   = require "lib.utils"
 local config  = require "_game-config"
 local Vector2 = require "lib.vector2"
 local Sprite  = require "lib.sprite"
-local keyboardIconPaths, gamepadIconPaths = require "lib.input-sprite-paths"
+local temp = require "lib.input-sprite-paths"
+local keyboardIconPaths, gamepadIconPaths = temp.keyboardPaths, temp.gamepadPaths
 
 local BUFFER_SIZE = config.input.bufferSize -- size of the input buffer in seconds
 -- gamepad analog values lower than this are clamped to 0
@@ -11,11 +12,11 @@ local LOW_DEADZONE = config.input.lowDeadzone
 -- gamepad analog values higher than this are clamped to 1
 local HIGH_DEADZONE = config.input.highDeadzone
 
---  the active gamepad (if any)
-local gamepad
+local gamepad -- the active gamepad (if any)
 local _gamepadConnected = false
 local _vibrationSupported = false
 local _gamepadType = "xbox" -- xbox or ps
+local _swapThumbsticks = false
 
 -- Which input type was last used, either "keyboard" or "gamepad"
 local _currentInputType = "keyboard"
@@ -93,6 +94,7 @@ local function initGamepad()
     print("Joystick Found:")
     print("Is gamepad: "..tostring(gamepad:isGamepad()))
     if gamepad:isGamepad() then
+      _currentInputType = "gamepad"
       _gamepadConnected = true
       _vibrationSupported = gamepad:isVibrationSupported()
       local name = gamepad:getName():lower() ---@type string
@@ -248,6 +250,17 @@ end
 ---@return number
 ---@nodiscard
 local function getAxisValue(name)
+  if _swapThumbsticks then
+    if name == "left stick x" then
+      name = "right stick x"
+    elseif name == "left stick y" then
+      name = "right stick y"
+    elseif name == "right stick x" then
+      name = "left stick x"
+    elseif name == "right stick y" then
+      name = "left stick y"
+    end
+  end
   return gamepadAxisValues[name]
 end
 
@@ -257,7 +270,7 @@ end
 ---@nodiscard
 local function getStickVector(stick)
   local v
-  if stick == "left" then
+  if (not _swapThumbsticks and stick == "left") or (_swapThumbsticks and stick == "right") then
     v = Vector2(
       gamepadAxisValues["left stick x"],
       gamepadAxisValues["left stick y"]
@@ -325,23 +338,45 @@ local function setCurrentInputType(type)
   love.mouse.setVisible(type == "keyboard")
 end
 
-local function getActionIcon(name)
-  if _currentInputType == "keyboard" then
+---Returns an array with sprites for the first keyboard key and the first gamepad button bound to an
+---action (if the key or button does not exist, the array item is nil).
+---@param name string
+---@return [Sprite, Sprite]
+local function getActionIcons(name)
+  local icons = {}
+
+  if #activeActions[name].keys > 0 then
     local keyName = activeActions[name].keys[1]
     local path
     if keyboardIconPaths[keyName] ~= nil then
-      path = "assets/icons/keyboard"..keyboardIconPaths[keyName]
+      path = "assets/icons/keyboard/"..keyboardIconPaths[keyName]
     else
       path = "assets/icons/keyboard/kb_"..keyName..".png"
     end
-    return Sprite(path, true, "assets/icons/keyboard/kb_blank_square.png")
+    icons[#icons+1] = Sprite(path, true, "assets/icons/keyboard/kb_blank_square.png")
   else
-    local filename = gamepadIconPaths[activeActions[name].gamepadButtons[1]]
-    local path = "assets/icons/".._gamepadType.."/".._gamepadType.."_"..filename
-    return Sprite(path, true)
+    icons[#icons+1] = nil
   end
+
+  if #activeActions[name].gamepadButtons > 0 then
+    local path
+    local button = activeActions[name].gamepadButtons[1]
+    if gamepadIconPaths[button] then
+      path = "assets/icons/".._gamepadType.."/".._gamepadType.."_"..gamepadIconPaths[button]
+    else
+      path = "assets/icons/".._gamepadType.."/".._gamepadType.."_"..button..".png"
+    end
+    icons[#icons+1] = Sprite(path, true)
+  else
+    icons[#icons+1] = nil
+  end
+
+  return icons
 end
 
+---Returns a sprite with the icon for a keyboard key.
+---@param name string
+---@return Sprite
 local function getKeyboardIcon(name)
   local path
   if keyboardIconPaths[name] ~= nil then
@@ -352,8 +387,11 @@ local function getKeyboardIcon(name)
   return Sprite(path, true, "assets/icons/keyboard/kb_blank_square.png")
 end
 
+---Returns a sprite with the icon for a gamepad button or joystick.
+---@param name string
+---@return Sprite
 local function getGamepadIcon(name)
-  local filename = gamepadIconPaths[activeActions[name].gamepadButtons[1]]
+  local filename = gamepadIconPaths[name]
   local path = "assets/icons/".._gamepadType.."/".._gamepadType.."_"..filename
   return Sprite(path, true)
 end
@@ -390,7 +428,7 @@ end
 ---@param dx number
 ---@param dy number
 local function mouseMoved(x, y, dx, dy)
-  setCurrentInputType("keyboard")
+  -- setCurrentInputType("keyboard")
   mousePos.x = x
   mousePos.y = y
   mouseDelta.x = x
@@ -459,7 +497,7 @@ return {
   getDpadVector = getDpadVector,
   getMousePos = getMousePos,
   getMouseDelta = getMouseDelta,
-  getActionIcon = getActionIcon,
+  getActionIcons = getActionIcons,
   getKeyboardIcon = getKeyboardIcon,
   getGamepadIcon = getGamepadIcon,
   setGamepadRumble = setGamepadRumble,
@@ -472,5 +510,7 @@ return {
   gamepadReleased = gamepadReleased,
   gamepadAxis = gamepadAxis,
   gamepadConnected = function() return _gamepadConnected end,
-  currentInputType = function() return _currentInputType end
+  currentInputType = function() return _currentInputType end,
+  swapThumbsticks = function() return _swapThumbsticks end,
+  setSwapThumbsticks = function(state) _swapThumbsticks = state end
 }

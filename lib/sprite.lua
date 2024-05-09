@@ -3,7 +3,7 @@ local utils = require "lib.utils"
 
 ---@alias Image table not actually a table but it keeps my linter happy
 
----@type table<string, string|Image> File paths for all sprite names.
+---@type table<string, string> File paths for all sprite names.
 local SPRITE_PATHS = {
   ["player"] = "assets/entities/player.png"
 }
@@ -21,7 +21,7 @@ local spriteImages = {}
 ---@field yOffset number
 ---@field new fun(name: string): Sprite
 ---@field setAlign fun(self, xAlign: string, yAlign: string)
----@field draw fun(self, x: number, y: number)
+---@field draw fun(self, x: number, y: number, scale: number?)
 local Sprite = utils.class(
   function (instance, name, fromPath, defaultPath)
     -- if the image is loaded, grab a reference to it
@@ -32,7 +32,7 @@ local Sprite = utils.class(
       if SPRITE_PATHS[name] == nil and not fromPath then
         if love.filesystem.getInfo(defaultPath) then
           instance.image = love.graphics.newImage(defaultPath)
-          SPRITE_PATHS[defaultPath] = instance.image
+          spriteImages[defaultPath] = instance.image
         else
           error("The sprite \""..name.."\" has no associated path!")
         end
@@ -46,7 +46,7 @@ local Sprite = utils.class(
 
         if love.filesystem.getInfo(path) then
           instance.image = love.graphics.newImage(path)
-          SPRITE_PATHS[name] = instance.image
+          spriteImages[name] = instance.image
         else
           -- throw an error if the image doesn't exist
           error("The image \""..path.."\" does not exist!")
@@ -84,10 +84,16 @@ function Sprite:setAlign(xAlign, yAlign)
   end
 end
 
-function Sprite:draw(x, y)
-  -- apparently color affects images for some reason
-  love.graphics.setColor(1, 1, 1)
-  love.graphics.draw(self.image, x + self.xOffset, y + self.yOffset)
+function Sprite:draw(x, y, scale)
+  scale = scale or 1
+
+  love.graphics.push()
+    love.graphics.translate(x, y)
+    love.graphics.scale(scale)
+    -- apparently color affects images for some reason
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(self.image, self.xOffset, self.yOffset)
+  love.graphics.pop()
 end
 
 return Sprite

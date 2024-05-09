@@ -14,22 +14,22 @@ return {
     keybinds = {
       {
         name = "move up",
-        keys = {"up", "w"},
+        keys = {"w", "up"},
         gamepadButtons = {"dpad up"}
       },
       {
         name = "move down",
-        keys = {"down", "s"},
+        keys = {"s", "down"},
         gamepadButtons = {"dpad down"}
       },
       {
         name = "move left",
-        keys = {"left", "a"},
+        keys = {"a", "left"},
         gamepadButtons = {"dpad left"}
       },
       {
         name = "move right",
-        keys = {"right", "d"},
+        keys = {"d", "right"},
         gamepadButtons = {"dpad right"}
       },
       {
@@ -63,7 +63,7 @@ return {
     },
 
     -- if true, the left and right thumbsticks are swapped
-    invertThumbsticks = false,
+    swapThumbsticks = false,
 
     bufferSize = 0.5,   -- size of the input buffer in seconds
     lowDeadzone = 0.1,  -- gamepad analog values lower than this are clamped to 0
