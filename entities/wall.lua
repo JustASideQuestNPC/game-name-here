@@ -1,8 +1,8 @@
 -- Basic wall.
 
-local HC    = require "hardon-collider"
+local HC    = require "hardonCollider"
 local utils = require "lib.utils"
-local temp  = require "lib.game-entity"
+local temp  = require "lib.gameEntity"
 local GameEntity, EntityTag = temp.GameEntity, temp.EntityTag
 
 ---@class Wall: GameEntity

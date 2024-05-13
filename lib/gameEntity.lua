@@ -24,6 +24,7 @@ local EntityTag = {
 ---@field setup fun(self)
 ---@field delete fun(self)
 ---@field hasTag fun(self, tag: EntityTag): boolean
+---@field takeDamage fun(self, dmg: number)
 local GameEntity = utils.class()
 
 ---Called once per frame in update(), and is passed the current delta time. This base class method
@@ -48,6 +49,11 @@ function GameEntity:delete() end
 function GameEntity:hasTag(tag)
   return utils.arrayFind(self.tags, tag) ~= 0
 end
+
+---Called once when damage is dealt to the entity, and is passed the amount of damage dealt. This
+---base class method does nothing and must be overriden.
+---@param dmg number
+function GameEntity:takeDamage(dmg) end
 
 ---Generates a new class that extends GameEntity.
 ---@param tags? EntityTag[]

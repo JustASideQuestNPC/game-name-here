@@ -3,7 +3,7 @@ local utils   = require "lib.utils"
 local config  = require "_game-config"
 local Vector2 = require "lib.vector2"
 local Sprite  = require "lib.sprite"
-local temp = require "lib.input-sprite-paths"
+local temp = require "lib.inputSpritePaths"
 local keyboardIconPaths, gamepadIconPaths = temp.keyboardPaths, temp.gamepadPaths
 
 local BUFFER_SIZE = config.input.bufferSize -- size of the input buffer in seconds

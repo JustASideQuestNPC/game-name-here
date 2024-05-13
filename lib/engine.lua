@@ -2,7 +2,7 @@
 local Vector2   = require "lib.vector2"
 local utils     = require "lib.utils"
 local config    = require "_game-config"
-local EntityTag = require("lib.game-entity").EntityTag
+local EntityTag = require("lib.gameEntity").EntityTag
 
 -- camera tightness gets run through exp() to make the value less sensitive to tuning
 local CAMERA_TIGHTNESS = config.engine.cameraTightness

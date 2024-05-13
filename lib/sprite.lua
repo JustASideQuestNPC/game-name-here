@@ -5,7 +5,7 @@ local utils = require "lib.utils"
 
 ---@type table<string, string> File paths for all sprite names.
 local SPRITE_PATHS = {
-  ["player"] = "assets/entities/player.png"
+  ["player"] = "assets/entities/player/player.png"
 }
 
 ---@type table<string, Image> All currently loaded images.

@@ -1,13 +1,13 @@
 -- Player character.
 
-local HC           = require "hardon-collider"
+local HC           = require "hardonCollider"
 local playerConfig = require "_game-config".entities.player
 local utils        = require "lib.utils"
 local input        = require "lib.input"
 local Vector2      = require "lib.vector2"
 local engine       = require "lib.engine"
 local Sprite       = require "lib.sprite"
-local temp         = require "lib.game-entity"
+local temp         = require "lib.gameEntity"
 local GameEntity, EntityTag = temp.GameEntity, temp.EntityTag
 
 local MELEE_COMBO_LENGTH = playerConfig.meleeComboLength

@@ -1,6 +1,6 @@
 -- Simple level/room background.
 local utils = require "lib.utils"
-local temp  = require "lib.game-entity"
+local temp  = require "lib.gameEntity"
 local GameEntity, EntityTag = temp.GameEntity, temp.EntityTag
 
 ---@class LevelBackground: GameEntity

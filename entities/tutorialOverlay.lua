@@ -1,6 +1,6 @@
 local utils = require "lib.utils"
 local input = require "lib.input"
-local temp  = require "lib.game-entity"
+local temp  = require "lib.gameEntity"
 local GameEntity, EntityTag = temp.GameEntity, temp.EntityTag
 
 ---@class TutorialOverlay: GameEntity

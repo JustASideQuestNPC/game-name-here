@@ -2,10 +2,10 @@ local input  = require "lib.input"
 local config = require "_game-config"
 local engine = require "lib.engine"
 
-local LevelBackground = require "entities.level-background"
+local LevelBackground = require "entities.levelBackground"
 local Player = require "entities.player"
 local Wall = require "entities.wall"
-local TutorialOverlay = require "entities.tutorial-overlay"
+local TutorialOverlay = require "entities.tutorialOverlay"
 
 -- called once on program start
 function love.load()
@@ -45,7 +45,9 @@ function love.load()
   engine.addEntity(Wall(0, config.gameplay.roomHeight - 50, config.gameplay.roomWidth, 50))
   engine.addEntity(Wall(0, 0, 50, config.gameplay.roomHeight))
   engine.addEntity(Wall(config.gameplay.roomWidth - 50, 0, 50, config.gameplay.roomHeight))
-  engine.addEntity(Player(200, 300))
+
+  -- global reference to the player
+  PlayerEntity = engine.addEntity(Player(200, 300))
   engine.addEntity(TutorialOverlay())
 end
 
