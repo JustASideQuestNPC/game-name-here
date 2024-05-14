@@ -1,11 +1,15 @@
 local input  = require "lib.input"
-local config = require "_game-config"
-local engine = require "lib.engine"
+local config = require "_gameConfig"
+
+-- The engine is accessed through the global "Engine" so this is unused, but everything crashes and
+-- burns for some reason unless I require it in main. This is truly a coconut.jpg moment.
+local _ = require "lib.engine"
 
 local LevelBackground = require "entities.levelBackground"
 local Player = require "entities.player"
 local Wall = require "entities.wall"
 local TutorialOverlay = require "entities.tutorialOverlay"
+local WaveLauncherEnemy = require "entities.waveLauncherEnemy"
 
 -- called once on program start
 function love.load()
@@ -40,28 +44,30 @@ function love.load()
   input.setSwapThumbsticks(config.input.swapThumbsticks)
 
   -- start the game engine
-  engine.addEntity(LevelBackground())
-  engine.addEntity(Wall(0, 0, config.gameplay.roomWidth, 50))
-  engine.addEntity(Wall(0, config.gameplay.roomHeight - 50, config.gameplay.roomWidth, 50))
-  engine.addEntity(Wall(0, 0, 50, config.gameplay.roomHeight))
-  engine.addEntity(Wall(config.gameplay.roomWidth - 50, 0, 50, config.gameplay.roomHeight))
+  Engine.addEntity(LevelBackground())
+  Engine.addEntity(Wall(0, 0, config.gameplay.roomWidth, 50))
+  Engine.addEntity(Wall(0, config.gameplay.roomHeight - 50, config.gameplay.roomWidth, 50))
+  Engine.addEntity(Wall(0, 0, 50, config.gameplay.roomHeight))
+  Engine.addEntity(Wall(config.gameplay.roomWidth - 50, 0, 50, config.gameplay.roomHeight))
 
   -- global reference to the player
-  PlayerEntity = engine.addEntity(Player(200, 300))
-  engine.addEntity(TutorialOverlay())
+---@diagnostic disable-next-line: assign-type-mismatch
+  PlayerEntity = Engine.addEntity(Player(640, 360)) ---@type Player
+
+  Engine.addEntity(TutorialOverlay())
 end
 
 ---Called once per frame to update the game.
 ---@param dt number The time between the previous two frames in seconds.
 function love.update(dt)
   input.update(dt)
-  engine.update(dt)
+  Engine.update(dt)
 end
 
 ---Called once per frame to draw the game
 function love.draw()
   love.graphics.clear(love.math.colorFromBytes(50, 49, 59))
-  engine.draw()
+  Engine.draw()
 end
 
 ---Called when a key is pressed.

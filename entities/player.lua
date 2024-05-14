@@ -1,11 +1,10 @@
 -- Player character.
 
 local HC           = require "hardonCollider"
-local playerConfig = require "_game-config".entities.player
+local playerConfig = require "_gameConfig".entities.player
 local utils        = require "lib.utils"
 local input        = require "lib.input"
 local Vector2      = require "lib.vector2"
-local engine       = require "lib.engine"
 local Sprite       = require "lib.sprite"
 local temp         = require "lib.gameEntity"
 local GameEntity, EntityTag = temp.GameEntity, temp.EntityTag
@@ -146,7 +145,7 @@ local Player = utils.class(
 
 function Player:draw()
   love.graphics.push()
-  love.graphics.translate(self.position.x, self.position.y)
+  love.graphics.translate(self.position:coords())
   love.graphics.rotate(self.angle + math.pi / 2)
 
   -- draw aim direction
@@ -167,7 +166,6 @@ function Player:draw()
       love.graphics.pop()
     end
   end
-  
 
   self.sprite:draw(0, -4)
 
@@ -181,6 +179,11 @@ function Player:draw()
 
   love.graphics.pop()
 
+  -- if DEBUG_CONFIG.SHOW_HITBOXES then
+  --   love.graphics.setColor(love.math.colorFromBytes(94, 253, 247))
+  --   love.graphics.setLineWidth(2)
+  --   self.hitbox:draw("line")
+  -- end
 end
 
 function Player:update(dt)
@@ -190,7 +193,7 @@ function Player:update(dt)
   self.hitbox:setRotation(self.angle + math.pi / 2)
 
   -- check for collisions with walls
-  local walls = engine.getTagged(EntityTag.WALL)
+  local walls = Engine.getTagged(EntityTag.WALL)
   for _, wall in ipairs(walls) do
     local collides, dx, dy = self.hitbox:collidesWith(wall.hitbox)
     if collides then
@@ -199,7 +202,7 @@ function Player:update(dt)
     end
   end
 
-  engine.setCameraTarget(self.position)
+  Engine.setCameraTarget(self.position)
 
   -- find aim direction
   self.isAiming = false
@@ -217,9 +220,8 @@ function Player:update(dt)
     else
       setAngleFromMovement = true
     end
-
   else
-    local mpos = engine.screenPosToWorldPos(input.getMousePos())
+    local mpos = Engine.screenPosToWorldPos(input.getMousePos())
     local delta = mpos - self.position
     self.angle = delta:angle()
 
@@ -245,7 +247,7 @@ function Player:update(dt)
         bulletVelocity = Vector2.fromPolar(bulletAngle, self.BULLET_VELOCITY)
       end
 
-      engine.addEntity(PlayerBullet(
+      Engine.addEntity(PlayerBullet(
         self.position, bulletVelocity + self.velocity, 0,
         self.BULLET_RANGE, self.shotChargeTimer < 0
       ))

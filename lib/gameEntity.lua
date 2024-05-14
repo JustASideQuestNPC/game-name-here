@@ -10,7 +10,8 @@ local EntityTag = {
   PLAYER = 3,
   WALL = 4,
   PLAYER_BULLET = 5,
-  HUD = 6
+  HUD = 6,
+  ENEMY = 7,
 }
 
 ---@class GameEntity: Class
@@ -18,9 +19,11 @@ local EntityTag = {
 ---@field displayLayer integer
 ---@field deleted boolean
 ---@field markForDelete boolean
+---@field hitbox table|nil
 ---@field new fun(): GameEntity
 ---@field update fun(self, dt: number)
 ---@field draw fun(self)
+---@field drawHitbox fun(self)
 ---@field setup fun(self)
 ---@field delete fun(self)
 ---@field hasTag fun(self, tag: EntityTag): boolean
@@ -34,6 +37,14 @@ function GameEntity:update(dt) end
 
 ---Called once per frame in draw(). This base class method does nothing and must be overriden.
 function GameEntity:draw() end
+
+function GameEntity:drawHitbox()
+  if self.hitbox ~= nil then
+    love.graphics.setColor(love.math.colorFromBytes(94, 253, 247))
+    love.graphics.setLineWidth(2)
+    self.hitbox:draw("line")
+  end
+end
 
 ---Called once when the entity is added to the game engine. This base class method does nothing and
 ---must be overriden.

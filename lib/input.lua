@@ -1,6 +1,6 @@
 -- Manages keyboard and mouse input.
 local utils   = require "lib.utils"
-local config  = require "_game-config"
+local config  = require "_gameConfig"
 local Vector2 = require "lib.vector2"
 local Sprite  = require "lib.sprite"
 local temp = require "lib.inputSpritePaths"

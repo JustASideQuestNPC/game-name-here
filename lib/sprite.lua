@@ -5,7 +5,9 @@ local utils = require "lib.utils"
 
 ---@type table<string, string> File paths for all sprite names.
 local SPRITE_PATHS = {
-  ["player"] = "assets/entities/player/player.png"
+  player = "assets/entities/player/player.png",
+  waveLauncherEnemyBody = "assets/entities/waveLauncherEnemy/body.png",
+  waveLauncherEnemyProjectile = "assets/entities/waveLauncherEnemy/projectile.png"
 }
 
 ---@type table<string, Image> All currently loaded images.
@@ -27,12 +29,14 @@ local Sprite = utils.class(
     -- if the image is loaded, grab a reference to it
     if spriteImages[name] ~= nil then
       instance.image = spriteImages[name]
+      print("Image for sprite \""..name.."\" is already loaded, referencing it.")
     else
       -- throw an error if the sprite name doesn't exist
       if SPRITE_PATHS[name] == nil and not fromPath then
         if love.filesystem.getInfo(defaultPath) then
           instance.image = love.graphics.newImage(defaultPath)
           spriteImages[defaultPath] = instance.image
+          print("Loaded image for sprite \""..name.."\" from default path \""..defaultPath.."\".")
         else
           error("The sprite \""..name.."\" has no associated path!")
         end
@@ -47,6 +51,7 @@ local Sprite = utils.class(
         if love.filesystem.getInfo(path) then
           instance.image = love.graphics.newImage(path)
           spriteImages[name] = instance.image
+          print("Loaded image for sprite \""..name.."\" from path \""..path.."\".")
         else
           -- throw an error if the image doesn't exist
           error("The image \""..path.."\" does not exist!")

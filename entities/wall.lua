@@ -28,6 +28,12 @@ local Wall = utils.class(
 function Wall:draw()
   love.graphics.setColor(love.math.colorFromBytes(50, 49, 59))
   love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+
+  -- if DEBUG_CONFIG.SHOW_HITBOXES then
+  --   love.graphics.setColor(love.math.colorFromBytes(94, 253, 247))
+  --   love.graphics.setLineWidth(2)
+  --   self.hitbox:draw("line")
+  -- end
 end
 
 return Wall

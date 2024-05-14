@@ -1,10 +1,9 @@
 -- Game engine that manages all entities
 local Vector2   = require "lib.vector2"
 local utils     = require "lib.utils"
-local config    = require "_game-config"
+local config    = require "_gameConfig"
 local EntityTag = require("lib.gameEntity").EntityTag
 
--- camera tightness gets run through exp() to make the value less sensitive to tuning
 local CAMERA_TIGHTNESS = config.engine.cameraTightness
 local ROOM_WIDTH = config.gameplay.roomWidth
 local ROOM_HEIGHT = config.gameplay.roomHeight
@@ -152,9 +151,15 @@ local function draw()
       if entity:hasTag(EntityTag.USES_SCREEN_SPACE_COORDS) then
         love.graphics.translate(-renderPos.x, -renderPos.y)
         entity:draw()
+        if DEBUG_CONFIG.SHOW_HITBOXES then
+          entity:drawHitbox()
+        end
         love.graphics.translate(renderPos.x, renderPos.y)
       else
         entity:draw()
+        if DEBUG_CONFIG.SHOW_HITBOXES then
+          entity:drawHitbox()
+        end
       end
     end
   end
@@ -241,13 +246,13 @@ local function getDeltaTimeMultiplier()
   return deltaTimeMultiplier
 end
 
----Sets the current delta time multiplier ("speed of").
+---Sets the current delta time multiplier ("speed of time").
 ---@param m number
 local function setDeltaTimeMultiplier(m)
   deltaTimeMultiplier = m
 end
 
-return {
+Engine = {
   removeAll = removeAll,
   removeIf = removeIf,
   getIf = getIf,
@@ -265,5 +270,9 @@ return {
   deltaTime = deltaTime,
   deltaTimeRaw = deltaTimeRaw,
   getDeltaTimeMultiplier = getDeltaTimeMultiplier,
-  setDeltaTimeMultiplier = setDeltaTimeMultiplier
+  setDeltaTimeMultiplier = setDeltaTimeMultiplier,
+  roomWidth = function() return ROOM_WIDTH end,
+  roomHeight = function() return ROOM_HEIGHT end,
+  roomSize = function() return ROOM_WIDTH, ROOM_HEIGHT end,
+  roomCenter = function() return ROOM_WIDTH / 2, ROOM_HEIGHT / 2 end
 }
