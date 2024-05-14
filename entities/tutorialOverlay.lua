@@ -55,7 +55,7 @@ function TutorialOverlay:drawControlOverlay()
     -- movement keys
     local x, y = startX, startY
     for _, icon in ipairs(self.movementKeyIcons) do
-      icon:draw(x, y, 0.3125)
+      icon:draw(x, y, 1, 0.3125)
       x = x + (icon.width * 0.3125) - 2
     end
     love.graphics.print("to move", x, y, 0, 1, 1, 12, 20)
@@ -66,7 +66,7 @@ function TutorialOverlay:drawControlOverlay()
     x = x + font:getWidth("Tap ") + 7
 
     local icon = self.dashIcons[1]
-    icon:draw(x, y, 0.3125)
+    icon:draw(x, y, 1, 0.3125)
     x = x + (icon.width * 0.3125) - 2
     love.graphics.print("to dash", x, y, 0, 1, 1, 12, 20)
 
@@ -76,7 +76,7 @@ function TutorialOverlay:drawControlOverlay()
     x = x + font:getWidth("Tap ") + 7
 
     icon = self.meleeIcons[1]
-    icon:draw(x, y, 0.3125)
+    icon:draw(x, y, 1, 0.3125)
     x = x + (icon.width * 0.3125) - 2
     love.graphics.print("to melee", x, y, 0, 1, 1, 12, 20)
 
@@ -86,7 +86,7 @@ function TutorialOverlay:drawControlOverlay()
     x = x + font:getWidth("Hold ") + 7
 
     icon = self.aimIcon
-    icon:draw(x, y, 0.3125)
+    icon:draw(x, y, 1, 0.3125)
     x = x + (icon.width * 0.3125) - 2
     love.graphics.print("to aim and release to fire", x, y, 0, 1, 1, 12, 20)
 
@@ -96,7 +96,7 @@ function TutorialOverlay:drawControlOverlay()
     x = x + font:getWidth("Hold ") + 7
 
     icon = self.fireIcons[1]
-    icon:draw(x, y, 0.3125)
+    icon:draw(x, y, 1, 0.3125)
     x = x + (icon.width * 0.3125) - 2
     love.graphics.print("while aiming to rapid fire", x, y, 0, 1, 1, 12, 20)
   else
@@ -107,14 +107,14 @@ function TutorialOverlay:drawControlOverlay()
     -- movement
     local x, y = startX, startY
     local icon = self.movementAxisIcon
-    icon:draw(x, y, 0.3125)
+    icon:draw(x, y, 1, 0.3125)
     x = x + (icon.width * 0.3125) - 2
     love.graphics.print("to move", x, y, 0, 1, 1, 10, 20)
 
     -- aiming
     x = startX; y = y + 45
     icon = self.aimAxisIcon
-    icon:draw(x, y, 0.3125)
+    icon:draw(x, y, 1, 0.3125)
     x = x + (icon.width * 0.3125) - 2
     love.graphics.print("to aim", x, y, 0, 1, 1, 12, 20)
 
@@ -124,7 +124,7 @@ function TutorialOverlay:drawControlOverlay()
     x = x + font:getWidth("Tap ") + 7
 
     icon = self.dashIcons[2]
-    icon:draw(x, y, 0.3125)
+    icon:draw(x, y, 1, 0.3125)
     x = x + (icon.width * 0.3125) - 2
     love.graphics.print("to dash", x, y, 0, 1, 1, 12, 20)
 
@@ -134,7 +134,7 @@ function TutorialOverlay:drawControlOverlay()
     x = x + font:getWidth("Tap ") + 7
 
     icon = self.meleeIcons[2]
-    icon:draw(x, y, 0.3125)
+    icon:draw(x, y, 1, 0.3125)
     x = x + (icon.width * 0.3125) - 2
     love.graphics.print("to melee", x, y, 0, 1, 1, 12, 20)
 
@@ -144,7 +144,7 @@ function TutorialOverlay:drawControlOverlay()
     x = x + font:getWidth("Hold ") + 7
 
     icon = self.fireIcons[2]
-    icon:draw(x, y, 0.3125)
+    icon:draw(x, y, 1, 0.3125)
     x = x + (icon.width * 0.3125) - 2
     love.graphics.print("to fire", x, y, 0, 1, 1, 12, 20)
   end

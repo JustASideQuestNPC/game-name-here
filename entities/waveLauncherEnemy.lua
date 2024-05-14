@@ -13,6 +13,76 @@ local MOVE_SPEED = config.moveSpeed
 local ACCELERATION = config.acceleration
 local MIN_DISTANCE = config.minDistance
 local MAX_DISTANCE = config.maxDistance
+local WAVE_CHARGE_TIME = config.waveChargeTime
+local WAVE_COOLDOWN = config.waveCooldown
+
+local PROJECTILE_MAX_VELOCITY = config.projectileMaxVelocity
+local PROJECTILE_ACCELERATION = config.projectileAcceleration
+local PROJECTILE_INITIAL_VELOCITY = config.projectileInitialVelocity
+
+---@class WaveLauncherProjectile: GameEntity
+---@field sprite Sprite
+---@field position Vector2
+---@field velocity Vector2
+---@field acceleration Vector2
+---@field angle number
+---@field trailPoints table[]
+local WaveLauncherProjectile = utils.class(
+  GameEntity, function (instance, position, angle)
+    instance.tags = {EntityTag.ENEMY_PROJECTILE}
+    instance.displayLayer = 0
+
+    instance.sprite = Sprite("waveLauncherEnemyProjectile")
+
+    instance.position = position:copy()
+    instance.velocity = Vector2.fromPolar(angle, PROJECTILE_INITIAL_VELOCITY)
+    instance.acceleration = Vector2.fromPolar(angle, PROJECTILE_ACCELERATION)
+    instance.angle = angle
+
+    instance.trailPoints = {}
+  end
+)
+
+function WaveLauncherProjectile:draw()
+  love.graphics.push()
+  love.graphics.translate(self.position:coords())
+  love.graphics.rotate(self.angle + math.pi / 2)
+  self.sprite:draw(0, 0)
+  love.graphics.pop()
+
+  for _, pt in ipairs(self.trailPoints) do
+    love.graphics.push()
+    love.graphics.translate(pt.position:coords())
+    love.graphics.rotate(self.angle + math.pi / 2)
+    self.sprite:draw(0, 0, pt.time / 0.5)
+    love.graphics.pop()
+  end
+end
+
+function WaveLauncherProjectile:update(dt)
+  -- update trail positions
+  self.trailPoints[#self.trailPoints+1] = {time=0.25, position=self.position:copy()}
+  local filteredPoints = {}
+  for _, pt in pairs(self.trailPoints) do
+    pt.time = pt.time - dt
+    if pt.time > 0 then
+      filteredPoints[#filteredPoints+1] = pt
+    end
+  end
+  self.trailPoints = filteredPoints
+  
+  self.position = self.position + self.velocity * dt
+
+  if self.velocity:magSq() < PROJECTILE_MAX_VELOCITY ^ 2 then
+    self.velocity = self.velocity + self.acceleration * dt
+    self.velocity:limit(PROJECTILE_MAX_VELOCITY)
+  end
+
+  if self.position.x < -50 or self.position.x > Engine.roomWidth() + 50 or
+     self.position.y < -50 or self.position.y > Engine.roomHeight() + 50 then
+    self.markForDelete = true
+  end
+end
 
 ---@class WaveLauncherEnemy: GameEntity
 ---@field sprite Sprite
@@ -21,6 +91,8 @@ local MAX_DISTANCE = config.maxDistance
 ---@field position Vector2
 ---@field velocity Vector2
 ---@field angle number
+---@field waveState "idle"|"charging"|"cooldown"
+---@field waveTimer number
 local WaveLauncherEnemy = utils.class(
   GameEntity, function (instance, x, y)
     instance.tags = {EntityTag.ENEMY}
@@ -29,19 +101,22 @@ local WaveLauncherEnemy = utils.class(
     instance.sprite = Sprite("waveLauncherEnemyBody")
     instance.waveSprite = Sprite("waveLauncherEnemyProjectile")
     instance.hitbox = HC.polygon(
-        0.00,  34.50,
-       30.00,  17.18,
-       30.00, -17.46,
-       22.50, -13.13,
-        0.00, -26.12,
-      -22.50, -13.13,
-      -30.00, -17.46,
-      -30.00,  17.18
+        0.00,  49.80,
+       45.00,  23.82,
+       45.00, -28.15,
+       33.75, -21.65,
+        0.00, -41.14,
+      -33.75, -21.65,
+      -45.00, -28.15,
+      -45.00,  23.82
     )
 
     instance.position = Vector2(x, y)
     instance.velocity = Vector2()
     instance.angle = 0
+
+    instance.waveState = "cooldown"
+    instance.waveTimer = WAVE_COOLDOWN
   end
 )
 
@@ -50,13 +125,18 @@ function WaveLauncherEnemy:draw()
   love.graphics.translate(self.position:coords())
   love.graphics.rotate(self.angle + math.pi / 2)
   self.sprite:draw(0, 0)
+
+  if self.waveState == "charging" then
+    self.waveSprite:draw(0, 0, 1 - (self.waveTimer / WAVE_CHARGE_TIME))
+  end
+
   love.graphics.pop()
 end
 
 function WaveLauncherEnemy:update(dt)
   self.position = self.position + self.velocity * dt
 
-  local hitboxOffset = Vector2.fromPolar(self.angle, -4)
+  local hitboxOffset = Vector2.fromPolar(self.angle, -6)
   local hitboxCenter = self.position + hitboxOffset
   self.hitbox:moveTo(hitboxCenter:coords())
   self.hitbox:setRotation(self.angle + math.pi / 2, hitboxCenter:coords())
@@ -74,7 +154,9 @@ function WaveLauncherEnemy:update(dt)
 
   -- turn to aim at the player
   local cross = playerRelativePosition:cross(Vector2.fromPolar(self.angle, 1))
+  local atTargetAngle = true
   if cross ~= 0 then
+    atTargetAngle = false
     if cross < 0 then
       self.angle = self.angle + TURN_SPEED * dt
     else
@@ -84,6 +166,7 @@ function WaveLauncherEnemy:update(dt)
     local newCross = playerRelativePosition:cross(Vector2.fromPolar(self.angle, 1))
     if (cross < 0 and newCross > 0) or (cross > 0 and newCross < 0) then
       self.angle = playerRelativePosition:angle()
+      atTargetAngle = true
     end
   end
 
@@ -101,6 +184,26 @@ function WaveLauncherEnemy:update(dt)
     self.velocity:limit(MOVE_SPEED)
   else
     self.velocity:setMag(math.max(self.velocity:mag() - ACCELERATION * dt, 0))
+  end
+
+  -- update wave 
+  if self.waveState == "cooldown" then
+    self.waveTimer = self.waveTimer - dt
+    if self.waveTimer <= 0 then
+      self.waveState = "idle"
+    end
+  elseif self.waveState == "idle" then
+    if atTargetAngle then
+      self.waveState = "charging"
+      self.waveTimer = WAVE_CHARGE_TIME
+    end
+  else -- self.waveState == "charging"
+    self.waveTimer = self.waveTimer - dt
+    if self.waveTimer <= 0 then
+      Engine.addEntity(WaveLauncherProjectile(self.position, self.angle))
+      self.waveState = "cooldown"
+      self.waveTimer = WAVE_COOLDOWN
+    end
   end
 end
 

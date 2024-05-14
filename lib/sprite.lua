@@ -23,13 +23,13 @@ local spriteImages = {}
 ---@field yOffset number
 ---@field new fun(name: string): Sprite
 ---@field setAlign fun(self, xAlign: string, yAlign: string)
----@field draw fun(self, x: number, y: number, scale: number?)
+---@field draw fun(self, x: number, y: number, transparency: number?, scale: number?)
 local Sprite = utils.class(
   function (instance, name, fromPath, defaultPath)
     -- if the image is loaded, grab a reference to it
     if spriteImages[name] ~= nil then
       instance.image = spriteImages[name]
-      print("Image for sprite \""..name.."\" is already loaded, referencing it.")
+      -- print("Image for sprite \""..name.."\" is already loaded, referencing it.")
     else
       -- throw an error if the sprite name doesn't exist
       if SPRITE_PATHS[name] == nil and not fromPath then
@@ -38,7 +38,7 @@ local Sprite = utils.class(
           spriteImages[defaultPath] = instance.image
           print("Loaded image for sprite \""..name.."\" from default path \""..defaultPath.."\".")
         else
-          error("The sprite \""..name.."\" has no associated path!")
+          -- error("The sprite \""..name.."\" has no associated path!")
         end
       else
         local path
@@ -51,7 +51,7 @@ local Sprite = utils.class(
         if love.filesystem.getInfo(path) then
           instance.image = love.graphics.newImage(path)
           spriteImages[name] = instance.image
-          print("Loaded image for sprite \""..name.."\" from path \""..path.."\".")
+          -- print("Loaded image for sprite \""..name.."\" from path \""..path.."\".")
         else
           -- throw an error if the image doesn't exist
           error("The image \""..path.."\" does not exist!")
@@ -89,14 +89,17 @@ function Sprite:setAlign(xAlign, yAlign)
   end
 end
 
-function Sprite:draw(x, y, scale)
+function Sprite:draw(x, y, transparency, scale)
+  if transparency == nil then
+    transparency = 1
+  end
   scale = scale or 1
 
   love.graphics.push()
     love.graphics.translate(x, y)
     love.graphics.scale(scale)
     -- apparently color affects images for some reason
-    love.graphics.setColor(1, 1, 1)
+    love.graphics.setColor(1, 1, 1, transparency)
     love.graphics.draw(self.image, self.xOffset, self.yOffset)
   love.graphics.pop()
 end

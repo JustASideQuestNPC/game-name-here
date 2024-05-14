@@ -13,6 +13,7 @@ local EntityTag = {
   HUD = 6,
   ENEMY = 7,
   COLLIDES_WITH_ENEMIES = 8,
+  ENEMY_PROJECTILE = 9
 }
 
 ---@class GameEntity: Class
@@ -67,19 +68,7 @@ end
 ---@param dmg number
 function GameEntity:takeDamage(dmg) end
 
----Generates a new class that extends GameEntity.
----@param tags? EntityTag[]
----@param displayLayer? integer
----@return table
-local function EntityClass(tags, displayLayer)
-  local class = utils.construct(GameEntity)
-  class.tags = tags or {}
-  class.displayLayer = displayLayer or 0
-  return class
-end
-
 return {
   GameEntity = GameEntity,
-  EntityTag = EntityTag,
-  EntityClass = EntityClass
+  EntityTag = EntityTag
 }

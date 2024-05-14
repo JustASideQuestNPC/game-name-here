@@ -113,6 +113,13 @@ return {
       acceleration = 900, -- pixels per second squared
       minDistance = 300, -- pixels
       maxDistance = 500, -- pixels
-    }
+
+      waveChargeTime = 0.75, -- seconds
+      waveCooldown = 2.5, -- seconds
+
+      projectileMaxVelocity = 1800, -- pixels per second
+      projectileAcceleration = 1800, -- pixels per second squared
+      projectileInitialVelocity = 0, -- pixels per second
+    },
   }
 }

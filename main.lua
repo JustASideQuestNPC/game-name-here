@@ -54,8 +54,8 @@ function love.load()
 ---@diagnostic disable-next-line: assign-type-mismatch
   PlayerEntity = Engine.addEntity(Player(Engine.roomCenter())) ---@type Player
 
-  Engine.addEntity(TutorialOverlay())
-  Engine.addEntity(WaveLauncherEnemy(Engine.roomWidth() / 2 - 200, Engine.roomHeight() / 2))
+  -- Engine.addEntity(TutorialOverlay())
+  Engine.addEntity(WaveLauncherEnemy(Engine.roomWidth() / 2 - 500, Engine.roomHeight() / 2))
 end
 
 ---Called once per frame to update the game.
