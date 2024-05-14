@@ -12,6 +12,7 @@ local EntityTag = {
   PLAYER_BULLET = 5,
   HUD = 6,
   ENEMY = 7,
+  COLLIDES_WITH_ENEMIES = 8,
 }
 
 ---@class GameEntity: Class

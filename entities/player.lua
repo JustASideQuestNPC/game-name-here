@@ -143,6 +143,10 @@ local Player = utils.class(
   end
 )
 
+function Player:setup()
+  Engine.setCameraPos(self.position)
+end
+
 function Player:draw()
   love.graphics.push()
   love.graphics.translate(self.position:coords())
@@ -178,12 +182,6 @@ function Player:draw()
   end
 
   love.graphics.pop()
-
-  -- if DEBUG_CONFIG.SHOW_HITBOXES then
-  --   love.graphics.setColor(love.math.colorFromBytes(94, 253, 247))
-  --   love.graphics.setLineWidth(2)
-  --   self.hitbox:draw("line")
-  -- end
 end
 
 function Player:update(dt)

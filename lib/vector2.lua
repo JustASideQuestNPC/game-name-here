@@ -189,6 +189,11 @@ function Vector2:dot(vec)
   return self.x * vec.x + self.y * vec.y
 end
 
+---Returns the cross product (kind of) of this vector and another vector.
+function Vector2:cross(vec)
+  return self.x * vec.y - self.y * vec.x
+end
+
 ---Returns the angle between this vector and another vector.
 ---@param vec Vector2
 ---@param degrees? boolean [false] Whether to return the angle in degrees or radians.
@@ -200,9 +205,9 @@ function Vector2:angleTo(vec, degrees)
   local d = self:dot(vec)
 
   if degrees then
-    return math.deg(math.acos(d / (m1 * m2)))
+    return math.deg(utils.constrainAngle(math.acos(d / (m1 * m2))))
   end
-  return math.acos(d / (m1 * m2))
+  return utils.constrainAngle(math.acos(d / (m1 * m2)))
 end
 
 ---Limits the vector to a maximum length.

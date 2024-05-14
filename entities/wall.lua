@@ -13,7 +13,7 @@ local GameEntity, EntityTag = temp.GameEntity, temp.EntityTag
 ---@field hitbox table
 local Wall = utils.class(
   GameEntity, function (instance, x, y, w, h)
-    instance.tags = {EntityTag.WALL}
+    instance.tags = {EntityTag.WALL, EntityTag.COLLIDES_WITH_ENEMIES}
     instance.displayLayer = 2
 
     instance.x = x
@@ -28,12 +28,6 @@ local Wall = utils.class(
 function Wall:draw()
   love.graphics.setColor(love.math.colorFromBytes(50, 49, 59))
   love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
-
-  -- if DEBUG_CONFIG.SHOW_HITBOXES then
-  --   love.graphics.setColor(love.math.colorFromBytes(94, 253, 247))
-  --   love.graphics.setLineWidth(2)
-  --   self.hitbox:draw("line")
-  -- end
 end
 
 return Wall

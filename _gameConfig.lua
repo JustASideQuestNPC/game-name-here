@@ -2,7 +2,7 @@
 -- underscore so it's always at the top of the list in my editor.
 
 DEBUG_CONFIG = {
-  SHOW_HITBOXES = true
+  SHOW_HITBOXES = false
 }
 
 return {
@@ -87,7 +87,7 @@ return {
   -- entity-specific settings
   entities = {
     player = {
-      runSpeed = 300, -- pixels per second
+      runSpeed = 375, -- pixels per second
       dashSpeed = 1600, -- pixels per second
       dashDuration = 0.075, -- seconds
       maxConsecutiveDashes = 3,
@@ -106,6 +106,13 @@ return {
       bulletVelocity = 1100, -- pixels per second
       bulletRange = 750, -- pixels
       fireRate = 450, -- rounds per minute
+    },
+    waveLauncherEnemy = {
+      turnSpeed = 240, -- degrees per second
+      moveSpeed = 600, -- pixels per second
+      acceleration = 900, -- pixels per second squared
+      minDistance = 300, -- pixels
+      maxDistance = 500, -- pixels
     }
   }
 }
