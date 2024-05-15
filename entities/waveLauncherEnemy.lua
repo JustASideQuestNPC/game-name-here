@@ -13,12 +13,27 @@ local MOVE_SPEED = config.moveSpeed
 local ACCELERATION = config.acceleration
 local MIN_DISTANCE = config.minDistance
 local MAX_DISTANCE = config.maxDistance
+
 local WAVE_CHARGE_TIME = config.waveChargeTime
 local WAVE_COOLDOWN = config.waveCooldown
+local LEAD_TARGETS = config.leadTargets
 
 local PROJECTILE_MAX_VELOCITY = config.projectileMaxVelocity
 local PROJECTILE_ACCELERATION = config.projectileAcceleration
-local PROJECTILE_INITIAL_VELOCITY = config.projectileInitialVelocity
+
+local a = PROJECTILE_MAX_VELOCITY / PROJECTILE_ACCELERATION
+local b = PROJECTILE_ACCELERATION / 2
+local c = (PROJECTILE_MAX_VELOCITY / 2) * a
+local function leadTime(distance)
+  -- this equation took me three hours lmao
+  if distance <= 0 then
+    return 0
+  elseif distance < c then
+    return math.sqrt(distance / b)
+  else
+    return (distance - c) / PROJECTILE_MAX_VELOCITY + a
+  end
+end
 
 ---@class WaveLauncherProjectile: GameEntity
 ---@field sprite Sprite
@@ -35,7 +50,7 @@ local WaveLauncherProjectile = utils.class(
     instance.sprite = Sprite("waveLauncherEnemyProjectile")
 
     instance.position = position:copy()
-    instance.velocity = Vector2.fromPolar(angle, PROJECTILE_INITIAL_VELOCITY)
+    instance.velocity = Vector2()
     instance.acceleration = Vector2.fromPolar(angle, PROJECTILE_ACCELERATION)
     instance.angle = angle
 
@@ -70,7 +85,7 @@ function WaveLauncherProjectile:update(dt)
     end
   end
   self.trailPoints = filteredPoints
-  
+
   self.position = self.position + self.velocity * dt
 
   if self.velocity:magSq() < PROJECTILE_MAX_VELOCITY ^ 2 then
@@ -152,8 +167,16 @@ function WaveLauncherEnemy:update(dt)
 
   local playerRelativePosition = PlayerEntity.position - self.position
 
-  -- turn to aim at the player
-  local cross = playerRelativePosition:cross(Vector2.fromPolar(self.angle, 1))
+  local targetPos
+  if LEAD_TARGETS and self.waveState ~= "cooldown" then
+    local t = leadTime(playerRelativePosition:mag())
+    targetPos = (PlayerEntity.position + PlayerEntity.velocity * t) - self.position
+  else
+    targetPos = playerRelativePosition
+  end
+
+  -- turn to aim at the target
+  local cross = targetPos:cross(Vector2.fromPolar(self.angle, 1))
   local atTargetAngle = true
   if cross ~= 0 then
     atTargetAngle = false
@@ -163,9 +186,9 @@ function WaveLauncherEnemy:update(dt)
       self.angle = self.angle - TURN_SPEED * dt
     end
 
-    local newCross = playerRelativePosition:cross(Vector2.fromPolar(self.angle, 1))
+    local newCross = targetPos:cross(Vector2.fromPolar(self.angle, 1))
     if (cross < 0 and newCross > 0) or (cross > 0 and newCross < 0) then
-      self.angle = playerRelativePosition:angle()
+      self.angle = targetPos:angle()
       atTargetAngle = true
     end
   end

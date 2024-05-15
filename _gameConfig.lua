@@ -87,7 +87,7 @@ return {
   -- entity-specific settings
   entities = {
     player = {
-      runSpeed = 375, -- pixels per second
+      runSpeed = 450, -- pixels per second
       dashSpeed = 1600, -- pixels per second
       dashDuration = 0.075, -- seconds
       maxConsecutiveDashes = 3,
@@ -116,10 +116,10 @@ return {
 
       waveChargeTime = 0.75, -- seconds
       waveCooldown = 2.5, -- seconds
+      leadTargets = true,
 
-      projectileMaxVelocity = 1800, -- pixels per second
-      projectileAcceleration = 1800, -- pixels per second squared
-      projectileInitialVelocity = 0, -- pixels per second
+      projectileMaxVelocity = 1950, -- pixels per second
+      projectileAcceleration = 2400, -- pixels per second squared
     },
   }
 }
