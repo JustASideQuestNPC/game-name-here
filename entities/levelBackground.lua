@@ -13,8 +13,8 @@ local LevelBackground = utils.class(
 
 function LevelBackground:draw()
   local blue = true -- which color to draw
-  for x = 0, Engine.roomWidth(), 300 do
-    for y = 0, Engine.roomHeight(), 300 do
+  for x = 0, Engine.roomWidth() - 300, 300 do
+    for y = 0, Engine.roomHeight() - 300, 300 do
       if blue then
         love.graphics.setColor(love.math.colorFromBytes(243, 167, 135))
       else
@@ -23,7 +23,9 @@ function LevelBackground:draw()
       love.graphics.rectangle("fill", x, y, 300, 300)
       blue = not blue
     end
-    blue = not blue
+    if math.floor(((Engine.roomWidth() - 300) / 300) % 2) == 0 then
+      blue = not blue
+    end
   end
 end
 

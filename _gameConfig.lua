@@ -2,10 +2,46 @@
 -- underscore so it's always at the top of the list in my editor.
 
 DEBUG_CONFIG = {
-  SHOW_HITBOXES = false
+  SHOW_HITBOXES = false,
+  FORCE_RESET_USER_SETTINGS = true
 }
 
 return {
+  saveDirectory = "UnnamedLuaShooter",
+
+  defaultUserSettings = {
+    graphics = {
+      width = 1280,
+      height = 720,
+      fullscreen = false,
+      vsync = "adaptive",
+      msaaSamples = 8
+    },
+    input = {
+      swapThumbsticks = false,
+      keyboardBinds = {
+        ["move up"] = {"w", "up"},
+        ["move down"] = {"s", "down"},
+        ["move left"] = {"a", "left"},
+        ["move right"] = {"d", "right"},
+        ["dash"] = {"right mouse"},
+        ["melee"] = {"v"},
+        ["aim"] = {"left mouse"},
+        ["auto fire"] = {"f"},
+        ["toggle fullscreen"] = {"f11"}
+      },
+      gamepadBinds = {
+        ["move up"] = {"dpad up"},
+        ["move down"] = {"dpad down"},
+        ["move left"] = {"dpad left"},
+        ["move right"] = {"dpad right"},
+        ["dash"] = {"left bumper"},
+        ["melee"] = {"x"},
+        ["auto fire"] = {"right bumper"}
+      }
+    }
+  },
+
   graphics = {
     width = 1280,
     height = 720,
@@ -15,55 +51,17 @@ return {
   },
 
   input = {
-    keybinds = {
-      {
-        name = "move up",
-        keys = {"w", "up"},
-        gamepadButtons = {"dpad up"}
-      },
-      {
-        name = "move down",
-        keys = {"s", "down"},
-        gamepadButtons = {"dpad down"}
-      },
-      {
-        name = "move left",
-        keys = {"a", "left"},
-        gamepadButtons = {"dpad left"}
-      },
-      {
-        name = "move right",
-        keys = {"d", "right"},
-        gamepadButtons = {"dpad right"}
-      },
-      {
-        name = "dash",
-        keys = {"right mouse"},
-        gamepadButtons = {"left bumper"},
-        mode = "press"
-      },
-      {
-        name = "melee",
-        keys = {"v"},
-        gamepadButtons = {"x"},
-        mode = "press"
-      },
-      {
-        name = "aim",
-        keys = {"left mouse"},
-        gamepadButtons = {},
-      },
-      {
-        name = "auto fire",
-        keys = {"f"},
-        gamepadButtons = {"right bumper"}
-      },
-      {
-        name = "aim release",
-        keys = {"left mouse"},
-        gamepadButtons = {},
-        mode = "release"
-      }
+    actions = {
+      {name = "move up"},
+      {name = "move down"},
+      {name = "move left"},
+      {name = "move right"},
+      {name = "dash", mode = "press"},
+      {name = "melee", mode = "press"},
+      {name = "aim"},
+      {name = "auto fire"},
+      {name = "aim release", mode = "release"},
+      {name = "toggle fullscreen", mode = "press"}
     },
 
     -- if true, the left and right thumbsticks are swapped
@@ -76,6 +74,8 @@ return {
 
   engine = {
     cameraTightness = 4, -- determines how quickly the camera moves
+    viewportWidth = 1600,
+    viewportHeight = 900
   },
 
   -- general gameplay configs
