@@ -245,12 +245,16 @@ local function verifyTable(table, template)
   elseif isArray(template) then
     for i, templateValue in ipairs(template) do
       local tableValue = table[i]
-      output[#output+1], changeMade = verifyTable(tableValue, templateValue)
+      local temp
+      output[#output+1], temp = verifyTable(tableValue, templateValue)
+      if temp then changeMade = true end
     end
   else
     for key, templateValue in pairs(template) do
       local tableValue = table[key]
-      output[key], changeMade = verifyTable(tableValue, templateValue)
+      local temp
+      output[key], temp = verifyTable(tableValue, templateValue)
+      if temp then changeMade = true end
     end
   end
 

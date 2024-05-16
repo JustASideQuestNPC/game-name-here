@@ -29,7 +29,7 @@ return {
         ["aim"] = {"left mouse"},
         ["auto fire"] = {"f"},
         ["toggle fullscreen"] = {"f11"},
-        ["pause"] = {"escape"}
+        ["pause"] = {"escape"},
       },
       gamepadBinds = {
         ["move up"] = {"dpad up"},
@@ -39,7 +39,13 @@ return {
         ["dash"] = {"left bumper"},
         ["melee"] = {"x"},
         ["auto fire"] = {"right bumper"},
-        ["pause"] = {"options"}
+        ["pause"] = {"options"},
+        ["menu up"] = {"dpad up"},
+        ["menu down"] = {"dpad down"},
+        ["menu left"] = {"dpad left"},
+        ["menu right"] = {"dpad right"},
+        ["menu confirm"] = {"dpad a"},
+        ["menu back"] = {"dpad b"},
       }
     }
   },
@@ -64,7 +70,13 @@ return {
       {name = "auto fire"},
       {name = "aim release", mode = "release"},
       {name = "toggle fullscreen", mode = "press"},
-      {name = "pause", mode = "press"}
+      {name = "pause", mode = "press"},
+      {name = "menu up", mode = "press"},
+      {name = "menu down", mode = "press"},
+      {name = "menu left", mode = "press"},
+      {name = "menu right", mode = "press"},
+      {name = "menu confirm", mode = "press"},
+      {name = "menu back", mode = "press"},
     },
 
     -- if true, the left and right thumbsticks are swapped

@@ -46,7 +46,8 @@ local TutorialOverlay = utils.class(
 function TutorialOverlay:drawControlOverlay()
   local startX, startY = 24, 24
 
-  local font = love.graphics.getFont()
+  local font = Fonts.RED_HAT_DISPLAY_30
+  love.graphics.setFont(font)
   if input.currentInputType() == "keyboard" then
     love.graphics.setColor(love.math.colorFromBytes(50, 49, 59, 196))
     love.graphics.rectangle("fill", 0, 0, 460, 230)

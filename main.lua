@@ -3,6 +3,7 @@ local gameConfig = require "_gameConfig"
 local json       = require "lib.json"
 local utils      = require "lib.utils"
 local engine     = require "lib.engine"
+local ListMenu   = require "lib.listMenu"
 
 -- My engine class is accessed through the global engine variable so this is completely unused, but
 -- everything crashes and burns for some reason unless I require the file in main. This is truly a
@@ -14,13 +15,22 @@ local Player = require "entities.player"
 local Wall = require "entities.wall"
 local WaveLauncherEnemy = require "entities.waveLauncherEnemy"
 
+---@enum Fonts
+Fonts = {
+  RED_HAT_DISPLAY_30 = {},
+  RED_HAT_DISPLAY_56 = {},
+  RED_HAT_DISPLAY_BLACK_84 = {}
+}
+
 ---@enum GameState
 GameState = {
   GAMEPLAY = 0,
   PAUSE_MENU = 1
 }
+CurrentGameState = GameState.PAUSE_MENU
 
-CurrentGameState = GameState.GAMEPLAY
+local displayScale
+local pauseMenu
 
 -- Called once on program start.
 function love.load()
@@ -36,6 +46,7 @@ function love.load()
   else
     userSettings = json.decode(love.filesystem.read("userSettings.json"))
 
+    -- verify that the settings data is still valid
     local saveRequired
     userSettings, saveRequired = utils.verifyTable(userSettings, gameConfig.defaultUserSettings)
     if saveRequired then
@@ -67,12 +78,14 @@ function love.load()
   )
   love.window.setTitle("[GAME NAME HERE]")
 
+  Fonts.RED_HAT_DISPLAY_30 = love.graphics.newFont("assets/fonts/RedHatDisplay-Regular.ttf", 30)
+  Fonts.RED_HAT_DISPLAY_56 = love.graphics.newFont("assets/fonts/RedHatDisplay-Regular.ttf", 56)
+  Fonts.RED_HAT_DISPLAY_BLACK_84 = love.graphics.newFont("assets/fonts/RedHatDisplay-Black.ttf", 84)
+
   local xZoom = userSettings.graphics.width / gameConfig.engine.viewportWidth
   local yZoom = userSettings.graphics.height / gameConfig.engine.viewportHeight
-  engine.setCameraZoom(math.min(xZoom, yZoom))
-
-  local font = love.graphics.newFont("assets/fonts/RedHatDisplay-Regular.ttf", 30)
-  love.graphics.setFont(font)
+  displayScale = math.min(xZoom, yZoom)
+  engine.setCameraZoom(displayScale)
 
   -- set up input
   input.initGamepad()
@@ -103,6 +116,28 @@ function love.load()
   input.addActionList(actions)
   input.setSwapThumbsticks(gameConfig.input.swapThumbsticks)
 
+  -- setui gui menus
+  pauseMenu = ListMenu({
+    title = "Game Paused",
+    titleFont = Fonts.RED_HAT_DISPLAY_BLACK_84,
+    titleColor = {1, 1, 1},
+    titleOffset = 150,
+    optionsFont = Fonts.RED_HAT_DISPLAY_56,
+    optionsColor = {1, 1, 1},
+    optionsLineSpacing = 1.8,
+    options = {
+      {
+        text = "Resume"
+      },
+      {
+        text = "Options"
+      },
+      {
+        text = "Quit"
+      }
+    },
+  })
+
   -- start the game engine
   engine.addEntity(LevelBackground())
   engine.addEntity(Wall(0, -100, gameConfig.gameplay.roomWidth, 100))
@@ -126,13 +161,30 @@ function love.update(dt)
 
   input.update(dt)
 
-  engine.update(dt)
+  if input.isActive("pause") then
+    if CurrentGameState == GameState.PAUSE_MENU then
+      CurrentGameState = GameState.GAMEPLAY
+    else
+      CurrentGameState = GameState.PAUSE_MENU
+    end
+  end
+
+  if CurrentGameState == GameState.GAMEPLAY then
+    engine.update(dt)
+  end
 end
 
 ---Called once per frame to draw the game
 function love.draw()
   love.graphics.clear(love.math.colorFromBytes(50, 49, 59))
   engine.draw()
+
+  if CurrentGameState == GameState.PAUSE_MENU then
+    love.graphics.setColor(love.math.colorFromBytes(50, 49, 59, 196))
+    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+
+    pauseMenu:draw(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2, displayScale)
+  end
 end
 
 ---Called when a key is pressed.
