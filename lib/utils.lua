@@ -55,6 +55,18 @@ local function class(base, init)
   return c
 end
 
+---Returns whether a table is an array.
+---@param t table
+---@return boolean
+local function isArray(t)
+  local i = 0
+  for _ in pairs(t) do
+    i = i + 1
+    if t[i] == nil then return false end
+  end
+  return true
+end
+
 ---Returns whether a predicate function returns true for every item in an array.
 ---@generic T
 ---@param arr T[]
@@ -213,7 +225,70 @@ local function randFloat(min, max)
   return (math.random() * (max - min)) + min
 end
 
+---Compares a table with a template, and returns a copy of the table that has the same structure
+---as the template.
+---@param table any
+---@param template any
+---@return table, boolean
+local function verifyTable(table, template)
+  local output = {}
+  local changeMade = false
+
+  -- catch mismatched types
+  if type(table) ~= type(template) then
+    return template, true
+  elseif type(table) ~= "table" then
+    return table, false
+  elseif (isArray(table) and not isArray(template)) or
+         (not isArray(table) and isArray(template)) then
+    return template, true
+  elseif isArray(template) then
+    for i, templateValue in ipairs(template) do
+      local tableValue = table[i]
+      output[#output+1], changeMade = verifyTable(tableValue, templateValue)
+    end
+  else
+    for key, templateValue in pairs(template) do
+      local tableValue = table[key]
+      output[key], changeMade = verifyTable(tableValue, templateValue)
+    end
+  end
+
+  return output, changeMade
+end
+
+local function tableToString(t)
+  if type(t) == 'table' then
+    if isArray(t) then
+      local s = '['
+      for i, v in ipairs(t) do
+        s = s..tableToString(v)
+        if i <= #t - 1 then s = s..', ' end
+      end
+      return s..']'
+    else
+      local len = 0
+      for _, _ in pairs(t) do len = len + 1 end
+
+      local s = '{'
+      local i = 0
+      for k,v in pairs(t) do
+        if type(k) ~= 'number' then k = '"'..k..'"' end
+        s = s..k..' = '..tableToString(v)
+        if i < len - 1 then s = s..', ' end
+        i = i + 1
+      end
+      return s..'}'
+    end
+  else
+    if type(t) == 'string' then return '"'..t..'"' end
+    return tostring(t)
+  end
+end
+
 return {
+  class = class,
+  isArray = isArray,
   arrayEvery = arrayEvery,
   arrayAny = arrayAny,
   arrayFind = arrayFind,
@@ -222,8 +297,9 @@ return {
   damp = damp,
   map = map,
   clamp = clamp,
-  class = class,
   atan2 = atan2,
   dottedLine = dottedLine,
-  randFloat = randFloat
+  randFloat = randFloat,
+  verifyTable = verifyTable,
+  tableToString = tableToString
 }

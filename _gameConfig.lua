@@ -3,7 +3,7 @@
 
 DEBUG_CONFIG = {
   SHOW_HITBOXES = false,
-  FORCE_RESET_USER_SETTINGS = true
+  FORCE_RESET_USER_SETTINGS = false
 }
 
 return {
@@ -28,7 +28,8 @@ return {
         ["melee"] = {"v"},
         ["aim"] = {"left mouse"},
         ["auto fire"] = {"f"},
-        ["toggle fullscreen"] = {"f11"}
+        ["toggle fullscreen"] = {"f11"},
+        ["pause"] = {"escape"}
       },
       gamepadBinds = {
         ["move up"] = {"dpad up"},
@@ -37,7 +38,8 @@ return {
         ["move right"] = {"dpad right"},
         ["dash"] = {"left bumper"},
         ["melee"] = {"x"},
-        ["auto fire"] = {"right bumper"}
+        ["auto fire"] = {"right bumper"},
+        ["pause"] = {"options"}
       }
     }
   },

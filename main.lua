@@ -1,6 +1,7 @@
 local input      = require "lib.input"
 local gameConfig = require "_gameConfig"
 local json       = require "lib.json"
+local utils      = require "lib.utils"
 
 -- My engine class is accessed through the global Engine variable so this is completely unused, but
 -- everything crashes and burns for some reason unless I require the file in main. This is truly a
@@ -21,11 +22,17 @@ function love.load()
   -- has been run), create it using the default settings
   if love.filesystem.getInfo("userSettings.json") == nil or
      DEBUG_CONFIG.FORCE_RESET_USER_SETTINGS then
-
     userSettings = gameConfig.defaultUserSettings
     love.filesystem.write("userSettings.json", json.encode(userSettings))
   else
     userSettings = json.decode(love.filesystem.read("userSettings.json"))
+
+    local saveRequired
+    userSettings, saveRequired = utils.verifyTable(userSettings, gameConfig.defaultUserSettings)
+    if saveRequired then
+      print("partially regenerated user settings")
+      love.filesystem.write("userSettings.json", json.encode(userSettings))
+    end
   end
 
   -- convert some graphics configs from human-readable formats into the love2d format
