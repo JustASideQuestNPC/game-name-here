@@ -2,8 +2,9 @@ local input      = require "lib.input"
 local gameConfig = require "_gameConfig"
 local json       = require "lib.json"
 local utils      = require "lib.utils"
+local engine     = require "lib.engine"
 
--- My engine class is accessed through the global Engine variable so this is completely unused, but
+-- My engine class is accessed through the global engine variable so this is completely unused, but
 -- everything crashes and burns for some reason unless I require the file in main. This is truly a
 -- coconut.jpg moment.
 local _ = require "lib.engine"
@@ -13,7 +14,15 @@ local Player = require "entities.player"
 local Wall = require "entities.wall"
 local WaveLauncherEnemy = require "entities.waveLauncherEnemy"
 
--- called once on program start
+---@enum GameState
+GameState = {
+  GAMEPLAY = 0,
+  PAUSE_MENU = 1
+}
+
+CurrentGameState = GameState.GAMEPLAY
+
+-- Called once on program start.
 function love.load()
   love.filesystem.setIdentity(gameConfig.saveDirectory)
 
@@ -60,7 +69,7 @@ function love.load()
 
   local xZoom = userSettings.graphics.width / gameConfig.engine.viewportWidth
   local yZoom = userSettings.graphics.height / gameConfig.engine.viewportHeight
-  Engine.setCameraZoom(math.min(xZoom, yZoom))
+  engine.setCameraZoom(math.min(xZoom, yZoom))
 
   local font = love.graphics.newFont("assets/fonts/RedHatDisplay-Regular.ttf", 30)
   love.graphics.setFont(font)
@@ -87,7 +96,7 @@ function love.load()
         action.gamepadButtons = {}
       end
     end
-    
+
     actions[#actions+1] = action
   end
 
@@ -95,17 +104,17 @@ function love.load()
   input.setSwapThumbsticks(gameConfig.input.swapThumbsticks)
 
   -- start the game engine
-  Engine.addEntity(LevelBackground())
-  Engine.addEntity(Wall(0, -100, gameConfig.gameplay.roomWidth, 100))
-  Engine.addEntity(Wall(0, gameConfig.gameplay.roomHeight, gameConfig.gameplay.roomWidth, 100))
-  Engine.addEntity(Wall(-100, -100, 100, gameConfig.gameplay.roomHeight + 200))
-  Engine.addEntity(Wall(gameConfig.gameplay.roomWidth, -100, 100, gameConfig.gameplay.roomHeight + 200))
+  engine.addEntity(LevelBackground())
+  engine.addEntity(Wall(0, -100, gameConfig.gameplay.roomWidth, 100))
+  engine.addEntity(Wall(0, gameConfig.gameplay.roomHeight, gameConfig.gameplay.roomWidth, 100))
+  engine.addEntity(Wall(-100, -100, 100, gameConfig.gameplay.roomHeight + 200))
+  engine.addEntity(Wall(gameConfig.gameplay.roomWidth, -100, 100, gameConfig.gameplay.roomHeight + 200))
 
   -- global reference to the player
 ---@diagnostic disable-next-line: assign-type-mismatch
-  PlayerEntity = Engine.addEntity(Player(Engine.roomCenter())) ---@type Player
+  PlayerEntity = engine.addEntity(Player(engine.roomCenter())) ---@type Player
 
-  Engine.addEntity(WaveLauncherEnemy(Engine.roomWidth() / 2 - 500, Engine.roomHeight() / 2))
+  engine.addEntity(WaveLauncherEnemy(engine.roomWidth() / 2 - 500, engine.roomHeight() / 2))
 end
 
 ---Called once per frame to update the game.
@@ -116,13 +125,14 @@ function love.update(dt)
   end
 
   input.update(dt)
-  Engine.update(dt)
+
+  engine.update(dt)
 end
 
 ---Called once per frame to draw the game
 function love.draw()
   love.graphics.clear(love.math.colorFromBytes(50, 49, 59))
-  Engine.draw()
+  engine.draw()
 end
 
 ---Called when a key is pressed.

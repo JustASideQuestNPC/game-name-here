@@ -257,6 +257,9 @@ local function verifyTable(table, template)
   return output, changeMade
 end
 
+---Formats a table as a string for debugging.
+---@param t table
+---@return string
 local function tableToString(t)
   if type(t) == 'table' then
     if isArray(t) then

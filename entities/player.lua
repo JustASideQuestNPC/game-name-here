@@ -2,6 +2,7 @@
 
 local HC           = require "hardonCollider"
 local playerConfig = require "_gameConfig".entities.player
+local engine       = require "lib.engine"
 local utils        = require "lib.utils"
 local input        = require "lib.input"
 local Vector2      = require "lib.vector2"
@@ -144,7 +145,7 @@ local Player = utils.class(
 )
 
 function Player:setup()
-  Engine.setCameraPos(self.position)
+  engine.setCameraPos(self.position)
 end
 
 function Player:draw()
@@ -191,7 +192,7 @@ function Player:update(dt)
   self.hitbox:setRotation(self.angle + math.pi / 2)
 
   -- check for collisions with walls
-  local walls = Engine.getTagged(EntityTag.WALL)
+  local walls = engine.getTagged(EntityTag.WALL)
   for _, wall in ipairs(walls) do
     local collides, dx, dy = self.hitbox:collidesWith(wall.hitbox)
     if collides then
@@ -200,7 +201,7 @@ function Player:update(dt)
     end
   end
 
-  Engine.setCameraTarget(self.position)
+  engine.setCameraTarget(self.position)
 
   -- find aim direction
   self.isAiming = false
@@ -219,7 +220,7 @@ function Player:update(dt)
       setAngleFromMovement = true
     end
   else
-    local mpos = Engine.screenPosToWorldPos(input.getMousePos())
+    local mpos = engine.screenPosToWorldPos(input.getMousePos())
     local delta = mpos - self.position
     self.angle = delta:angle()
 
@@ -245,7 +246,7 @@ function Player:update(dt)
         bulletVelocity = Vector2.fromPolar(bulletAngle, self.BULLET_VELOCITY)
       end
 
-      Engine.addEntity(PlayerBullet(
+      engine.addEntity(PlayerBullet(
         self.position, bulletVelocity + self.velocity, 0,
         self.BULLET_RANGE, self.shotChargeTimer < 0
       ))

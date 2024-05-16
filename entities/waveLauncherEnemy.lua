@@ -3,6 +3,7 @@
 local HC      = require "hardonCollider"
 local Sprite  = require "lib.sprite"
 local Vector2 = require "lib.vector2"
+local engine  = require "lib.engine"
 local utils   = require "lib.utils"
 local config  = require("_gameConfig").entities.waveLauncherEnemy
 local temp    = require "lib.gameEntity"
@@ -93,8 +94,8 @@ function WaveLauncherProjectile:update(dt)
     self.velocity:limit(PROJECTILE_MAX_VELOCITY)
   end
 
-  if self.position.x < -50 or self.position.x > Engine.roomWidth() + 50 or
-     self.position.y < -50 or self.position.y > Engine.roomHeight() + 50 then
+  if self.position.x < -50 or self.position.x > engine.roomWidth() + 50 or
+     self.position.y < -50 or self.position.y > engine.roomHeight() + 50 then
     self.markForDelete = true
   end
 end
@@ -156,7 +157,7 @@ function WaveLauncherEnemy:update(dt)
   self.hitbox:moveTo(hitboxCenter:coords())
   self.hitbox:setRotation(self.angle + math.pi / 2, hitboxCenter:coords())
 
-  local walls = Engine.getTagged(EntityTag.COLLIDES_WITH_ENEMIES)
+  local walls = engine.getTagged(EntityTag.COLLIDES_WITH_ENEMIES)
   for _, wall in ipairs(walls) do
     local collides, dx, dy = self.hitbox:collidesWith(wall.hitbox)
     if collides then
@@ -223,7 +224,7 @@ function WaveLauncherEnemy:update(dt)
   else -- self.waveState == "charging"
     self.waveTimer = self.waveTimer - dt
     if self.waveTimer <= 0 then
-      Engine.addEntity(WaveLauncherProjectile(self.position, self.angle))
+      engine.addEntity(WaveLauncherProjectile(self.position, self.angle))
       self.waveState = "cooldown"
       self.waveTimer = WAVE_COOLDOWN
     end

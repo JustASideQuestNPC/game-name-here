@@ -63,7 +63,8 @@ return {
       {name = "aim"},
       {name = "auto fire"},
       {name = "aim release", mode = "release"},
-      {name = "toggle fullscreen", mode = "press"}
+      {name = "toggle fullscreen", mode = "press"},
+      {name = "pause", mode = "press"}
     },
 
     -- if true, the left and right thumbsticks are swapped

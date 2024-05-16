@@ -242,7 +242,7 @@ local function deltaTimeRaw()
   return lastDt
 end
 
-Engine = {
+return {
   removeAll = removeAll,
   removeIf = removeIf,
   getIf = getIf,
