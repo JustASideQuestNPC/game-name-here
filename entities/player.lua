@@ -220,7 +220,7 @@ function Player:update(dt)
       setAngleFromMovement = true
     end
   else
-    local mpos = engine.screenPosToWorldPos(input.getMousePos())
+    local mpos = engine.screenPosToWorldPos(input.mousePos())
     local delta = mpos - self.position
     self.angle = delta:angle()
 

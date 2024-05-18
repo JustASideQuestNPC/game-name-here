@@ -27,10 +27,11 @@ GameState = {
   GAMEPLAY = 0,
   PAUSE_MENU = 1
 }
-CurrentGameState = GameState.PAUSE_MENU
+CurrentGameState = GameState.GAMEPLAY
 
 local displayScale
-local pauseMenu
+local displayedMenu ---@type ListMenu
+local mainPauseMenu ---@type ListMenu
 
 -- Called once on program start.
 function love.load()
@@ -110,20 +111,35 @@ function love.load()
       end
     end
 
+    -- the left stick can always be used to navigate menus
+    if action.name == "menu up" then
+      action.gamepadButtons[#action.gamepadButtons+1] = "left stick up"
+    elseif action.name == "menu down" then
+      action.gamepadButtons[#action.gamepadButtons+1] = "left stick down"
+    elseif action.name == "menu left" then
+      action.gamepadButtons[#action.gamepadButtons+1] = "left stick left"
+    elseif action.name == "menu right" then
+      action.gamepadButtons[#action.gamepadButtons+1] = "left stick right"
+    end
+
     actions[#actions+1] = action
   end
 
   input.addActionList(actions)
-  input.setSwapThumbsticks(gameConfig.input.swapThumbsticks)
+  input.setSwapThumbsticks(userSettings.input.swapThumbsticks)
+  input.setGamepadRumbleEnabled(userSettings.input.enableGamepadRumble)
 
   -- setui gui menus
-  pauseMenu = ListMenu({
+  mainPauseMenu = ListMenu({
+    pos = {love.graphics.getWidth() / 2, love.graphics.getHeight() / 2},
+    scale = displayScale,
     title = "Game Paused",
     titleFont = Fonts.RED_HAT_DISPLAY_BLACK_84,
     titleColor = {1, 1, 1},
     titleOffset = 150,
     optionsFont = Fonts.RED_HAT_DISPLAY_56,
     optionsColor = {1, 1, 1},
+    optionsHoverColor = {love.math.colorFromBytes(95, 201, 231)},
     optionsLineSpacing = 1.8,
     options = {
       {
@@ -133,10 +149,12 @@ function love.load()
         text = "Options"
       },
       {
-        text = "Quit"
+        text = "Quit to Desktop"
       }
     },
   })
+  CurrentGameState = GameState.PAUSE_MENU
+  displayedMenu = mainPauseMenu
 
   -- start the game engine
   engine.addEntity(LevelBackground())
@@ -161,16 +179,34 @@ function love.update(dt)
 
   input.update(dt)
 
-  if input.isActive("pause") then
-    if CurrentGameState == GameState.PAUSE_MENU then
-      CurrentGameState = GameState.GAMEPLAY
-    else
-      CurrentGameState = GameState.PAUSE_MENU
-    end
-  end
-
   if CurrentGameState == GameState.GAMEPLAY then
     engine.update(dt)
+  elseif CurrentGameState == GameState.PAUSE_MENU then
+    displayedMenu:update()
+  end
+
+  -- handle menu input
+  if input.isActive("pause") and CurrentGameState == GameState.GAMEPLAY then
+    CurrentGameState = GameState.PAUSE_MENU
+    displayedMenu = mainPauseMenu
+  end
+
+  if input.isActive("menu confirm") and CurrentGameState == GameState.PAUSE_MENU and
+     displayedMenu.hoveredOption ~= nil then
+
+    print("confirmed")
+    local selected = displayedMenu.hoveredOption.text
+    if displayedMenu == mainPauseMenu then
+      if selected == "Resume" then
+        CurrentGameState = GameState.GAMEPLAY
+      elseif selected == "Quit to Desktop" then
+        love.event.quit()
+      end
+    end
+  elseif input.isActive("menu back") and CurrentGameState == GameState.PAUSE_MENU then
+    if displayedMenu == mainPauseMenu then
+      CurrentGameState = GameState.GAMEPLAY
+    end
   end
 end
 
@@ -183,7 +219,7 @@ function love.draw()
     love.graphics.setColor(love.math.colorFromBytes(50, 49, 59, 196))
     love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
 
-    pauseMenu:draw(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2, displayScale)
+    displayedMenu:draw()
   end
 end
 

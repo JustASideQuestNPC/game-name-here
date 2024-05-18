@@ -1,9 +1,9 @@
--- Gameplay configs and anything else I don't want player's touching. The filename starts with an
+-- Gameplay configs and anything else I don't want players touching. The filename starts with an
 -- underscore so it's always at the top of the list in my editor.
 
 DEBUG_CONFIG = {
-  SHOW_HITBOXES = false,
-  FORCE_RESET_USER_SETTINGS = false
+  SHOW_HITBOXES = false, -- displays entity hitboxes and ui bounding boxes
+  FORCE_RESET_USER_SETTINGS = false -- always resets user settings to default on startup
 }
 
 return {
@@ -19,6 +19,7 @@ return {
     },
     input = {
       swapThumbsticks = false,
+      enableGamepadRumble = true, -- rumble is always disabled when the keyboard is being used
       keyboardBinds = {
         ["move up"] = {"w", "up"},
         ["move down"] = {"s", "down"},
@@ -30,6 +31,8 @@ return {
         ["auto fire"] = {"f"},
         ["toggle fullscreen"] = {"f11"},
         ["pause"] = {"escape"},
+        ["menu confirm"] = {"left mouse"},
+        ["menu back"] = {"escape"}
       },
       gamepadBinds = {
         ["move up"] = {"dpad up"},
@@ -44,8 +47,8 @@ return {
         ["menu down"] = {"dpad down"},
         ["menu left"] = {"dpad left"},
         ["menu right"] = {"dpad right"},
-        ["menu confirm"] = {"dpad a"},
-        ["menu back"] = {"dpad b"},
+        ["menu confirm"] = {"a"},
+        ["menu back"] = {"b"},
       }
     }
   },
@@ -89,6 +92,8 @@ return {
 
   engine = {
     cameraTightness = 4, -- determines how quickly the camera moves
+
+    -- when the window is this size in pixels, everything is displayed at 1:1 scale
     viewportWidth = 1600,
     viewportHeight = 900
   },
@@ -110,13 +115,13 @@ return {
 
       meleeComboLength = 4, -- final hit is the spin attack
       meleeJabAngleSize = 120, -- degrees
-      meleeSpinEndLag = 0.25, -- seconds
+      meleeSpinEndLag = 0.25, -- after the spin attack, melee is disabled for this many seconds
 
       initialBulletSpread = 45, -- degrees
       aimSpeed = 45, -- degrees per second
       aimSpeedWhileFiring = 15, -- degrees per second
       unAimSpeed = 30, -- degrees per second
-      shotChargeTime = 0.5, -- seconds
+      shotChargeTime = 0.5, -- seconds after fully aiming
 
       bulletVelocity = 1100, -- pixels per second
       bulletRange = 750, -- pixels
@@ -126,14 +131,16 @@ return {
       turnSpeed = 240, -- degrees per second
       moveSpeed = 600, -- pixels per second
       acceleration = 900, -- pixels per second squared
+
+      -- determines how far from the player enemies try to stay
       minDistance = 300, -- pixels
       maxDistance = 500, -- pixels
 
       waveChargeTime = 0.75, -- seconds
       waveCooldown = 2.5, -- seconds
-      leadTargets = true,
+      leadTargets = true, -- if true, the enemy predicts where the player will be when targeting
 
-      projectileMaxVelocity = 1950, -- pixels per second
+      projectileMaxVelocity = 1950, -- pixels per second; projectiles spawn with 0 velocity
       projectileAcceleration = 2400, -- pixels per second squared
     },
   }

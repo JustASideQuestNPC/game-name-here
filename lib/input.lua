@@ -17,9 +17,10 @@ local _gamepadConnected = false
 local _vibrationSupported = false
 local _gamepadType = "xbox" -- xbox or ps
 local _swapThumbsticks = false
+local _gamepadRumbleEnabled = false
 
 -- Which input type was last used, either "keyboard" or "gamepad"
-local _currentInputType = "keyboard"
+local _currentInputType = "keyboard" ---@type "keyboard"|"gamepad"
 
 ---@type table[] All currently managed actions.
 local activeActions = {}
@@ -83,8 +84,8 @@ local gamepadAxisNames = {
   triggerright = "right trigger"
 }
 
-local mousePos = Vector2() -- Current mouse position.
-local mouseDelta = Vector2() -- How far the mouse has moved since the last mouse movement event.
+local _mousePos = Vector2() -- Current mouse position.
+local _mouseDelta = Vector2() -- How far the mouse has moved since the last mouse movement event.
 
 -- Checks whether a gamepad is connected and runs some setup if it is.
 local function initGamepad()
@@ -226,8 +227,6 @@ local function update(dt)
 
   -- update all actions
   for _, action in pairs(activeActions) do
-    -- I don't know who decided Lua shouldn't have += or -=, but I hope Taco Bell gets their orders
-    -- wrong for the next decade.
     action.active = action.active - dt;
     action:update()
   end
@@ -265,7 +264,7 @@ local function getAxisValue(name)
 end
 
 ---Returns the position of a stick as a *non-normalized* Vector2.
----@param stick string
+---@param stick "left"|"right"
 ---@return Vector2
 ---@nodiscard
 local function getStickVector(stick)
@@ -309,18 +308,15 @@ local function getDpadVector(up, down, left, right)
   return v:normalize()
 end
 
----Returns the current position of the mouse.
----@return Vector2
----@nodiscard
-local function getMousePos()
-  return mousePos:copy()
-end
-
----Returns how far the mouse has moved since the last mouse movement event.
----@return Vector2
----@nodiscard
-local function getMouseDelta()
-  return mouseDelta.copy()
+---Returns whether the mouse is currently inside a rectangle.
+---@param x number
+---@param y number
+---@param width number
+---@param height number
+---@return boolean
+local function mouseOver(x, y, width, height)
+  return _mousePos.x >= x and _mousePos.x <= x + width and
+         _mousePos.y >= y and _mousePos.y <= y + height
 end
 
 ---Sets the vibration of the gamepad, if possible.
@@ -328,7 +324,8 @@ end
 ---@param right number Strength of the right motor. Must be in the range [0, 1].
 ---@param duration number Duration of the rumble in seconds. < 0 means infinite duration.
 local function setGamepadRumble(left, right, duration)
-  if _gamepadConnected and _vibrationSupported then
+  if _gamepadConnected and _vibrationSupported and _gamepadRumbleEnabled and
+    _currentInputType =="gamepad" then
     gamepad:setVibration(left, right, duration)
   end
 end
@@ -429,10 +426,10 @@ end
 ---@param dy number
 local function mouseMoved(x, y, dx, dy)
   -- setCurrentInputType("keyboard")
-  mousePos.x = x
-  mousePos.y = y
-  mouseDelta.x = x
-  mouseDelta.y = y
+  _mousePos.x = x
+  _mousePos.y = y
+  _mouseDelta.x = dx
+  _mouseDelta.y = dy
 end
 
 ---Updates the internal state when a gamepad button is pressed. Call in `love.gamepadpressed()`.
@@ -480,9 +477,27 @@ local function gamepadAxis(axis, value)
     setCurrentInputType("gamepad")
   end
 
-  -- triggers also activate a button on a full pull
+  -- triggers activate a button on a full pull
   if axis == "left trigger" or axis == "right trigger" then
     gamepadButtonStates[axis] = (value == 1)
+  
+    -- sticks also activate directional buttons
+  elseif axis == "left stick x" or axis == "left stick y" then
+    local x = gamepadAxisValues["left stick x"]
+    local y = gamepadAxisValues["left stick y"]
+    gamepadButtonStates["left stick up"] = (y == -1 and math.abs(x) < 0.5)
+    gamepadButtonStates["left stick down"] = (y == 1 and math.abs(x) < 0.5)
+    gamepadButtonStates["left stick left"] = (x == -1 and math.abs(y) < 0.5)
+    gamepadButtonStates["left stick right"] = (x == 1 and math.abs(y) < 0.5)
+
+  else -- axis == "right stick x" or axis == "right stick y"
+    local x = gamepadAxisValues["right stick x"]
+    local y = gamepadAxisValues["right stick y"]
+    gamepadButtonStates["right stick up"] = (y == -1 and math.abs(x) < 0.5)
+    gamepadButtonStates["right stick down"] = (y == 1 and math.abs(x) < 0.5)
+    gamepadButtonStates["right stick left"] = (x == -1 and math.abs(y) < 0.5)
+    gamepadButtonStates["right stick right"] = (x == 1 and math.abs(y) < 0.5)
+
   end
 end
 
@@ -495,8 +510,9 @@ return {
   getAxisValue = getAxisValue,
   getStickVector = getStickVector,
   getDpadVector = getDpadVector,
-  getMousePos = getMousePos,
-  getMouseDelta = getMouseDelta,
+  mousePos = function() return _mousePos:copy() end,
+  mouseDelta = function() return _mouseDelta:copy() end,
+  mouseOver = mouseOver,
   getActionIcons = getActionIcons,
   getKeyboardIcon = getKeyboardIcon,
   getGamepadIcon = getGamepadIcon,
@@ -512,5 +528,7 @@ return {
   gamepadConnected = function() return _gamepadConnected end,
   currentInputType = function() return _currentInputType end,
   swapThumbsticks = function() return _swapThumbsticks end,
-  setSwapThumbsticks = function(state) _swapThumbsticks = state end
+  setSwapThumbsticks = function(state) _swapThumbsticks = state end,
+  gamepadRumbleEnabled = function() return _gamepadRumbleEnabled end,
+  setGamepadRumbleEnabled = function(state) _gamepadRumbleEnabled = state end
 }
