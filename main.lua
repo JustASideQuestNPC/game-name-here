@@ -25,13 +25,105 @@ Fonts = {
 ---@enum GameState
 GameState = {
   GAMEPLAY = 0,
-  PAUSE_MENU = 1
+  PAUSE_MENU = 1,
+  SETTINGS_MENU = 2,
+  GRAPHICS_MENU = 3
 }
-CurrentGameState = GameState.GAMEPLAY
+local currentGameState = nil
+local prevMenu = nil -- pause menu or main menu
+function SetGameState(state)
+  if currentGameState == GameState.PAUSE_MENU then
+    prevMenu = currentGameState
+  end
+  currentGameState = state
+end
 
-local displayScale
-local displayedMenu ---@type ListMenu
-local mainPauseMenu ---@type ListMenu
+DisplayScale = 1
+
+---@type ListMenu, ListMenu, ListMenu
+local mainPauseMenu, settingsMenu, graphicsMenu
+
+-- Draw functions for each game state.
+local drawFunctions = {
+  [GameState.GAMEPLAY] = function()
+    love.graphics.clear(love.math.colorFromBytes(50, 49, 59))
+    engine.draw()
+  end,
+  [GameState.PAUSE_MENU] = function()
+    love.graphics.clear(love.math.colorFromBytes(50, 49, 59))
+    engine.draw()
+
+    love.graphics.setColor(love.math.colorFromBytes(50, 49, 59, 196))
+    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+    mainPauseMenu:draw()
+  end,
+  [GameState.SETTINGS_MENU] = function()
+    if prevMenu == GameState.PAUSE_MENU then
+      love.graphics.clear(love.math.colorFromBytes(50, 49, 59))
+      engine.draw()
+
+      love.graphics.setColor(love.math.colorFromBytes(50, 49, 59, 196))
+      love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+    end
+    settingsMenu:draw()
+  end,
+  [GameState.GRAPHICS_MENU] = function()
+    if prevMenu == GameState.PAUSE_MENU then
+      love.graphics.clear(love.math.colorFromBytes(50, 49, 59))
+      engine.draw()
+
+      love.graphics.setColor(love.math.colorFromBytes(50, 49, 59, 196))
+      love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+    end
+    graphicsMenu:draw()
+  end
+}
+
+-- Update functions for each game state.
+local updateFunctions = {
+  [GameState.GAMEPLAY] = function(dt)
+    engine.update(dt)
+    if input.isActive("pause") then
+      input.clearAction("menu back")
+      SetGameState(GameState.PAUSE_MENU)
+    end
+  end,
+  [GameState.PAUSE_MENU] = function(dt)
+    mainPauseMenu:update()
+    if input.isActive("menu confirm") and mainPauseMenu.hoveredOption ~= nil then
+      local selected = mainPauseMenu.hoveredOption.text
+      if selected == "Resume" then
+        SetGameState(GameState.GAMEPLAY)
+      elseif selected == "Settings" then
+        SetGameState(GameState.SETTINGS_MENU)
+      elseif selected == "Quit to Desktop" then
+        love.event.quit()
+      end
+    elseif input.isActive("menu back") then
+      input.clearAction("pause")
+      SetGameState(GameState.GAMEPLAY)
+    end
+  end,
+  [GameState.SETTINGS_MENU] = function(dt)
+    settingsMenu:update()
+    if input.isActive("menu confirm") and settingsMenu.hoveredOption ~= nil then
+      local selected = settingsMenu.hoveredOption.text
+      if selected == "Graphics" then
+        SetGameState(GameState.GRAPHICS_MENU)
+      end
+    elseif input.isActive("menu back") then
+      SetGameState(prevMenu)
+    end
+  end,
+  [GameState.GRAPHICS_MENU] = function(dt)
+    graphicsMenu:update()
+    if input.isActive("menu confirm") and graphicsMenu.hoveredOption ~= nil then
+
+    elseif input.isActive("menu back") then
+      SetGameState(GameState.SETTINGS_MENU)
+    end
+  end
+}
 
 -- Called once on program start.
 function love.load()
@@ -85,8 +177,7 @@ function love.load()
 
   local xZoom = userSettings.graphics.width / gameConfig.engine.viewportWidth
   local yZoom = userSettings.graphics.height / gameConfig.engine.viewportHeight
-  displayScale = math.min(xZoom, yZoom)
-  engine.setCameraZoom(displayScale)
+  DisplayScale = math.min(xZoom, yZoom)
 
   -- set up input
   input.initGamepad()
@@ -131,8 +222,7 @@ function love.load()
 
   -- setui gui menus
   mainPauseMenu = ListMenu({
-    pos = {love.graphics.getWidth() / 2, love.graphics.getHeight() / 2},
-    scale = displayScale,
+    pos = {gameConfig.engine.viewportWidth / 2, gameConfig.engine.viewportHeight / 2},
     title = "Game Paused",
     titleFont = Fonts.RED_HAT_DISPLAY_BLACK_84,
     titleColor = {1, 1, 1},
@@ -143,18 +233,67 @@ function love.load()
     optionsLineSpacing = 1.8,
     options = {
       {
+        type = "text",
         text = "Resume"
       },
       {
-        text = "Options"
+        type = "text",
+        text = "Settings"
       },
       {
+        type = "text",
         text = "Quit to Desktop"
       }
     },
   })
-  CurrentGameState = GameState.PAUSE_MENU
-  displayedMenu = mainPauseMenu
+  settingsMenu = ListMenu({
+    pos = {gameConfig.engine.viewportWidth / 2, gameConfig.engine.viewportHeight / 2},
+    optionsFont = Fonts.RED_HAT_DISPLAY_56,
+    optionsColor = {1, 1, 1},
+    optionsHoverColor = {love.math.colorFromBytes(95, 201, 231)},
+    optionsLineSpacing = 1.8,
+    options = {
+      {
+        type = "text",
+        text = "Graphics"
+      },
+      {
+        type = "text",
+        text = "Gamepad Binds"
+      },
+      {
+        type = "text",
+        text = "Keyboard Binds"
+      }
+    },
+  })
+  graphicsMenu = ListMenu({
+    pos = {gameConfig.engine.viewportWidth / 2, gameConfig.engine.viewportHeight / 2},
+    optionsFont = Fonts.RED_HAT_DISPLAY_56,
+    optionsColor = {1, 1, 1},
+    optionsHoverColor = {love.math.colorFromBytes(95, 201, 231)},
+    optionsLineSpacing = 1.8,
+    options = {
+      {
+        type = "toggle",
+        text = "Enable Fullscreen",
+        trueColor = {love.math.colorFromBytes(95, 110, 231)},
+        falseColor = {1, 1, 1},
+        outlineColor = {love.math.colorFromBytes(50, 49, 59)},
+        value = userSettings.graphics.fullscreen
+      },
+      {
+        type = "text",
+        text = "MSAA Samples"
+      },
+      {
+        type = "text",
+        text = "VSync"
+      }
+    },
+  })
+  prevMenu = GameState.PAUSE_MENU
+  SetGameState(GameState.GRAPHICS_MENU)
 
   -- start the game engine
   engine.addEntity(LevelBackground())
@@ -179,48 +318,21 @@ function love.update(dt)
 
   input.update(dt)
 
-  if CurrentGameState == GameState.GAMEPLAY then
-    engine.update(dt)
-  elseif CurrentGameState == GameState.PAUSE_MENU then
-    displayedMenu:update()
-  end
-
-  -- handle menu input
-  if input.isActive("pause") and CurrentGameState == GameState.GAMEPLAY then
-    CurrentGameState = GameState.PAUSE_MENU
-    displayedMenu = mainPauseMenu
-  end
-
-  if input.isActive("menu confirm") and CurrentGameState == GameState.PAUSE_MENU and
-     displayedMenu.hoveredOption ~= nil then
-
-    print("confirmed")
-    local selected = displayedMenu.hoveredOption.text
-    if displayedMenu == mainPauseMenu then
-      if selected == "Resume" then
-        CurrentGameState = GameState.GAMEPLAY
-      elseif selected == "Quit to Desktop" then
-        love.event.quit()
-      end
-    end
-  elseif input.isActive("menu back") and CurrentGameState == GameState.PAUSE_MENU then
-    if displayedMenu == mainPauseMenu then
-      CurrentGameState = GameState.GAMEPLAY
-    end
-  end
+  updateFunctions[currentGameState](dt)
 end
 
----Called once per frame to draw the game
+---Called once per frame to draw the game.
 function love.draw()
-  love.graphics.clear(love.math.colorFromBytes(50, 49, 59))
-  engine.draw()
+  drawFunctions[currentGameState]()
+end
 
-  if CurrentGameState == GameState.PAUSE_MENU then
-    love.graphics.setColor(love.math.colorFromBytes(50, 49, 59, 196))
-    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
-
-    displayedMenu:draw()
-  end
+---Called when the window is resized.
+---@param width number
+---@param height number
+function love.resize(width, height)
+  local xZoom = width / gameConfig.engine.viewportWidth
+  local yZoom = height / gameConfig.engine.viewportHeight
+  DisplayScale = math.min(xZoom, yZoom)
 end
 
 ---Called when a key is pressed.

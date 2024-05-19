@@ -18,7 +18,6 @@ local cameraPos = Vector2() -- The current position of the camera.
 local cameraTarget = Vector2() -- The position the camera is trying to reach.
 local deltaTimeMultiplier = 1.0 -- "Speed of time"
 local lastDt = 0.0 -- Last delta time passed to `update()`
-local cameraZoom = 1
 
 ---Adds an entity to the engine, calls its `setup()` method (if it has one), then returns it.
 ---@param entity GameEntity
@@ -140,11 +139,11 @@ end
 ---Draws all entities. Should be called once in `love.draw()`.
 local function draw()
   -- find how much to translate by
-  local renderX = -(cameraPos.x - love.graphics.getWidth() / 2 / cameraZoom)
-  local renderY = -(cameraPos.y - love.graphics.getHeight() / 2 / cameraZoom)
+  local renderX = -(cameraPos.x - love.graphics.getWidth() / 2 / DisplayScale)
+  local renderY = -(cameraPos.y - love.graphics.getHeight() / 2 / DisplayScale)
 
   love.graphics.push()
-  love.graphics.scale(cameraZoom)
+  love.graphics.scale(DisplayScale)
   love.graphics.translate(renderX, renderY)
   for _, i in ipairs(layerIndexes) do
     local layer = displayLayers[i]
@@ -261,8 +260,8 @@ return {
   deltaTimeRaw = deltaTimeRaw,
   getDeltaTimeMultiplier = function() return deltaTimeMultiplier end,
   setDeltaTimeMultiplier = function(m) deltaTimeMultiplier = m end,
-  getCameraZoom = function() return cameraZoom end,
-  setCameraZoom = function(z) cameraZoom = z end,
+  getCameraZoom = function() return DisplayScale end,
+  setCameraZoom = function(z) DisplayScale = z end,
   roomWidth = function() return ROOM_WIDTH end,
   roomHeight = function() return ROOM_HEIGHT end,
   roomSize = function() return ROOM_WIDTH, ROOM_HEIGHT end,

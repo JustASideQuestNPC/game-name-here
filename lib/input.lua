@@ -289,8 +289,10 @@ end
 ---@param down string
 ---@param left string
 ---@param right string
+---@param fourWay boolean?
 ---@return Vector2
-local function getDpadVector(up, down, left, right)
+local function getDpadVector(up, down, left, right, fourWay)
+  fourWay = fourWay or false
   local v = Vector2()
   if isActive(up) then
     v.y = v.y - 1
@@ -298,6 +300,8 @@ local function getDpadVector(up, down, left, right)
   if isActive(down) then
     v.y = v.y + 1
   end
+  if fourWay and v.y ~= 0 then return v end
+
   if isActive(left) then
     v.x = v.x - 1
   end
@@ -507,6 +511,7 @@ return {
   addActionList = addActionList,
   update = update,
   isActive = isActive,
+  clearAction = function(action) clearedActions[#clearedActions+1] = action end,
   getAxisValue = getAxisValue,
   getStickVector = getStickVector,
   getDpadVector = getDpadVector,

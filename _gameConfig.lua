@@ -3,7 +3,7 @@
 
 DEBUG_CONFIG = {
   SHOW_HITBOXES = false, -- displays entity hitboxes and ui bounding boxes
-  FORCE_RESET_USER_SETTINGS = false -- always resets user settings to default on startup
+  FORCE_RESET_USER_SETTINGS = true -- always resets user settings to default on startup
 }
 
 return {
@@ -32,7 +32,9 @@ return {
         ["toggle fullscreen"] = {"f11"},
         ["pause"] = {"escape"},
         ["menu confirm"] = {"left mouse"},
-        ["menu back"] = {"escape"}
+        ["menu back"] = {"escape"},
+        ["menu revert"] = {"r"},
+        ["menu reset"] = {"delete"}
       },
       gamepadBinds = {
         ["move up"] = {"dpad up"},
@@ -49,6 +51,8 @@ return {
         ["menu right"] = {"dpad right"},
         ["menu confirm"] = {"a"},
         ["menu back"] = {"b"},
+        ["menu revert"] = {"x"},
+        ["menu reset"] = {"right stick click"}
       }
     }
   },
