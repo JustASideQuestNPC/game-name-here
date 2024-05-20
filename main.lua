@@ -148,23 +148,13 @@ function love.load()
     end
   end
 
-  -- convert some graphics configs from human-readable formats into the love2d format
-  local vsync
-  if  userSettings.graphics.vsync == "adaptive" then
-    vsync = -1 -- adaptive vsync where supported
-  elseif  userSettings.graphics.vsync == false then
-    vsync = 0 -- vsync disabled
-  else
-    vsync = 1 -- vsync enabled
-  end
-
   -- start love2d 
   love.window.setMode(
     userSettings.graphics.width,
     userSettings.graphics.height,
     { -- flags
       fullscreen = userSettings.graphics.fullscreen,
-      vsync = vsync,
+      vsync = userSettings.graphics.vsync,
       msaa = userSettings.graphics.msaaSamples,
       resizable = true
     }
@@ -267,6 +257,13 @@ function love.load()
       }
     },
   })
+
+  local msaaIndex
+  if userSettings.graphics.msaaSamples == 0 then
+    msaaIndex = 1
+  else
+    msaaIndex = math.ceil(math.log(userSettings.graphics.msaaSamples, 2)) + 2
+  end
   graphicsMenu = ListMenu({
     pos = {gameConfig.engine.viewportWidth / 2, gameConfig.engine.viewportHeight / 2},
     optionsFont = Fonts.RED_HAT_DISPLAY_56,
@@ -283,12 +280,27 @@ function love.load()
         value = userSettings.graphics.fullscreen
       },
       {
-        type = "text",
-        text = "MSAA Samples"
+        type = "selector",
+        text = "MSAA",
+        values = {
+          -- {value, displayed text}
+          {0, "Disabled"},
+          {1, "1x"},
+          {2, "2x"},
+          {4, "4x"},
+          {8, "8x"}
+        },
+        selectedIndex = msaaIndex
       },
       {
-        type = "text",
-        text = "VSync"
+        type = "selector",
+        text = "VSync",
+        values = {
+          {-1, "Adaptive"},
+          {0, "Disabled"},
+          {1, "Enabled"}
+        },
+        selectedIndex = userSettings.graphics.vsync + 2
       }
     },
   })

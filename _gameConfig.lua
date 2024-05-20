@@ -14,8 +14,8 @@ return {
       width = 1280,
       height = 720,
       fullscreen = false,
-      vsync = "adaptive",
-      msaaSamples = 8
+      vsync = 1,
+      msaaSamples = 4
     },
     input = {
       swapThumbsticks = false,
@@ -55,14 +55,6 @@ return {
         ["menu reset"] = {"right stick click"}
       }
     }
-  },
-
-  graphics = {
-    width = 1280,
-    height = 720,
-    fullscreen = false, -- overrides width and height
-    vsync = "adaptive", -- true, false, or "adaptive"
-    msaaSamples = 8,    -- number of samples for antialiasing
   },
 
   input = {
