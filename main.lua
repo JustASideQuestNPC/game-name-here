@@ -5,11 +5,6 @@ local utils      = require "lib.utils"
 local engine     = require "lib.engine"
 local ListMenu   = require "lib.listMenu"
 
--- My engine class is accessed through the global engine variable so this is completely unused, but
--- everything crashes and burns for some reason unless I require the file in main. This is truly a
--- coconut.jpg moment.
-local _ = require "lib.engine"
-
 local LevelBackground = require "entities.levelBackground"
 local Player = require "entities.player"
 local Wall = require "entities.wall"
