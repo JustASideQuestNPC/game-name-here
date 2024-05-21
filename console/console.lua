@@ -15,7 +15,7 @@ DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
 ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ]]--
 
-local console = {}
+Console = {}
 
 -- Utilty functions for manipulating tables.
 local function map(tbl, f)
@@ -52,78 +52,87 @@ local function concat(...)
   return tbl
 end
 
-local function parseArgs(s)
+local function parseArgs(str)
   local args = {}
   local e = 0
   while true do
-      local b = e+1
-      b = s:find("%S",b)
-      if b==nil then break end
-      if s:sub(b,b)=="'" then
-          e = s:find("'",b+1)
-          b = b+1
-      elseif s:sub(b,b)=='"' then
-          e = s:find('"',b+1)
-          b = b+1
+      local b = e +1 
+      b = str:find("%S",b)
+      if b == nil then break end
+      if str:sub(b, b) == "'" then
+          e = str:find("'", b + 1)
+          b = b + 1
+      elseif str:sub(b,b )== '"' then
+          e = str:find('"', b  +1)
+          b = b + 1
       else
-          e = s:find("%s",b+1)
+          e = str:find("%s",b+1)
       end
-      if e==nil then e=#s+1 end
-      args[#args+1] = s:sub(b,e-1)
+      if e == nil then e = #str+1 end
+
+      local a = str:sub(b, e-1)
+      if tonumber(a) ~= nil then
+        a = tonumber(a)
+      elseif a == "true" then
+        a = true
+      elseif  a == "false" then
+        a = false
+      end
+      args[#args+1] = a
   end
   return args
 end
 
-console.HORIZONTAL_MARGIN = 10 -- Horizontal margin between the text and window.
-console.VERTICAL_MARGIN = 10 -- Vertical margins between components.
-console.PROMPT = "> " -- The prompt symbol.
+Console.HORIZONTAL_MARGIN = 10 -- Horizontal margin between the text and window.
+Console.VERTICAL_MARGIN = 10 -- Vertical margins between components.
+Console.PROMPT = "> " -- The prompt symbol.
 
-console.MAX_LINES = 200 -- How many lines to store in the buffer.
-console.HISTORY_SIZE = 100 -- How much of history to store.
+Console.MAX_LINES = 200 -- How many lines to store in the buffer.
+Console.HISTORY_SIZE = 100 -- How much of history to store.
 
 -- Color configurations.
-console.BACKGROUND_COLOR = {0, 0, 0, 0.7}
-console.TEXT_COLOR = {1, 1, 1, 1}
-console.COMPLETION_TEXT_COLOR = {1, 1, 1, 0.7}
-console.WARNING_COLOR = {0.89, 0.6, 0.4, 1}
-console.ERROR_COLOR = {0.94, 0.35, 0.44, 1}
+Console.BACKGROUND_COLOR = {0, 0, 0, 0.7}
+Console.TEXT_COLOR = {1, 1, 1, 1}
+Console.COMPLETION_TEXT_COLOR = {1, 1, 1, 0.7}
+Console.WARNING_COLOR = {0.89, 0.6, 0.4, 1}
+Console.ERROR_COLOR = {0.94, 0.35, 0.44, 1}
 
-console.FONT_SIZE = 12
-console.FONT = love.graphics.newFont(console.FONT_SIZE)
+Console.FONT_SIZE = 12
+Console.FONT = love.graphics.newFont(Console.FONT_SIZE)
 
 -- The scope in which lines in the console are executed.
-console.ENV = setmetatable({}, {__index = _G})
+Console.ENV = setmetatable({}, {__index = _G})
 
 -- The default help text shown.
-console.HELP_TEXT = [[==== Welcome to the In-Game Console ====
+Console.HELP_TEXT = [[==== Welcome to the In-Game Console ====
 - Type any expression or statement to evaluate it.
 - Type a built-in command to run it (type `commands` to list all commands).]]
 
 -- Builtin commands.
-console.COMMANDS = {
-  clear = function(_) console.clear() end,
+Console.COMMANDS = {
+  clear = function(_) Console.clear() end,
   quit = function(_) love.event.quit(0) end,
-  help = function(_) console.log(console.HELP_TEXT) end,
+  help = function(_) Console.log(Console.HELP_TEXT) end,
   commands = function(_)
-    console.log("=== Available Commands ===")
-    for k, _ in pairs(console.COMMANDS) do
-      if console.COMMAND_HELP[k] then
-        console.log(k .. " - " .. console.COMMAND_HELP[k])
+    Console.log("=== Available Commands ===")
+    for k, _ in pairs(Console.COMMANDS) do
+      if Console.COMMAND_HELP[k] then
+        Console.log(k .. " - " .. Console.COMMAND_HELP[k])
       else
-        console.log(k)
+        Console.log(k)
       end
     end
   end
 }
 
-console.COMMAND_HELP = {
+Console.COMMAND_HELP = {
   clear = "Clears the console.",
   quit = "Quits the game.",
   help = "Prints help text.",
   commands = "Lists all commands."
 }
 
-function console.inspect(val)
+function Console.inspect(val)
   if type(val) == "table"  then
     -- If this table has a tostring function, just use that.
     local mt = getmetatable(val)
@@ -152,45 +161,65 @@ function console.inspect(val)
 end
 
 -- Overrideable function that is used for formatting return values.
-console.INSPECT_FUNCTION = function(...)
+Console.INSPECT_FUNCTION = function(...)
   local args = {...}
   if #args == 0 then
     return "nil"
   else
-    return table.concat(map(args, console.inspect), "\t")
+    return table.concat(map(args, Console.inspect), "\t")
   end
 end
 
 -- Store global state for whether or not the console is enabled / disabled.
 local enabled = false
-function console.isEnabled() return enabled end
+function Console.isEnabled() return enabled end
 
 -- Store the printed lines in a buffer.
-local lines = {}
-function console.clear() lines = {} end
+local displayedLines = {}
+function Console.clear() displayedLines = {} end
+
+local logLines = {}
 
 -- Store previously executed commands in a history buffer.
 local history = {}
-function console.addHistory(command)
+function Console.addHistory(command)
   table.insert(history, 1, command)
 end
 
 -- Print a colored text to the console. Colored text is simply represented
 -- as a table of values that alternate between an {r, g, b, a} object and a
 -- string value.
-function console.colorprint(coloredtext) table.insert(lines, coloredtext) end
+function Console.colorprint(coloredtext) table.insert(displayedLines, coloredtext) end
 
-function console.log(text)
+function Console.log(text)
   print(tostring(text))
-  table.insert(lines, {console.TEXT_COLOR, tostring(text)})
+  table.insert(displayedLines, {Console.TEXT_COLOR, tostring(text)})
+  table.insert(logLines, text)
 end
-function console.warn(text)
+function Console.warn(text)
   print("\x1b[33m"..tostring(text).."\x1b[39m")
-  table.insert(lines, {console.WARNING_COLOR, tostring(text)})
+  table.insert(displayedLines, {Console.WARNING_COLOR, tostring(text)})
+  table.insert(logLines, text)
 end
-function console.error(text)
+function Console.error(text)
   print("\x1b[31m"..tostring(text).."\x1b[39m")
-  table.insert(lines, {console.ERROR_COLOR, tostring(text)})
+  table.insert(displayedLines, {Console.ERROR_COLOR, tostring(text)})
+  table.insert(logLines, text)
+end
+
+Console.logToFile = function(filename)
+  local file, errorString = love.filesystem.newFile(filename, "w")
+  if file == nil then
+    print(errorString)
+    return
+  end
+
+  for _, line in ipairs(logLines) do
+    file:write(line.."\r\n")
+  end
+
+  file:close()
+  Console.log("Logged output to "..filename)
 end
 
 -- Helper object that encapuslates operations on the current command.
@@ -272,7 +301,7 @@ local command = {
 
   update_completion = function(self)
     if self.text:len() > 0 then
-      self.completion = console.completion(self.text)
+      self.completion = Console.completion(self.text)
     else
       self.completion = nil
     end
@@ -290,78 +319,78 @@ local command = {
 }
 command:clear()
 
-function console.draw()
+function Console.draw()
   -- Only draw the console if enabled.
   if not enabled then return end
 
   -- Fill the background color.
-  love.graphics.setColor(unpack(console.BACKGROUND_COLOR))
+  love.graphics.setColor(unpack(Console.BACKGROUND_COLOR))
   love.graphics.rectangle('fill', 0, 0, love.graphics.getWidth(),
     love.graphics.getHeight())
 
   love.graphics.setColor(1, 1, 1, 1)
-  love.graphics.setFont(console.FONT)
+  love.graphics.setFont(Console.FONT)
 
-  local line_start = love.graphics.getHeight() - console.VERTICAL_MARGIN*3 - console.FONT:getHeight()
-  local wraplimit = love.graphics.getWidth() - console.HORIZONTAL_MARGIN*2
+  local line_start = love.graphics.getHeight() - Console.VERTICAL_MARGIN*3 - Console.FONT:getHeight()
+  local wraplimit = love.graphics.getWidth() - Console.HORIZONTAL_MARGIN*2
 
-  for i = #lines, 1, -1 do
-    local textonly = lines[i]
-    if type(lines[i]) == "table" then
-      textonly = table.concat(filter(lines[i], function(val)
+  for i = #displayedLines, 1, -1 do
+    local textonly = displayedLines[i]
+    if type(displayedLines[i]) == "table" then
+      textonly = table.concat(filter(displayedLines[i], function(val)
         return type(val) == "string"
       end), "")
     end
-    local _, wrapped = console.FONT:getWrap(textonly, wraplimit)
+    local _, wrapped = Console.FONT:getWrap(textonly, wraplimit)
 
     love.graphics.printf(
-      lines[i], console.HORIZONTAL_MARGIN,
-      line_start - #wrapped * console.FONT:getHeight(),
+      displayedLines[i], Console.HORIZONTAL_MARGIN,
+      line_start - #wrapped * Console.FONT:getHeight(),
       wraplimit, "left")
-    line_start = line_start - #wrapped * console.FONT:getHeight()
+    line_start = line_start - #wrapped * Console.FONT:getHeight()
   end
 
   love.graphics.setLineWidth(1)
 
   love.graphics.line(0,
-    love.graphics.getHeight() - console.VERTICAL_MARGIN
-      - console.FONT:getHeight() - console.VERTICAL_MARGIN,
+    love.graphics.getHeight() - Console.VERTICAL_MARGIN
+      - Console.FONT:getHeight() - Console.VERTICAL_MARGIN,
     love.graphics.getWidth(),
-    love.graphics.getHeight() - console.VERTICAL_MARGIN
-      - console.FONT:getHeight() - console.VERTICAL_MARGIN)
+    love.graphics.getHeight() - Console.VERTICAL_MARGIN
+      - Console.FONT:getHeight() - Console.VERTICAL_MARGIN)
 
   love.graphics.printf(
-    console.PROMPT .. command.text,
-    console.HORIZONTAL_MARGIN,
-    love.graphics.getHeight() - console.VERTICAL_MARGIN - console.FONT:getHeight(),
-    love.graphics.getWidth() - console.HORIZONTAL_MARGIN*2, "left")
+    Console.PROMPT .. command.text,
+    Console.HORIZONTAL_MARGIN,
+    love.graphics.getHeight() - Console.VERTICAL_MARGIN - Console.FONT:getHeight(),
+    love.graphics.getWidth() - Console.HORIZONTAL_MARGIN*2, "left")
 
   if love.timer.getTime() % 1 > 0.5 then
-    local cursorx = console.HORIZONTAL_MARGIN +
-      console.FONT:getWidth(console.PROMPT .. command.text:sub(0, command.cursor))
+    local cursorx = Console.HORIZONTAL_MARGIN +
+      Console.FONT:getWidth(Console.PROMPT .. command.text:sub(0, command.cursor))
     love.graphics.line(
       cursorx,
-      love.graphics.getHeight() - console.VERTICAL_MARGIN - console.FONT:getHeight(),
+      love.graphics.getHeight() - Console.VERTICAL_MARGIN - Console.FONT:getHeight(),
       cursorx,
-      love.graphics.getHeight() - console.VERTICAL_MARGIN)
+      love.graphics.getHeight() - Console.VERTICAL_MARGIN)
   end
 
   if command.completion ~= nil then
     local suggested = command.completion:sub(command.text:len() + 1, -1)
 
-    love.graphics.setColor(console.COMPLETION_TEXT_COLOR)
-    local autocompletex = console.FONT:getWidth(console.PROMPT .. command.text)
+    love.graphics.setColor(Console.COMPLETION_TEXT_COLOR)
+    local autocompletex = Console.FONT:getWidth(Console.PROMPT .. command.text)
     love.graphics.printf(
       suggested,
-      console.HORIZONTAL_MARGIN + autocompletex,
-      love.graphics.getHeight() - console.VERTICAL_MARGIN - console.FONT:getHeight(),
-      love.graphics.getWidth() - console.HORIZONTAL_MARGIN*2 - autocompletex, "left")
+      Console.HORIZONTAL_MARGIN + autocompletex,
+      love.graphics.getHeight() - Console.VERTICAL_MARGIN - Console.FONT:getHeight(),
+      love.graphics.getWidth() - Console.HORIZONTAL_MARGIN*2 - autocompletex, "left")
   end
 end
 
-function console.completion(partial)
+function Console.completion(partial)
   -- Generate a list of all possible completions.
-  local possible_completions = concat(keys(console.ENV), keys(console.COMMANDS), history)
+  local possible_completions = concat(keys(Console.ENV), keys(Console.COMMANDS), history)
 
   -- Filter out completions that don't match the currently typed text.
   possible_completions = filter(possible_completions, function(possible_completion)
@@ -380,7 +409,7 @@ function console.completion(partial)
   end
 end
 
-function console.textinput(input)
+function Console.textinput(input)
   -- Use the "~" key to enable / disable the console.
   if input == "~" then
     enabled = not enabled
@@ -392,17 +421,18 @@ function console.textinput(input)
   command:insert(input)
 end
 
-function console.execute(command)
+function Console.execute(command)
+  Console.log("> "..command)
   local args = parseArgs(command)
 
   -- If this is a builtin command, execute it and return immediately.
-  if console.COMMANDS[args[1]] then
-    console.COMMANDS[args[1]]({unpack(args, 2)})
+  if Console.COMMANDS[args[1]] then
+    Console.COMMANDS[args[1]]({unpack(args, 2)})
     return
   end
 
   -- Reprint the command + the prompt string.
-  console.log(console.PROMPT .. command)
+  Console.log(Console.PROMPT .. command)
 
   local chunk, error = load("return " .. command)
   if not chunk then
@@ -410,25 +440,25 @@ function console.execute(command)
   end
 
   if chunk then
-    setfenv(chunk, console.ENV)
+    setfenv(chunk, Console.ENV)
     local values = { pcall(chunk) }
     if values[1] then
       table.remove(values, 1)
-      console.log(console.INSPECT_FUNCTION(unpack(values)))
+      Console.log(Console.INSPECT_FUNCTION(unpack(values)))
 
       -- Bind '_' to the first returned value, and bind 'last' to a list
       -- of returned values.
-      console.ENV._ = values[1]
-      console.ENV.last = values
+      Console.ENV._ = values[1]
+      Console.ENV.last = values
     else
-      console.error(values[2])
+      Console.error(values[2])
     end
   else
-    console.error(command.." is not a command")
+    Console.error(command.." is not a command")
   end
 end
 
-function console.keypressed(key, scancode, isrepeat)
+function Console.keypressed(key, scancode, isrepeat)
   -- Ignore if the console isn't enabled.
   if not enabled then return end
 
@@ -453,15 +483,15 @@ function console.keypressed(key, scancode, isrepeat)
   elseif key == "c" and ctrl then command:clear()
 
   elseif key == "=" and shift and ctrl then
-      console.FONT_SIZE = console.FONT_SIZE + 1
-      console.FONT = love.graphics.newFont(console.FONT_SIZE)
+      Console.FONT_SIZE = Console.FONT_SIZE + 1
+      Console.FONT = love.graphics.newFont(Console.FONT_SIZE)
   elseif key == "-" and ctrl then
-      console.FONT_SIZE = math.max(console.FONT_SIZE - 1, 1)
-      console.FONT = love.graphics.newFont(console.FONT_SIZE)
+      Console.FONT_SIZE = math.max(Console.FONT_SIZE - 1, 1)
+      Console.FONT = love.graphics.newFont(Console.FONT_SIZE)
 
   elseif key == "return" then
-    console.addHistory(command.text)
-    console.execute(command.text)
+    Console.addHistory(command.text)
+    Console.execute(command.text)
     command:clear()
 
   elseif key == "tab" then
@@ -469,8 +499,8 @@ function console.keypressed(key, scancode, isrepeat)
   end
 end
 
-function console.setEnabled(enable)
+function Console.setEnabled(enable)
 	enabled = enable
 end
 
-Console = console
+Console = Console

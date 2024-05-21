@@ -426,9 +426,36 @@ function love.textinput(text)
   Console.textinput(text)
 end
 
+love.errorhandler = require "lib.errorHandler"
+
 Console.COMMAND_HELP.saveDir = "Opens your save directory."
-Console.COMMANDS.saveDir = function()
+Console.COMMANDS.saveDir = function(_)
   local path = love.filesystem.getSaveDirectory()
   Console.log("Opening save directory at "..path)
   love.system.openURL(path)
+end
+
+Console.COMMAND_HELP.showHitboxes = "Sets whether to display hitboxes, or checks the current"..
+                                    "setting if called without arguments."
+Console.COMMANDS.showHitboxes = function(args)
+  if args[1] ~= nil and type(args[1]) ~= "boolean" then
+    Console.error("Invalid argument to showHitboxes (expected true or false, recieved "..
+                  tostring(args[1])..").")
+    return
+  end
+
+  if args[1] ~= nil then
+    DEBUG_CONFIG.SHOW_HITBOXES = args[1]
+  end
+
+  Console.log("showHitboxes = "..tostring(DEBUG_CONFIG.SHOW_HITBOXES))
+end
+
+Console.COMMAND_HELP.showHitboxes = "Writes existing console output to a file."
+Console.COMMANDS.logToFile = function(args)
+  if args[1] == nil then
+    Console.error("Invalid argument: logFile requires a filename.")
+  else
+    Console.logToFile(args[1])
+  end
 end
