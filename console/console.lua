@@ -52,6 +52,28 @@ local function concat(...)
   return tbl
 end
 
+local function parseArgs(s)
+  local args = {}
+  local e = 0
+  while true do
+      local b = e+1
+      b = s:find("%S",b)
+      if b==nil then break end
+      if s:sub(b,b)=="'" then
+          e = s:find("'",b+1)
+          b = b+1
+      elseif s:sub(b,b)=='"' then
+          e = s:find('"',b+1)
+          b = b+1
+      else
+          e = s:find("%s",b+1)
+      end
+      if e==nil then e=#s+1 end
+      args[#args+1] = s:sub(b,e-1)
+  end
+  return args
+end
+
 console.HORIZONTAL_MARGIN = 10 -- Horizontal margin between the text and window.
 console.VERTICAL_MARGIN = 10 -- Vertical margins between components.
 console.PROMPT = "> " -- The prompt symbol.
@@ -79,11 +101,11 @@ console.HELP_TEXT = [[==== Welcome to the In-Game Console ====
 
 -- Builtin commands.
 console.COMMANDS = {
-  clear = function() console.clear() end,
-  quit = function() love.event.quit(0) end,
-  exit = function() love.event.quit(0) end,
-  help = function() console.log(console.HELP_TEXT) end,
-  commands = function()
+  clear = function(_) console.clear() end,
+  quit = function(_) love.event.quit(0) end,
+  exit = function(_) love.event.quit(0) end,
+  help = function(_) console.log(console.HELP_TEXT) end,
+  commands = function(_)
     console.log("=== Available Commands ===")
     for k, _ in pairs(console.COMMANDS) do
       if console.COMMAND_HELP[k] then
@@ -161,16 +183,16 @@ end
 function console.colorprint(coloredtext) table.insert(lines, coloredtext) end
 
 function console.log(text)
-  print(text)
-  table.insert(lines, {console.TEXT_COLOR, text})
+  print(tostring(text))
+  table.insert(lines, {console.TEXT_COLOR, tostring(text)})
 end
 function console.warn(text)
-  print("\x1b[33m"..text.."\x1b[39m")
-  table.insert(lines, {console.WARNING_COLOR, text})
+  print("\x1b[33m"..tostring(text).."\x1b[39m")
+  table.insert(lines, {console.WARNING_COLOR, tostring(text)})
 end
 function console.error(text)
-  print("\x1b[31m"..text.."\x1b[39m")
-  table.insert(lines, {console.ERROR_COLOR, text})
+  print("\x1b[31m"..tostring(text).."\x1b[39m")
+  table.insert(lines, {console.ERROR_COLOR, tostring(text)})
 end
 
 -- Helper object that encapuslates operations on the current command.
@@ -373,9 +395,11 @@ function console.textinput(input)
 end
 
 function console.execute(command)
+  local args = parseArgs(command)
+
   -- If this is a builtin command, execute it and return immediately.
-  if console.COMMANDS[command] then
-    console.COMMANDS[command]()
+  if console.COMMANDS[args[1]] then
+    console.COMMANDS[args[1]]({unpack(args, 2)})
     return
   end
 
@@ -399,10 +423,10 @@ function console.execute(command)
       console.ENV._ = values[1]
       console.ENV.last = values
     else
-      console.colorprint({console.ERROR_COLOR, values[2]})
+      console.error(values[2])
     end
   else
-    console.colorprint({console.ERROR_COLOR, error})
+    console.error(command.." is not a command")
   end
 end
 

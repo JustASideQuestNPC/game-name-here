@@ -320,10 +320,6 @@ function love.load()
   PlayerEntity = engine.addEntity(Player(engine.roomCenter())) ---@type Player
 
   engine.addEntity(WaveLauncherEnemy(engine.roomWidth() / 2 - 500, engine.roomHeight() / 2))
-
-  Console.log("basic printout")
-  Console.warn("warning")
-  Console.error("error")
 end
 
 ---Called once per frame to update the game.
@@ -358,7 +354,7 @@ end
 ---Called when a key is pressed.
 ---@param key string
 function love.keypressed(key, scancode, isrepeat)
-  if key == "escape" and console.isEnabled() then
+  if key == "escape" and Console.isEnabled() then
     Console.setEnabled(false)
   end
 
