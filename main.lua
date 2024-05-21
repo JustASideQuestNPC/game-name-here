@@ -5,6 +5,10 @@ local utils      = require "lib.utils"
 local engine     = require "lib.engine"
 local ListMenu   = require "lib.listMenu"
 
+-- The console is stored in a global for easy access, but for some reason the game crashes unless I
+-- require the file anyway. This is truly a coconut.jpg moment.
+local _ = require "console.console"
+
 local LevelBackground = require "entities.levelBackground"
 local Player = require "entities.player"
 local Wall = require "entities.wall"
@@ -119,6 +123,8 @@ local updateFunctions = {
     end
   end
 }
+
+love.keyboard.setKeyRepeat(true)
 
 -- Called once on program start.
 function love.load()
@@ -314,6 +320,10 @@ function love.load()
   PlayerEntity = engine.addEntity(Player(engine.roomCenter())) ---@type Player
 
   engine.addEntity(WaveLauncherEnemy(engine.roomWidth() / 2 - 500, engine.roomHeight() / 2))
+
+  Console.log("basic printout")
+  Console.warn("warning")
+  Console.error("error")
 end
 
 ---Called once per frame to update the game.
@@ -325,12 +335,15 @@ function love.update(dt)
 
   input.update(dt)
 
-  updateFunctions[currentGameState](dt)
+  if not Console.isEnabled() then
+    updateFunctions[currentGameState](dt)
+  end
 end
 
 ---Called once per frame to draw the game.
 function love.draw()
   drawFunctions[currentGameState]()
+  Console.draw()
 end
 
 ---Called when the window is resized.
@@ -344,7 +357,12 @@ end
 
 ---Called when a key is pressed.
 ---@param key string
-function love.keypressed(key)
+function love.keypressed(key, scancode, isrepeat)
+  if key == "escape" and console.isEnabled() then
+    Console.setEnabled(false)
+  end
+
+  Console.keypressed(key, scancode, isrepeat)
   input.keyPressed(key)
 end
 
@@ -402,4 +420,10 @@ end
 ---@param value number The new axis value.
 function love.gamepadaxis(joystick, axis, value)
   input.gamepadAxis(axis, value)
+end
+
+---Called when a character is typed. Accounts for modifier keys.
+---@param text string
+function love.textinput(text)
+  Console.textinput(text)
 end
