@@ -82,9 +82,9 @@ console.MAX_LINES = 200 -- How many lines to store in the buffer.
 console.HISTORY_SIZE = 100 -- How much of history to store.
 
 -- Color configurations.
-console.BACKGROUND_COLOR = {0, 0, 0, 0.4}
+console.BACKGROUND_COLOR = {0, 0, 0, 0.7}
 console.TEXT_COLOR = {1, 1, 1, 1}
-console.COMPLETION_TEXT_COLOR = {1, 1, 1, 0.4}
+console.COMPLETION_TEXT_COLOR = {1, 1, 1, 0.7}
 console.WARNING_COLOR = {0.89, 0.6, 0.4, 1}
 console.ERROR_COLOR = {0.94, 0.35, 0.44, 1}
 
@@ -103,7 +103,6 @@ console.HELP_TEXT = [[==== Welcome to the In-Game Console ====
 console.COMMANDS = {
   clear = function(_) console.clear() end,
   quit = function(_) love.event.quit(0) end,
-  exit = function(_) love.event.quit(0) end,
   help = function(_) console.log(console.HELP_TEXT) end,
   commands = function(_)
     console.log("=== Available Commands ===")
@@ -118,11 +117,10 @@ console.COMMANDS = {
 }
 
 console.COMMAND_HELP = {
-  clear = "Clear the sceen.",
-  quit = "Quit the game.",
-  exit = "Quit the game.",
-  help = "Print help text.",
-  commands = "List all commands."
+  clear = "Clears the console.",
+  quit = "Quits the game.",
+  help = "Prints help text.",
+  commands = "Lists all commands."
 }
 
 function console.inspect(val)

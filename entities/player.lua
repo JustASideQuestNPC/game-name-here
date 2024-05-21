@@ -94,7 +94,7 @@ end
 local Player = utils.class(
   GameEntity, function (instance, x, y)
     instance.tags = {EntityTag.PLAYER}
-    instance.displayLayer = 1
+    instance.displayLayer = 2
 
     instance.RUN_SPEED = playerConfig.runSpeed
     instance.DASH_SPEED = playerConfig.dashSpeed

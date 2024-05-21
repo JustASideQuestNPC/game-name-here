@@ -12,7 +12,7 @@ local _ = require "console.console"
 local LevelBackground = require "entities.levelBackground"
 local Player = require "entities.player"
 local Wall = require "entities.wall"
-local WaveLauncherEnemy = require "entities.waveLauncherEnemy"
+local DebugTarget = require "entities.debugTarget"
 
 ---@enum Fonts
 Fonts = {
@@ -137,6 +137,8 @@ function love.load()
      DEBUG_CONFIG.FORCE_RESET_USER_SETTINGS then
     userSettings = gameConfig.defaultUserSettings
     love.filesystem.write("userSettings.json", json.encode(userSettings))
+    Console.warn("userSettings.json was not found or could not be opened. A new settings file "..
+                 "has been created in the save directory.")
   else
     userSettings = json.decode(love.filesystem.read("userSettings.json"))
 
@@ -144,7 +146,8 @@ function love.load()
     local saveRequired
     userSettings, saveRequired = utils.verifyTable(userSettings, gameConfig.defaultUserSettings)
     if saveRequired then
-      print("partially regenerated user settings")
+      Console.warn("userSettings.json is (at least) partially invalid. Missing and/or invalid "..
+                   "data has been regenerated with default settings.")
       love.filesystem.write("userSettings.json", json.encode(userSettings))
     end
   end
@@ -305,8 +308,6 @@ function love.load()
       }
     },
   })
-  prevMenu = GameState.PAUSE_MENU
-  SetGameState(GameState.GRAPHICS_MENU)
 
   -- start the game engine
   engine.addEntity(LevelBackground())
@@ -315,11 +316,17 @@ function love.load()
   engine.addEntity(Wall(-100, -100, 100, gameConfig.gameplay.roomHeight + 200))
   engine.addEntity(Wall(gameConfig.gameplay.roomWidth, -100, 100, gameConfig.gameplay.roomHeight + 200))
 
+  local centerX, centerY = engine.roomCenter()
   -- global reference to the player
 ---@diagnostic disable-next-line: assign-type-mismatch
-  PlayerEntity = engine.addEntity(Player(engine.roomCenter())) ---@type Player
+  PlayerEntity = engine.addEntity(Player(centerX, centerY)) ---@type Player
 
-  engine.addEntity(WaveLauncherEnemy(engine.roomWidth() / 2 - 500, engine.roomHeight() / 2))
+  engine.addEntity(DebugTarget(centerX - 300, centerY))
+  engine.addEntity(DebugTarget(centerX + 300, centerY))
+  engine.addEntity(DebugTarget(centerX, centerY - 300))
+  engine.addEntity(DebugTarget(centerX, centerY + 300))
+
+  SetGameState(GameState.GAMEPLAY)
 end
 
 ---Called once per frame to update the game.
@@ -354,10 +361,6 @@ end
 ---Called when a key is pressed.
 ---@param key string
 function love.keypressed(key, scancode, isrepeat)
-  if key == "escape" and Console.isEnabled() then
-    Console.setEnabled(false)
-  end
-
   Console.keypressed(key, scancode, isrepeat)
   input.keyPressed(key)
 end
@@ -422,4 +425,11 @@ end
 ---@param text string
 function love.textinput(text)
   Console.textinput(text)
+end
+
+Console.COMMAND_HELP.saveDir = "Opens your save directory."
+Console.COMMANDS.saveDir = function()
+  local path = love.filesystem.getSaveDirectory()
+  Console.log("Opening save directory at "..path)
+  love.system.openURL(path)
 end

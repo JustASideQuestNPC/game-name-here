@@ -13,7 +13,8 @@ local EntityTag = {
   HUD = 6,
   ENEMY = 7,
   COLLIDES_WITH_ENEMIES = 8,
-  ENEMY_PROJECTILE = 9
+  ENEMY_PROJECTILE = 9,
+  AIM_ASSIST_TARGET = 10
 }
 
 ---@class GameEntity: Class
@@ -22,6 +23,7 @@ local EntityTag = {
 ---@field deleted boolean
 ---@field markForDelete boolean
 ---@field hitbox table|nil
+---@field position Vector2
 ---@field new fun(): GameEntity
 ---@field update fun(self, dt: number)
 ---@field draw fun(self)
