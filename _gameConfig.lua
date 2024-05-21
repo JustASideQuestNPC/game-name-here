@@ -3,7 +3,7 @@
 
 DEBUG_CONFIG = {
   SHOW_HITBOXES = false, -- displays entity hitboxes and ui bounding boxes
-  FORCE_RESET_USER_SETTINGS = true -- always resets user settings to default on startup
+  FORCE_RESET_USER_SETTINGS = false -- always resets user settings to default on startup
 }
 
 return {
@@ -76,6 +76,8 @@ return {
       {name = "menu right", mode = "press"},
       {name = "menu confirm", mode = "press"},
       {name = "menu back", mode = "press"},
+      {name = "menu revert", mode = "press"},
+      {name = "menu reset", mode = "press"}
     },
 
     -- if true, the left and right thumbsticks are swapped

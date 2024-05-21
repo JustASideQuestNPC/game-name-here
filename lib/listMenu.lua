@@ -1,13 +1,6 @@
 local utils = require "lib.utils"
 local input = require "lib.input"
 
-local function drawTextCentered(text, font, x, y)
-  local width = font:getWidth(text)
-  local height = font:getAscent() + font:getDescent()
-
-  love.graphics.print(text, x - width / 2, y - height / 2)
-end
-
 ---@class ListMenu: Class
 ---@field x number
 ---@field y number
@@ -218,7 +211,7 @@ function ListMenu:draw()
 
     love.graphics.setColor(self.titleColor)
     love.graphics.setFont(self.titleFont)
-    drawTextCentered(self.title, self.titleFont, 0, 0)
+    utils.drawTextCentered(self.title, self.titleFont, 0, 0)
     love.graphics.pop()
   end
 
@@ -239,9 +232,9 @@ function ListMenu:draw()
     end
 
     if option.type == "text" then
-      drawTextCentered(option.text, self.optionsFont, 0, yPos)
+      utils.drawTextCentered(option.text, self.optionsFont, 0, yPos)
     elseif option.type == "toggle" then
-      drawTextCentered(option.text, self.optionsFont, -52, yPos)
+      utils.drawTextCentered(option.text, self.optionsFont, -52, yPos)
 
       local yOffset = self.optionLineHeight / 4
       local xOffset = option.switchOffset
@@ -285,8 +278,8 @@ function ListMenu:draw()
       end
 
       love.graphics.setColor(self.optionsColor)
-      drawTextCentered(option.text, self.optionsFont, option.textX, yPos)
-      drawTextCentered(option.selectedValue[2], self.optionsFont, option.valueX, yPos)
+      utils.drawTextCentered(option.text, self.optionsFont, option.textX, yPos)
+      utils.drawTextCentered(option.selectedValue[2], self.optionsFont, option.valueX, yPos)
 
       -- draw selector buttons
       if colorLeft or colorAll then

@@ -293,6 +293,44 @@ local function tableToString(t)
   end
 end
 
+---Draws center-aligned text.
+---@param text string
+---@param font table
+---@param x number
+---@param y number
+local function drawTextCentered(text, font, x, y)
+  local width = font:getWidth(text)
+  local height = font:getAscent() + font:getDescent()
+  love.graphics.push()
+  love.graphics.setFont(font)
+  love.graphics.print(text, x - width / 2, y - height / 2)
+  love.graphics.pop()
+end
+
+---Draws an image sprite followed by a text tooltip, center-aligned on a point.
+---@param sprite Sprite
+---@param spriteScale number
+---@param text string
+---@param font table
+---@param spacing number
+---@param x number
+---@param y number
+local function drawImageTooltipCentered(sprite, spriteScale, text, font, spacing, x, y)
+  local textWidth = font:getWidth(text)
+  local spriteWidth = sprite.width * spriteScale
+
+  local totalWidth = (font:getWidth(text) + spriteWidth + spacing)
+  local spriteX = spriteWidth / 2 - totalWidth / 2
+  local textX = totalWidth / 2 - textWidth / 2
+
+  love.graphics.push()
+  love.graphics.translate(x, y)
+
+  sprite:draw(spriteX, 0, 1, spriteScale)
+  drawTextCentered(text, font, textX, -(sprite.height * spriteScale) / 4)
+  love.graphics.pop()
+end
+
 return {
   class = class,
   isArray = isArray,
@@ -308,5 +346,7 @@ return {
   dottedLine = dottedLine,
   randFloat = randFloat,
   verifyTable = verifyTable,
-  tableToString = tableToString
+  tableToString = tableToString,
+  drawTextCentered = drawTextCentered,
+  drawImageTooltipCentered = drawImageTooltipCentered
 }

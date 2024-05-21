@@ -37,10 +37,107 @@ function SetGameState(state)
   currentGameState = state
 end
 
+SetGameState(GameState.PAUSE_MENU)
+
 DisplayScale = 1
 
 ---@type ListMenu, ListMenu, ListMenu
 local mainPauseMenu, settingsMenu, graphicsMenu
+
+---@type table<string, Sprite>
+local menuSprites = {
+  -- confirm,
+  -- back,
+  -- revert,
+  -- reset
+}
+
+-- draws a tooltip that shows the confirm and back buttons
+local function drawMenuTooltip()
+  local font = Fonts.RED_HAT_DISPLAY_30
+
+  local confirmSprite, backSprite
+  if input.currentInputType() == "keyboard" then
+    confirmSprite = menuSprites.confirm[1]
+    backSprite = menuSprites.back[1]
+  else
+    confirmSprite = menuSprites.confirm[2]
+    backSprite = menuSprites.back[2]
+  end
+
+  local confirmWidth = confirmSprite.width * 0.3125 + font:getWidth("Confirm") + 5
+  local backWidth = backSprite.width * 0.3125 + font:getWidth("Back") + 5
+  local totalWidth = confirmWidth + backWidth + 20
+  local confirmX = confirmWidth / 2 - totalWidth / 2
+  local backX = totalWidth / 2 - backWidth / 2
+  local lineX = totalWidth / 2 - backWidth - 10
+
+  love.graphics.push()
+  love.graphics.translate(love.graphics.getPixelWidth() / 2, love.graphics.getPixelHeight() - 50)
+  love.graphics.scale(DisplayScale)
+
+  love.graphics.setColor(1, 1, 1)
+  utils.drawImageTooltipCentered(confirmSprite, 0.3125, "Confirm", font, 5, confirmX, 0)
+  utils.drawImageTooltipCentered(backSprite, 0.3125, "Back", font, 5, backX, 0)
+
+  love.graphics.setLineWidth(3)
+  love.graphics.line(lineX, -20, lineX, 20)
+  love.graphics.pop()
+end
+
+-- draws a tooltip that shows the confirm, back, revert, and reset buttons
+local function drawSettingsTooltip()
+  local font = Fonts.RED_HAT_DISPLAY_30
+
+  local confirmSprite, backSprite, revertSprite, resetSprite
+  if input.currentInputType() == "keyboard" then
+    confirmSprite = menuSprites.confirm[1]
+    backSprite = menuSprites.back[1]
+    revertSprite = menuSprites.revert[1]
+    resetSprite = menuSprites.reset[1]
+  else
+    confirmSprite = menuSprites.confirm[2]
+    backSprite = menuSprites.back[2]
+    revertSprite = menuSprites.revert[2]
+    resetSprite = menuSprites.reset[2]
+  end
+
+  local confirmWidth = confirmSprite.width * 0.3125 + font:getWidth("Confirm") + 5
+  local backWidth = backSprite.width * 0.3125 + font:getWidth("Back") + 5
+  local leftWidth = confirmWidth + backWidth + 20
+  local confirmX = confirmWidth / 2 - leftWidth / 2
+  local backX = leftWidth / 2 - backWidth / 2
+
+  local revertWidth = revertSprite.width * 0.3125 + font:getWidth("Revert Changes") + 5
+  local resetWidth = resetSprite.width * 0.3125 + font:getWidth("Reset to Default") + 5
+  local rightWidth = revertWidth + resetWidth + 20
+  local revertX = revertWidth / 2 - rightWidth / 2
+  local resetX = rightWidth / 2 - resetWidth / 2
+
+  local totalWidth = leftWidth + rightWidth + 20
+  local leftX = leftWidth / 2 - totalWidth / 2
+  local rightX = totalWidth / 2 - rightWidth / 2
+
+  local leftLineX = leftWidth / 2 - backWidth - 10 + leftX
+  local rightLineX = rightWidth / 2 - resetWidth - 10 + rightX
+  local centerLineX = totalWidth / 2 - rightWidth - 10
+
+  love.graphics.push()
+  love.graphics.translate(love.graphics.getPixelWidth() / 2, love.graphics.getPixelHeight() - 50)
+  love.graphics.scale(DisplayScale)
+
+  love.graphics.setColor(1, 1, 1)
+  utils.drawImageTooltipCentered(confirmSprite, 0.3125, "Confirm", font, 5, confirmX + leftX, 0)
+  utils.drawImageTooltipCentered(backSprite, 0.3125, "Back", font, 5, backX + leftX, 0)
+  utils.drawImageTooltipCentered(revertSprite, 0.3125, "Revert Changes", font, 5, revertX + rightX, 0)
+  utils.drawImageTooltipCentered(resetSprite, 0.3125, "Reset to Default", font, 5, resetX + rightX + 3, 0)
+
+  love.graphics.setLineWidth(3)
+  love.graphics.line(leftLineX, -20, leftLineX, 20)
+  love.graphics.line(rightLineX, -20, rightLineX, 20)
+  love.graphics.line(centerLineX, -20, centerLineX, 20)
+  love.graphics.pop()
+end
 
 -- Draw functions for each game state.
 local drawFunctions = {
@@ -55,6 +152,8 @@ local drawFunctions = {
     love.graphics.setColor(love.math.colorFromBytes(50, 49, 59, 196))
     love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
     mainPauseMenu:draw()
+
+    drawMenuTooltip()
   end,
   [GameState.SETTINGS_MENU] = function()
     if prevMenu == GameState.PAUSE_MENU then
@@ -65,6 +164,8 @@ local drawFunctions = {
       love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
     end
     settingsMenu:draw()
+
+    drawMenuTooltip()
   end,
   [GameState.GRAPHICS_MENU] = function()
     if prevMenu == GameState.PAUSE_MENU then
@@ -75,6 +176,8 @@ local drawFunctions = {
       love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
     end
     graphicsMenu:draw()
+
+    drawSettingsTooltip()
   end
 }
 
@@ -213,7 +316,7 @@ function love.load()
   input.setSwapThumbsticks(UserSettings.input.swapThumbsticks)
   input.setGamepadRumbleEnabled(UserSettings.input.enableGamepadRumble)
 
-  -- setui gui menus
+  -- initialize gui menus
   mainPauseMenu = ListMenu({
     pos = {gameConfig.engine.viewportWidth / 2, gameConfig.engine.viewportHeight / 2},
     title = "Game Paused",
@@ -308,6 +411,13 @@ function love.load()
     },
   })
 
+  -- load sprites for menu tooltips
+  local temp = input.getActionIcons("menu confirm")
+  menuSprites.confirm = input.getActionIcons("menu confirm")
+  menuSprites.back = input.getActionIcons("menu back")
+  menuSprites.revert = input.getActionIcons("menu revert")
+  menuSprites.reset = input.getActionIcons("menu reset")
+
   -- start the game engine
   engine.addEntity(LevelBackground())
   engine.addEntity(Wall(0, -100, gameConfig.gameplay.roomWidth, 100))
@@ -324,8 +434,6 @@ function love.load()
   engine.addEntity(DebugTarget(centerX + 300, centerY))
   engine.addEntity(DebugTarget(centerX, centerY - 300))
   engine.addEntity(DebugTarget(centerX, centerY + 300))
-
-  SetGameState(GameState.GAMEPLAY)
 end
 
 ---Called once per frame to update the game.
