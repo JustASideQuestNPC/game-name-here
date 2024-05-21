@@ -11,6 +11,8 @@ local input = require "lib.input"
 ---@field optionsFont table
 ---@field optionsColor table
 ---@field optionsHoverColor table
+---@field descriptionFont table
+---@field descriptionColor table
 ---@field optionLineHeight number
 ---@field optionListHeight number
 ---@field optionListOffset number
@@ -33,6 +35,8 @@ local ListMenu = utils.class(
     instance.optionsFont = args.optionsFont
     instance.optionsColor = args.optionsColor
     instance.optionsHoverColor = args.optionsHoverColor
+    instance.descriptionFont = args.descriptionFont
+    instance.descriptionColor = args.descriptionColor
 
     instance.optionLineHeight = (instance.optionsFont:getAscent() +
         instance.optionsFont:getDescent()) * args.optionsLineSpacing
@@ -72,37 +76,40 @@ local ListMenu = utils.class(
         option.hoveredButton = "left"
 
         -- add the selector width to the line
-        local selectorWidth = -1
+        local valueWidth = -1
         for _, value in ipairs(option.values) do
-          local valueWidth = instance.optionsFont:getWidth(value[2])
-          if valueWidth > selectorWidth then
-            selectorWidth = valueWidth
+          local vw = instance.optionsFont:getWidth(value[2])
+          if vw > valueWidth then
+            valueWidth = vw
           end
         end
-        selectorWidth = selectorWidth * 1.1
+        local buttonOffset = (valueWidth * 1.1) / 2 + 12 * instance.selectorButtonScale
+        local selectorWidth = valueWidth * 1.1 + (80 * instance.selectorButtonScale)
 
         local textWidth = instance.optionsFont:getWidth(option.text)
-        local difference = textWidth - selectorWidth
+        local totalWidth = selectorWidth + textWidth + 75 * instance.selectorButtonScale
 
-        option.textX = -selectorWidth / 2 + difference / 4 - 25 * instance.selectorButtonScale
-        option.valueX = selectorWidth / 2 + difference / 4 + 25 * instance.selectorButtonScale
+        option.textX = textWidth / 2 - totalWidth / 2
+        option.valueX = totalWidth / 2 - selectorWidth / 2
 
-        local buttonOffset = selectorWidth / 2 + 12 * instance.selectorButtonScale
         option.leftButtonX = option.valueX - buttonOffset
         option.rightButtonX = option.valueX + buttonOffset
 
         option.leftButtonBox = {
-          x = option.leftButtonX - 32 * instance.selectorButtonScale,
+          x = option.leftButtonX - 20 * instance.selectorButtonScale,
           y = yPos - 6 * instance.selectorButtonScale,
           w = 40 * instance.selectorButtonScale,
           h = 50 * instance.selectorButtonScale
         }
         option.rightButtonBox = {
-          x = option.rightButtonX - 6 * instance.selectorButtonScale,
+          x = option.rightButtonX - 20 * instance.selectorButtonScale,
           y = yPos - 6 * instance.selectorButtonScale,
           w = 40 * instance.selectorButtonScale,
           h = 50 * instance.selectorButtonScale
         }
+
+        option.bbox.w = totalWidth
+        option.bbox.x = -option.bbox.w / 2
       end
 
       if option.description == nil then option.description = "" end
@@ -173,7 +180,6 @@ function ListMenu:update()
 
   -- check for menu inputs
   if self.hoveredOption == nil then return end -- reduces nesting
-
   if self.hoveredOption.type == "toggle" then
     if input.isActive("menu confirm") then
       self.hoveredOption.value = not self.hoveredOption.value
@@ -214,14 +220,13 @@ function ListMenu:draw()
     love.graphics.translate(0, self.titleOffset)
 
     love.graphics.setColor(self.titleColor)
-    love.graphics.setFont(self.titleFont)
     utils.drawTextCentered(self.title, self.titleFont, 0, 0)
     love.graphics.pop()
   end
 
   love.graphics.translate(0, self.optionListOffset)
-  love.graphics.setFont(self.optionsFont)
 
+  local describedOption = nil
   for i, option in ipairs(self.options) do
     local yPos = -self.optionListHeight / 2 + (i - 1) * self.optionLineHeight
     local hovered = (input.currentInputType() == "keyboard" and option.hovered) or
@@ -266,6 +271,15 @@ function ListMenu:draw()
         love.graphics.circle("fill", xOffset, yPos + yOffset, size * 0.75)
       end
     elseif option.type == "selector" then
+      if input.mouseOver(
+        (self.x + option.bbox.x) * DisplayScale,
+        (self.y + option.bbox.y) * DisplayScale,
+        (option.bbox.w) * DisplayScale,
+        (option.bbox.h) * DisplayScale
+      ) then
+        describedOption = option
+      end
+
       local colorAll = false
       local colorLeft = false
       local colorRight = false
@@ -292,7 +306,8 @@ function ListMenu:draw()
         love.graphics.setColor(self.optionsColor)
       end
       love.graphics.push()
-      love.graphics.translate(option.leftButtonX, yPos + self.optionLineHeight / 4)
+      love.graphics.translate(option.leftButtonX + 12 * self.selectorButtonScale,
+          yPos + self.optionLineHeight / 4)
       love.graphics.scale(self.selectorButtonScale * 0.9)
       love.graphics.rotate(-math.pi / 4)
 
@@ -306,7 +321,8 @@ function ListMenu:draw()
         love.graphics.setColor(self.optionsColor)
       end
       love.graphics.push()
-      love.graphics.translate(option.rightButtonX, yPos + self.optionLineHeight / 4)
+      love.graphics.translate(option.rightButtonX - 12 * self.selectorButtonScale,
+          yPos + self.optionLineHeight / 4)
       love.graphics.scale(self.selectorButtonScale * 0.9)
       love.graphics.rotate(math.pi - math.pi / 4)
 
@@ -317,6 +333,18 @@ function ListMenu:draw()
   end
 
   love.graphics.pop()
+
+  describedOption = self.hoveredOption or describedOption
+  if describedOption ~= nil and describedOption.description ~= "" then
+    love.graphics.push()
+    love.graphics.translate(love.graphics.getPixelWidth() / 2, love.graphics.getPixelHeight() - 125)
+    love.graphics.scale(DisplayScale)
+
+    love.graphics.setColor(self.descriptionColor)
+    utils.drawTextCentered(describedOption.description, self.descriptionFont, 0, 0)
+
+    love.graphics.pop()
+  end
 
   if DEBUG_CONFIG.SHOW_HITBOXES then
     love.graphics.setColor(love.math.colorFromBytes(94, 253, 247))
@@ -335,14 +363,13 @@ function ListMenu:draw()
           (option.rightButtonBox.w) * DisplayScale,
           (option.rightButtonBox.h) * DisplayScale
         )
-      else
-        love.graphics.rectangle("line",
-          (self.x + option.bbox.x) * DisplayScale,
-          (self.y + option.bbox.y) * DisplayScale,
-          (option.bbox.w) * DisplayScale,
-          (option.bbox.h) * DisplayScale
-        )
       end
+      love.graphics.rectangle("line",
+        (self.x + option.bbox.x) * DisplayScale,
+        (self.y + option.bbox.y) * DisplayScale,
+        (option.bbox.w) * DisplayScale,
+        (option.bbox.h) * DisplayScale
+      )
     end
   end
 end

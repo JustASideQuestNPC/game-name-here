@@ -37,7 +37,8 @@ function SetGameState(state)
   currentGameState = state
 end
 
-SetGameState(GameState.PAUSE_MENU)
+prevMenu = GameState.PAUSE_MENU
+SetGameState(GameState.GRAPHICS_MENU)
 
 DisplayScale = 1
 local function setDisplayScale(width, height)
@@ -237,8 +238,7 @@ local updateFunctions = {
           end
           option.selectedValue = option.values[option.selectedIndex]
         elseif option.text == "VSync" then
-          option.selectedIndex = gameConfig.defaultUserSettings.graphics.vsync + 2
-          option.selectedValue = option.values[option.selectedIndex]
+          option.value = (gameConfig.defaultUserSettings.graphics.vsync == 1)
         end
       end
     elseif input.isActive("menu revert") then
@@ -254,8 +254,7 @@ local updateFunctions = {
           end
           option.selectedValue = option.values[option.selectedIndex]
         elseif option.text == "VSync" then
-          option.selectedIndex = UserSettings.graphics.vsync + 2
-          option.selectedValue = option.values[option.selectedIndex]
+          option.value = (UserSettings.graphics.vsync == 1)
         end
       end
     elseif input.isActive("menu back") then
@@ -269,7 +268,7 @@ local updateFunctions = {
         elseif option.text == "MSAA" then
           newSettings.msaaSamples = option.selectedValue[1]
         elseif option.text == "VSync" then
-          newSettings.vsync = option.selectedValue[1]
+          if option.value then newSettings.vsync = 1 else newSettings.vsync = 0 end
         end
       end
       if newSettings.fullscreen ~= UserSettings.graphics.fullscreen or
@@ -441,6 +440,8 @@ function love.load()
     optionsColor = {1, 1, 1},
     optionsHoverColor = {love.math.colorFromBytes(95, 201, 231)},
     optionsLineSpacing = 1.8,
+    descriptionFont = Fonts.RED_HAT_DISPLAY_30,
+    descriptionColor = {1, 1, 1},
     options = {
       {
         type = "toggle",
@@ -453,6 +454,8 @@ function love.load()
       {
         type = "selector",
         text = "MSAA",
+        description = "How many samples to use for antialiasing. Higher values look better but "..
+                      "require more performance.",
         values = {
           -- {value, displayed text}
           {0, "Disabled"},
@@ -464,14 +467,14 @@ function love.load()
         selectedIndex = msaaIndex
       },
       {
-        type = "selector",
+        type = "toggle",
         text = "VSync",
-        values = {
-          {-1, "Adaptive"},
-          {0, "Disabled"},
-          {1, "Enabled"}
-        },
-        selectedIndex = UserSettings.graphics.vsync + 2
+        description = "Locks the game's frame rate to your display's refresh rate. If your frame "..
+                      "rate is stable, keep this enabled.",
+        trueColor = {love.math.colorFromBytes(95, 110, 231)},
+        falseColor = {1, 1, 1},
+        outlineColor = {love.math.colorFromBytes(50, 49, 59)},
+        value = (UserSettings.graphics.vsync == 1)
       }
     },
   })
@@ -605,20 +608,9 @@ Console.COMMANDS.saveDir = function(_)
   love.system.openURL(path)
 end
 
-Console.COMMAND_HELP.showHitboxes = "Sets whether to display hitboxes, or checks the current "..
-                                    "setting if called without arguments."
-Console.COMMANDS.showHitboxes = function(args)
-  if args[1] ~= nil and type(args[1]) ~= "boolean" then
-    Console.error("Invalid argument to showHitboxes (expected true or false, recieved "..
-                  tostring(args[1])..").")
-    return
-  end
-
-  if args[1] ~= nil then
-    DEBUG_CONFIG.SHOW_HITBOXES = args[1]
-  end
-
-  Console.log("showHitboxes = "..tostring(DEBUG_CONFIG.SHOW_HITBOXES))
+Console.COMMAND_HELP.showHitboxes = "Toggles whether to draw hitboxes."
+Console.COMMANDS.showHitboxes = function(_)
+  DEBUG_CONFIG.SHOW_HITBOXES = not DEBUG_CONFIG.SHOW_HITBOXES
 end
 
 Console.COMMAND_HELP.showHitboxes = "Writes existing console output to a file."
