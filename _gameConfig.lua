@@ -15,7 +15,7 @@ return {
       height = 720,
       fullscreen = false,
       vsync = 1,
-      msaaSamples = 4
+      msaa = 4
     },
     input = {
       swapThumbsticks = false,

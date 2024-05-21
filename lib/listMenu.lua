@@ -179,18 +179,22 @@ function ListMenu:update()
       self.hoveredOption.value = not self.hoveredOption.value
     end
   elseif self.hoveredOption.type == "selector" then
-    local moveLeft = (input.currentInputType() == "keyboard" and input.isActive("menu confirm")) or
-        (input.currentInputType() == "gamepad" and input.isActive("menu left"))
-    local moveRight = (input.currentInputType() == "keyboard" and input.isActive("menu confirm")) or
-        (input.currentInputType() == "gamepad" and input.isActive("menu right"))
+    local side = "none"
+    if input.currentInputType() == "keyboard" and input.isActive("menu confirm") then
+      side = self.hoveredOption.hoveredButton
+    elseif input.isActive("menu left") then
+      side = "left"
+    elseif input.isActive("menu right") then
+      side = "right"
+    end
 
-    if moveLeft then
+    if side == "left" then
       self.hoveredOption.selectedIndex = self.hoveredOption.selectedIndex - 1
       if self.hoveredOption.selectedIndex == 0 then
         self.hoveredOption.selectedIndex = #self.hoveredOption.values
       end
       self.hoveredOption.selectedValue = self.hoveredOption.values[self.hoveredOption.selectedIndex]
-    elseif moveRight then
+    elseif side == "right" then
       self.hoveredOption.selectedIndex = self.hoveredOption.selectedIndex + 1
       if self.hoveredOption.selectedIndex > #self.hoveredOption.values then
         self.hoveredOption.selectedIndex = 1

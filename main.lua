@@ -40,6 +40,11 @@ end
 SetGameState(GameState.PAUSE_MENU)
 
 DisplayScale = 1
+local function setDisplayScale(width, height)
+  local xZoom = width / gameConfig.engine.viewportWidth
+  local yZoom = height / gameConfig.engine.viewportHeight
+  DisplayScale = math.min(xZoom, yZoom)
+end
 
 ---@type ListMenu, ListMenu, ListMenu
 local mainPauseMenu, settingsMenu, graphicsMenu
@@ -219,9 +224,71 @@ local updateFunctions = {
   end,
   [GameState.GRAPHICS_MENU] = function(dt)
     graphicsMenu:update()
-    if input.isActive("menu confirm") and graphicsMenu.hoveredOption ~= nil then
-
+    if input.isActive("menu reset") then
+      for _, option in ipairs(graphicsMenu.options) do
+        if option.text == "Fullscreen" then
+          option.value = gameConfig.defaultUserSettings.graphics.fullscreen
+        elseif option.text == "MSAA" then
+          local default = gameConfig.defaultUserSettings.graphics.msaa
+          if default == 0 then
+            option.selectedIndex = 1
+          else
+            option.selectedIndex = math.ceil(math.log(default, 2)) + 2
+          end
+          option.selectedValue = option.values[option.selectedIndex]
+        elseif option.text == "VSync" then
+          option.selectedIndex = gameConfig.defaultUserSettings.graphics.vsync + 2
+          option.selectedValue = option.values[option.selectedIndex]
+        end
+      end
+    elseif input.isActive("menu revert") then
+      for _, option in ipairs(graphicsMenu.options) do
+        if option.text == "Fullscreen" then
+          option.value = UserSettings.graphics.fullscreen
+        elseif option.text == "MSAA" then
+          local default = UserSettings.graphics.msaa
+          if default == 0 then
+            option.selectedIndex = 1
+          else
+            option.selectedIndex = math.ceil(math.log(default, 2)) + 2
+          end
+          option.selectedValue = option.values[option.selectedIndex]
+        elseif option.text == "VSync" then
+          option.selectedIndex = UserSettings.graphics.vsync + 2
+          option.selectedValue = option.values[option.selectedIndex]
+        end
+      end
     elseif input.isActive("menu back") then
+      local newSettings = {
+        width = UserSettings.graphics.width,
+        height = UserSettings.graphics.height
+      }
+      for _, option in ipairs(graphicsMenu.options) do
+        if option.text == "Fullscreen" then
+          newSettings.fullscreen = option.value
+        elseif option.text == "MSAA" then
+          newSettings.msaaSamples = option.selectedValue[1]
+        elseif option.text == "VSync" then
+          newSettings.vsync = option.selectedValue[1]
+        end
+      end
+      if newSettings.fullscreen ~= UserSettings.graphics.fullscreen or
+         newSettings.msaa ~= UserSettings.graphics.msaa or
+         newSettings.vsync ~= UserSettings.graphics.vsync then
+        UserSettings.graphics = newSettings
+        love.filesystem.write("UserSettings.json", json.encode(UserSettings))
+        love.window.setMode(
+          UserSettings.graphics.width,
+          UserSettings.graphics.height,
+          { -- flags
+            fullscreen = UserSettings.graphics.fullscreen,
+            vsync = UserSettings.graphics.vsync,
+            msaa = UserSettings.graphics.msaa,
+            resizable = true
+          }
+        )
+        setDisplayScale(love.graphics.getDimensions())
+      end
       SetGameState(GameState.SETTINGS_MENU)
     end
   end
@@ -261,7 +328,7 @@ function love.load()
     { -- flags
       fullscreen = UserSettings.graphics.fullscreen,
       vsync = UserSettings.graphics.vsync,
-      msaa = UserSettings.graphics.msaaSamples,
+      msaa = UserSettings.graphics.msaa,
       resizable = true
     }
   )
@@ -271,9 +338,7 @@ function love.load()
   Fonts.RED_HAT_DISPLAY_56 = love.graphics.newFont("assets/fonts/RedHatDisplay-Regular.ttf", 56)
   Fonts.RED_HAT_DISPLAY_BLACK_84 = love.graphics.newFont("assets/fonts/RedHatDisplay-Black.ttf", 84)
 
-  local xZoom = UserSettings.graphics.width / gameConfig.engine.viewportWidth
-  local yZoom = UserSettings.graphics.height / gameConfig.engine.viewportHeight
-  DisplayScale = math.min(xZoom, yZoom)
+  setDisplayScale(UserSettings.graphics.width, UserSettings.graphics.height)
 
   -- set up input
   input.initGamepad()
@@ -365,10 +430,10 @@ function love.load()
   })
 
   local msaaIndex
-  if UserSettings.graphics.msaaSamples == 0 then
+  if UserSettings.graphics.msaa == 0 then
     msaaIndex = 1
   else
-    msaaIndex = math.ceil(math.log(UserSettings.graphics.msaaSamples, 2)) + 2
+    msaaIndex = math.ceil(math.log(UserSettings.graphics.msaa, 2)) + 2
   end
   graphicsMenu = ListMenu({
     pos = {gameConfig.engine.viewportWidth / 2, gameConfig.engine.viewportHeight / 2},
@@ -379,7 +444,7 @@ function love.load()
     options = {
       {
         type = "toggle",
-        text = "Enable Fullscreen",
+        text = "Fullscreen",
         trueColor = {love.math.colorFromBytes(95, 110, 231)},
         falseColor = {1, 1, 1},
         outlineColor = {love.math.colorFromBytes(50, 49, 59)},
@@ -412,7 +477,6 @@ function love.load()
   })
 
   -- load sprites for menu tooltips
-  local temp = input.getActionIcons("menu confirm")
   menuSprites.confirm = input.getActionIcons("menu confirm")
   menuSprites.back = input.getActionIcons("menu back")
   menuSprites.revert = input.getActionIcons("menu revert")
@@ -460,9 +524,7 @@ end
 ---@param width number
 ---@param height number
 function love.resize(width, height)
-  local xZoom = width / gameConfig.engine.viewportWidth
-  local yZoom = height / gameConfig.engine.viewportHeight
-  DisplayScale = math.min(xZoom, yZoom)
+  setDisplayScale(width, height)
 end
 
 ---Called when a key is pressed.
@@ -543,7 +605,7 @@ Console.COMMANDS.saveDir = function(_)
   love.system.openURL(path)
 end
 
-Console.COMMAND_HELP.showHitboxes = "Sets whether to display hitboxes, or checks the current"..
+Console.COMMAND_HELP.showHitboxes = "Sets whether to display hitboxes, or checks the current "..
                                     "setting if called without arguments."
 Console.COMMANDS.showHitboxes = function(args)
   if args[1] ~= nil and type(args[1]) ~= "boolean" then
