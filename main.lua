@@ -130,36 +130,35 @@ love.keyboard.setKeyRepeat(true)
 function love.load()
   love.filesystem.setIdentity(gameConfig.saveDirectory)
 
-  local userSettings
   -- if the user settings file doesn't exist (probably because this is the first time the game has
   -- has been run), create it using the default settings
-  if love.filesystem.getInfo("userSettings.json") == nil or
+  if love.filesystem.getInfo("UserSettings.json") == nil or
      DEBUG_CONFIG.FORCE_RESET_USER_SETTINGS then
-    userSettings = gameConfig.defaultUserSettings
-    love.filesystem.write("userSettings.json", json.encode(userSettings))
-    Console.warn("userSettings.json was not found or could not be opened. A new settings file "..
+    UserSettings = gameConfig.defaultUserSettings
+    love.filesystem.write("UserSettings.json", json.encode(UserSettings))
+    Console.warn("UserSettings.json was not found or could not be opened. A new settings file "..
                  "has been created in the save directory.")
   else
-    userSettings = json.decode(love.filesystem.read("userSettings.json"))
+    UserSettings = json.decode(love.filesystem.read("UserSettings.json"))
 
     -- verify that the settings data is still valid
     local saveRequired
-    userSettings, saveRequired = utils.verifyTable(userSettings, gameConfig.defaultUserSettings)
+    UserSettings, saveRequired = utils.verifyTable(UserSettings, gameConfig.defaultUserSettings)
     if saveRequired then
-      Console.warn("userSettings.json is (at least) partially invalid. Missing and/or invalid "..
+      Console.warn("UserSettings.json is (at least) partially invalid. Missing and/or invalid "..
                    "data has been regenerated with default settings.")
-      love.filesystem.write("userSettings.json", json.encode(userSettings))
+      love.filesystem.write("UserSettings.json", json.encode(UserSettings))
     end
   end
 
   -- start love2d 
   love.window.setMode(
-    userSettings.graphics.width,
-    userSettings.graphics.height,
+    UserSettings.graphics.width,
+    UserSettings.graphics.height,
     { -- flags
-      fullscreen = userSettings.graphics.fullscreen,
-      vsync = userSettings.graphics.vsync,
-      msaa = userSettings.graphics.msaaSamples,
+      fullscreen = UserSettings.graphics.fullscreen,
+      vsync = UserSettings.graphics.vsync,
+      msaa = UserSettings.graphics.msaaSamples,
       resizable = true
     }
   )
@@ -169,8 +168,8 @@ function love.load()
   Fonts.RED_HAT_DISPLAY_56 = love.graphics.newFont("assets/fonts/RedHatDisplay-Regular.ttf", 56)
   Fonts.RED_HAT_DISPLAY_BLACK_84 = love.graphics.newFont("assets/fonts/RedHatDisplay-Black.ttf", 84)
 
-  local xZoom = userSettings.graphics.width / gameConfig.engine.viewportWidth
-  local yZoom = userSettings.graphics.height / gameConfig.engine.viewportHeight
+  local xZoom = UserSettings.graphics.width / gameConfig.engine.viewportWidth
+  local yZoom = UserSettings.graphics.height / gameConfig.engine.viewportHeight
   DisplayScale = math.min(xZoom, yZoom)
 
   -- set up input
@@ -180,17 +179,17 @@ function love.load()
   local actions = {}
   for _, action in ipairs(gameConfig.input.actions) do
     if action.name == "aim release" then
-      action.keys = userSettings.input.keyboardBinds["aim"]
+      action.keys = UserSettings.input.keyboardBinds["aim"]
       action.gamepadButtons = {}
     else
-      if userSettings.input.keyboardBinds[action.name] ~= nil then
-        action.keys = userSettings.input.keyboardBinds[action.name]
+      if UserSettings.input.keyboardBinds[action.name] ~= nil then
+        action.keys = UserSettings.input.keyboardBinds[action.name]
       else
         action.keys = {}
       end
 
-      if userSettings.input.gamepadBinds[action.name] ~= nil then
-        action.gamepadButtons = userSettings.input.gamepadBinds[action.name]
+      if UserSettings.input.gamepadBinds[action.name] ~= nil then
+        action.gamepadButtons = UserSettings.input.gamepadBinds[action.name]
       else
         action.gamepadButtons = {}
       end
@@ -211,8 +210,8 @@ function love.load()
   end
 
   input.addActionList(actions)
-  input.setSwapThumbsticks(userSettings.input.swapThumbsticks)
-  input.setGamepadRumbleEnabled(userSettings.input.enableGamepadRumble)
+  input.setSwapThumbsticks(UserSettings.input.swapThumbsticks)
+  input.setGamepadRumbleEnabled(UserSettings.input.enableGamepadRumble)
 
   -- setui gui menus
   mainPauseMenu = ListMenu({
@@ -263,10 +262,10 @@ function love.load()
   })
 
   local msaaIndex
-  if userSettings.graphics.msaaSamples == 0 then
+  if UserSettings.graphics.msaaSamples == 0 then
     msaaIndex = 1
   else
-    msaaIndex = math.ceil(math.log(userSettings.graphics.msaaSamples, 2)) + 2
+    msaaIndex = math.ceil(math.log(UserSettings.graphics.msaaSamples, 2)) + 2
   end
   graphicsMenu = ListMenu({
     pos = {gameConfig.engine.viewportWidth / 2, gameConfig.engine.viewportHeight / 2},
@@ -281,7 +280,7 @@ function love.load()
         trueColor = {love.math.colorFromBytes(95, 110, 231)},
         falseColor = {1, 1, 1},
         outlineColor = {love.math.colorFromBytes(50, 49, 59)},
-        value = userSettings.graphics.fullscreen
+        value = UserSettings.graphics.fullscreen
       },
       {
         type = "selector",
@@ -304,7 +303,7 @@ function love.load()
           {0, "Disabled"},
           {1, "Enabled"}
         },
-        selectedIndex = userSettings.graphics.vsync + 2
+        selectedIndex = UserSettings.graphics.vsync + 2
       }
     },
   })
