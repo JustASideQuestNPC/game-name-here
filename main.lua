@@ -273,7 +273,7 @@ local updateFunctions = {
          newSettings.msaa ~= UserSettings.graphics.msaa or
          newSettings.vsync ~= UserSettings.graphics.vsync then
         UserSettings.graphics = newSettings
-        love.filesystem.write("UserSettings.json", json.encode(UserSettings))
+        love.filesystem.write("userSettings.json", json.encode(UserSettings))
         love.window.setMode(
           UserSettings.graphics.width,
           UserSettings.graphics.height,
@@ -299,26 +299,28 @@ function love.load()
 
   -- if the user settings file doesn't exist (probably because this is the first time the game has
   -- has been run), create it using the default settings
-  if love.filesystem.getInfo("UserSettings.json") == nil or
+  Console.verboseLog("Looking for settings file...")
+  if love.filesystem.getInfo("userSettings.json") == nil or
      DEBUG_CONFIG.FORCE_RESET_USER_SETTINGS then
     UserSettings = gameConfig.defaultUserSettings
-    love.filesystem.write("UserSettings.json", json.encode(UserSettings))
-    Console.warn("UserSettings.json was not found or could not be opened. A new settings file "..
+    love.filesystem.write("userSettings.json", json.encode(UserSettings))
+    Console.warn("userSettings.json was not found or could not be opened. A new settings file "..
                  "has been created in the save directory.")
   else
-    UserSettings = json.decode(love.filesystem.read("UserSettings.json"))
+    UserSettings = json.decode(love.filesystem.read("userSettings.json"))
 
     -- verify that the settings data is still valid
     local saveRequired
     UserSettings, saveRequired = utils.verifyTable(UserSettings, gameConfig.defaultUserSettings)
     if saveRequired then
-      Console.warn("UserSettings.json is (at least) partially invalid. Missing and/or invalid "..
+      Console.warn("userSettings.json is (at least) partially invalid. Missing and/or invalid "..
                    "data has been regenerated with default settings.")
-      love.filesystem.write("UserSettings.json", json.encode(UserSettings))
+      love.filesystem.write("userSettings.json", json.encode(UserSettings))
     end
   end
 
-  -- start love2d 
+  -- start love2d
+  Console.verboseLog("Starting love2d...")
   love.window.setMode(
     UserSettings.graphics.width,
     UserSettings.graphics.height,
@@ -341,6 +343,7 @@ function love.load()
   input.initGamepad()
 
   -- load user keybinds
+  Console.verboseLog("Loading keybinds...")
   local actions = {}
   for _, action in ipairs(gameConfig.input.actions) do
     if action.name == "aim release" then
@@ -379,6 +382,7 @@ function love.load()
   input.setGamepadRumbleEnabled(UserSettings.input.enableGamepadRumble)
 
   -- initialize gui menus
+  Console.verboseLog("Initializing menus...")
   mainPauseMenu = ListMenu({
     pos = {gameConfig.engine.viewportWidth / 2, gameConfig.engine.viewportHeight / 2},
     title = "Game Paused",
@@ -484,6 +488,7 @@ function love.load()
   menuSprites.reset = input.getActionIcons("menu reset")
 
   -- start the game engine
+  Console.verboseLog("Starting engine...")
   engine.addEntity(LevelBackground())
   engine.addEntity(Wall(0, -100, gameConfig.gameplay.roomWidth, 100))
   engine.addEntity(Wall(0, gameConfig.gameplay.roomHeight, gameConfig.gameplay.roomWidth, 100))
@@ -611,11 +616,16 @@ Console.COMMANDS.showHitboxes = function(_)
   DEBUG_CONFIG.SHOW_HITBOXES = not DEBUG_CONFIG.SHOW_HITBOXES
 end
 
-Console.COMMAND_HELP.showHitboxes = "Writes existing console output to a file."
+Console.COMMAND_HELP.logToFile = "Writes existing console output to a file."
 Console.COMMANDS.logToFile = function(args)
   if args[1] == nil then
     Console.error("Invalid argument: logFile requires a filename.")
   else
     Console.logToFile(args[1])
   end
+end
+
+Console.COMMAND_HELP.hcf = "Crashes the game, in case you wanted to do that for some reason."
+Console.COMMANDS.hcf = function(_)
+  local foo = {} + 1
 end

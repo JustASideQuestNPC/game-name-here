@@ -207,6 +207,28 @@ function Console.error(text)
   table.insert(logLines, text)
 end
 
+function Console.verboseLog(text)
+  if DEBUG_CONFIG.VERBOSE_LOGGING then
+    print(tostring(text))
+    table.insert(displayedLines, {Console.TEXT_COLOR, tostring(text)})
+    table.insert(logLines, text)
+  end
+end
+function Console.verboseWarn(text)
+  if DEBUG_CONFIG.VERBOSE_LOGGING then
+    print("\x1b[33m"..tostring(text).."\x1b[39m")
+    table.insert(displayedLines, {Console.WARNING_COLOR, tostring(text)})
+    table.insert(logLines, text)
+  end
+end
+function Console.verboseError(text)
+  if DEBUG_CONFIG.VERBOSE_LOGGING then
+    print("\x1b[31m"..tostring(text).."\x1b[39m")
+    table.insert(displayedLines, {Console.ERROR_COLOR, tostring(text)})
+    table.insert(logLines, text)
+  end
+end
+
 Console.logToFile = function(filename)
   local file, errorString = love.filesystem.newFile(filename, "w")
   if file == nil then

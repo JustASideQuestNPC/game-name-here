@@ -237,6 +237,7 @@ end
 ---@return boolean
 ---@nodiscard
 local function isActive(name)
+  if activeActions[name] == nil then error("The action \""..name.."\" does not exist!") end
   if activeActions[name].active > 0 then
     table.insert(clearedActions, name)
     return true
@@ -249,6 +250,7 @@ end
 ---@return number
 ---@nodiscard
 local function getAxisValue(name)
+  if gamepadAxisValues[name] == nil then error("The axis \""..name.."\" does not exist!") end
   if _swapThumbsticks then
     if name == "left stick x" then
       name = "right stick x"
@@ -268,6 +270,10 @@ end
 ---@return Vector2
 ---@nodiscard
 local function getStickVector(stick)
+  if stick ~= "left" and stick ~= "right" then
+    error("Invalid gamepad joystick (expected left or right, recievied \""..stick.."\")!")
+  end
+
   local v
   if (not _swapThumbsticks and stick == "left") or (_swapThumbsticks and stick == "right") then
     v = Vector2(
@@ -335,6 +341,9 @@ local function setGamepadRumble(left, right, duration)
 end
 
 local function setCurrentInputType(type)
+  if type ~= "keyboard" and type ~= "gamepad" then
+    error("Invalid input type (expected keyboard or gamepad, recievied \""..type.."\")!")
+  end
   _currentInputType = type
   love.mouse.setVisible(type == "keyboard")
 end
@@ -344,8 +353,9 @@ end
 ---@param name string
 ---@return [Sprite, Sprite]
 local function getActionIcons(name)
-  local icons = {}
+  if gamepadAxisValues[name] == nil then error("The axis \""..name.."\" does not exist!") end
 
+  local icons = {}
   if #activeActions[name].keys > 0 then
     local keyName = activeActions[name].keys[1]
     local path

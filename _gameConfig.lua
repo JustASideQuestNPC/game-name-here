@@ -3,7 +3,8 @@
  
 DEBUG_CONFIG = {
   SHOW_HITBOXES = false, -- displays entity hitboxes and ui bounding boxes
-  FORCE_RESET_USER_SETTINGS = true -- always resets user settings to default on startup
+  FORCE_RESET_USER_SETTINGS = false, -- always resets user settings to default on startup
+  VERBOSE_LOGGING = true -- logs a ton of extra stuff to the console
 }
 
 return {
