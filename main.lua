@@ -21,12 +21,39 @@ Fonts = {
   RED_HAT_DISPLAY_BLACK_84 = {}
 }
 
+---@type [string, string][]
+local KEYBOARD_BINDS = {
+  {"Move up", "move up"},
+  {"Move down", "move down"},
+  {"Move left", "move left"},
+  {"Move right", "move right"},
+  {"Dash", "dash"},
+  {"Melee", "melee"},
+  {"Aim", "aim"},
+  {"Auto-fire", "auto fire"},
+  {"Pause", "pause"},
+}
+
+---@type table<string, string>
+local GAMEPAD_BINDS = {
+  {"Move up", "move up"},
+  {"Move down", "move down"},
+  {"Move left", "move left"},
+  {"Move right", "move right"},
+  {"Dash", "dash"},
+  {"Melee", "melee"},
+  {"Fire", "auto fire"},
+  {"Pause", "pause"},
+}
+
 ---@enum GameState
 GameState = {
   GAMEPLAY = 0,
   PAUSE_MENU = 1,
   SETTINGS_MENU = 2,
-  GRAPHICS_MENU = 3
+  GRAPHICS_MENU = 3,
+  KEYBOARD_CONFIG_MENU = 4,
+  GAMEPAD_CONFIG_MENU = 5
 }
 local currentGameState = nil
 local prevMenu = nil -- pause menu or main menu
@@ -36,7 +63,7 @@ function SetGameState(state)
   end
   currentGameState = state
 end
-SetGameState(GameState.GAMEPLAY)
+SetGameState(GameState.PAUSE_MENU)
 
 DisplayScale = 1
 local function setDisplayScale(width, height)
@@ -45,8 +72,8 @@ local function setDisplayScale(width, height)
   DisplayScale = math.min(xZoom, yZoom)
 end
 
----@type ListMenu, ListMenu, ListMenu
-local mainPauseMenu, settingsMenu, graphicsMenu
+---@type ListMenu, ListMenu, ListMenu, ListMenu, ListMenu
+local mainPauseMenu, settingsMenu, graphicsMenu, keyboardConfigMenu, gamepadConfigMenu
 
 ---@type table<string, Sprite>
 local menuSprites = {
@@ -57,7 +84,7 @@ local menuSprites = {
 }
 
 -- draws a tooltip that shows the confirm and back buttons
-local function drawMenuTooltip()
+local function drawMenuTooltip(msg1, msg2)
   local font = Fonts.RED_HAT_DISPLAY_30
 
   local confirmSprite, backSprite
@@ -69,8 +96,8 @@ local function drawMenuTooltip()
     backSprite = menuSprites.back[2]
   end
 
-  local confirmWidth = confirmSprite.width * 0.3125 + font:getWidth("Confirm") + 5
-  local backWidth = backSprite.width * 0.3125 + font:getWidth("Back") + 5
+  local confirmWidth = confirmSprite.width * 0.3125 + font:getWidth(msg1) + 5
+  local backWidth = backSprite.width * 0.3125 + font:getWidth(msg2) + 5
   local totalWidth = confirmWidth + backWidth + 20
   local confirmX = confirmWidth / 2 - totalWidth / 2
   local backX = totalWidth / 2 - backWidth / 2
@@ -81,8 +108,8 @@ local function drawMenuTooltip()
   love.graphics.scale(DisplayScale)
 
   love.graphics.setColor(1, 1, 1)
-  utils.drawImageTooltipCentered(confirmSprite, 0.3125, "Confirm", font, 5, confirmX, 0)
-  utils.drawImageTooltipCentered(backSprite, 0.3125, "Back", font, 5, backX, 0)
+  utils.drawImageTooltipCentered(confirmSprite, 0.3125, msg1, font, 5, confirmX, 0)
+  utils.drawImageTooltipCentered(backSprite, 0.3125, msg2, font, 5, backX, 0)
 
   love.graphics.setLineWidth(3)
   love.graphics.line(lineX, -20, lineX, 20)
@@ -90,7 +117,7 @@ local function drawMenuTooltip()
 end
 
 -- draws a tooltip that shows the confirm, back, revert, and reset buttons
-local function drawSettingsTooltip()
+local function drawSettingsTooltip(msg1, msg2, msg3, msg4)
   local font = Fonts.RED_HAT_DISPLAY_30
 
   local confirmSprite, backSprite, revertSprite, resetSprite
@@ -106,14 +133,14 @@ local function drawSettingsTooltip()
     resetSprite = menuSprites.reset[2]
   end
 
-  local confirmWidth = confirmSprite.width * 0.3125 + font:getWidth("Confirm") + 5
-  local backWidth = backSprite.width * 0.3125 + font:getWidth("Back") + 5
+  local confirmWidth = confirmSprite.width * 0.3125 + font:getWidth(msg1) + 5
+  local backWidth = backSprite.width * 0.3125 + font:getWidth(msg2) + 5
   local leftWidth = confirmWidth + backWidth + 20
   local confirmX = confirmWidth / 2 - leftWidth / 2
   local backX = leftWidth / 2 - backWidth / 2
 
-  local revertWidth = revertSprite.width * 0.3125 + font:getWidth("Revert Changes") + 5
-  local resetWidth = resetSprite.width * 0.3125 + font:getWidth("Reset to Default") + 5
+  local revertWidth = revertSprite.width * 0.3125 + font:getWidth(msg3) + 5
+  local resetWidth = resetSprite.width * 0.3125 + font:getWidth(msg4) + 5
   local rightWidth = revertWidth + resetWidth + 20
   local revertX = revertWidth / 2 - rightWidth / 2
   local resetX = rightWidth / 2 - resetWidth / 2
@@ -131,10 +158,10 @@ local function drawSettingsTooltip()
   love.graphics.scale(DisplayScale)
 
   love.graphics.setColor(1, 1, 1)
-  utils.drawImageTooltipCentered(confirmSprite, 0.3125, "Confirm", font, 5, confirmX + leftX, 0)
-  utils.drawImageTooltipCentered(backSprite, 0.3125, "Back", font, 5, backX + leftX, 0)
-  utils.drawImageTooltipCentered(revertSprite, 0.3125, "Revert Changes", font, 5, revertX + rightX, 0)
-  utils.drawImageTooltipCentered(resetSprite, 0.3125, "Reset to Default", font, 5, resetX + rightX + 3, 0)
+  utils.drawImageTooltipCentered(confirmSprite, 0.3125, msg1, font, 5, confirmX + leftX, 0)
+  utils.drawImageTooltipCentered(backSprite, 0.3125, msg2, font, 5, backX + leftX, 0)
+  utils.drawImageTooltipCentered(revertSprite, 0.3125, msg3, font, 5, revertX + rightX, 0)
+  utils.drawImageTooltipCentered(resetSprite, 0.3125, msg4, font, 5, resetX + rightX + 3, 0)
 
   love.graphics.setLineWidth(3)
   love.graphics.line(leftLineX, -20, leftLineX, 20)
@@ -157,7 +184,7 @@ local drawFunctions = {
     love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
     mainPauseMenu:draw()
 
-    drawMenuTooltip()
+    drawMenuTooltip("Confirm", "Back")
   end,
   [GameState.SETTINGS_MENU] = function()
     if prevMenu == GameState.PAUSE_MENU then
@@ -169,7 +196,7 @@ local drawFunctions = {
     end
     settingsMenu:draw()
 
-    drawMenuTooltip()
+    drawMenuTooltip("Confirm", "Back")
   end,
   [GameState.GRAPHICS_MENU] = function()
     if prevMenu == GameState.PAUSE_MENU then
@@ -181,7 +208,31 @@ local drawFunctions = {
     end
     graphicsMenu:draw()
 
-    drawSettingsTooltip()
+    drawSettingsTooltip("Confirm", "Back", "Revert Changes", "Reset to Default")
+  end,
+  [GameState.KEYBOARD_CONFIG_MENU] = function()
+    if prevMenu == GameState.PAUSE_MENU then
+      love.graphics.clear(love.math.colorFromBytes(50, 49, 59))
+      engine.draw()
+
+      love.graphics.setColor(love.math.colorFromBytes(50, 49, 59, 196))
+      love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+    end
+    keyboardConfigMenu:draw()
+
+    drawSettingsTooltip("Confirm", "Back", "Clear Bind", "Reset to Default")
+  end,
+  [GameState.GAMEPAD_CONFIG_MENU] = function()
+    if prevMenu == GameState.PAUSE_MENU then
+      love.graphics.clear(love.math.colorFromBytes(50, 49, 59))
+      engine.draw()
+
+      love.graphics.setColor(love.math.colorFromBytes(50, 49, 59, 196))
+      love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+    end
+    gamepadConfigMenu:draw()
+
+    drawSettingsTooltip("Confirm", "Back", "Clear Bind", "Reset to Default")
   end
 }
 
@@ -194,7 +245,7 @@ local updateFunctions = {
       SetGameState(GameState.PAUSE_MENU)
     end
   end,
-  [GameState.PAUSE_MENU] = function(dt)
+  [GameState.PAUSE_MENU] = function(_)
     mainPauseMenu:update()
     if input.isActive("menu confirm") and mainPauseMenu.hoveredOption ~= nil then
       local selected = mainPauseMenu.hoveredOption.text
@@ -210,18 +261,22 @@ local updateFunctions = {
       SetGameState(GameState.GAMEPLAY)
     end
   end,
-  [GameState.SETTINGS_MENU] = function(dt)
+  [GameState.SETTINGS_MENU] = function(_)
     settingsMenu:update()
     if input.isActive("menu confirm") and settingsMenu.hoveredOption ~= nil then
       local selected = settingsMenu.hoveredOption.text
       if selected == "Graphics" then
         SetGameState(GameState.GRAPHICS_MENU)
+      elseif selected == "Keyboard Binds" then
+        SetGameState(GameState.KEYBOARD_CONFIG_MENU)
+      elseif selected == "Gamepad Binds" then
+        SetGameState(GameState.GAMEPAD_CONFIG_MENU)
       end
     elseif input.isActive("menu back") then
       SetGameState(prevMenu)
     end
   end,
-  [GameState.GRAPHICS_MENU] = function(dt)
+  [GameState.GRAPHICS_MENU] = function(_)
     graphicsMenu:update()
     if input.isActive("menu reset") then
       for _, option in ipairs(graphicsMenu.options) do
@@ -286,6 +341,22 @@ local updateFunctions = {
         )
         setDisplayScale(love.graphics.getDimensions())
       end
+      SetGameState(GameState.SETTINGS_MENU)
+    end
+  end,
+  [GameState.KEYBOARD_CONFIG_MENU] = function(_)
+    keyboardConfigMenu:update()
+
+    if input.isActive("menu back") then
+      input.clearAction("pause")
+      SetGameState(GameState.SETTINGS_MENU)
+    end
+  end,
+  [GameState.GAMEPAD_CONFIG_MENU] = function(_)
+    gamepadConfigMenu:update()
+
+    if input.isActive("menu back") then
+      input.clearAction("pause")
       SetGameState(GameState.SETTINGS_MENU)
     end
   end
@@ -479,6 +550,65 @@ function love.load()
         value = (UserSettings.graphics.vsync == 1)
       }
     },
+  })
+
+  local keyboardConfigOptions = {}
+  for _, bind in ipairs(KEYBOARD_BINDS) do
+    keyboardConfigOptions[#keyboardConfigOptions+1] = {
+      type = "image",
+      text = bind[1],
+      image = input.getActionIcons(bind[2])[1],
+      imageScale = 0.3125,
+      spacing = 15
+    }
+  end
+  keyboardConfigMenu = ListMenu({
+    pos = {gameConfig.engine.viewportWidth / 2, gameConfig.engine.viewportHeight / 2},
+    optionsFont = Fonts.RED_HAT_DISPLAY_30,
+    optionsColor = {1, 1, 1},
+    optionsHoverColor = {love.math.colorFromBytes(95, 201, 231)},
+    optionsLineSpacing = 2.2,
+    descriptionFont = Fonts.RED_HAT_DISPLAY_30,
+    descriptionColor = {1, 1, 1},
+    options = keyboardConfigOptions
+  })
+
+  local gamepadConfigOptions = {
+    {
+      type = "toggle",
+      text = "Swap Thumbsticks",
+      trueColor = {love.math.colorFromBytes(95, 110, 231)},
+      falseColor = {1, 1, 1},
+      outlineColor = {love.math.colorFromBytes(50, 49, 59)},
+      value = UserSettings.input.swapThumbsticks
+    },
+    {
+      type = "toggle",
+      text = "Gamepad Vibration",
+      trueColor = {love.math.colorFromBytes(95, 110, 231)},
+      falseColor = {1, 1, 1},
+      outlineColor = {love.math.colorFromBytes(50, 49, 59)},
+      value = UserSettings.input.enableGamepadRumble
+    },
+  }
+  for _, bind in ipairs(GAMEPAD_BINDS) do
+    gamepadConfigOptions[#gamepadConfigOptions+1] = {
+      type = "image",
+      text = bind[1],
+      image = input.getActionIcons(bind[2])[2],
+      imageScale = 0.3125,
+      spacing = 15
+    }
+  end
+  gamepadConfigMenu = ListMenu({
+    pos = {gameConfig.engine.viewportWidth / 2, gameConfig.engine.viewportHeight / 2},
+    optionsFont = Fonts.RED_HAT_DISPLAY_30,
+    optionsColor = {1, 1, 1},
+    optionsHoverColor = {love.math.colorFromBytes(95, 201, 231)},
+    optionsLineSpacing = 2.2,
+    descriptionFont = Fonts.RED_HAT_DISPLAY_30,
+    descriptionColor = {1, 1, 1},
+    options = gamepadConfigOptions
   })
 
   -- load sprites for menu tooltips

@@ -315,19 +315,27 @@ end
 ---@param spacing number
 ---@param x number
 ---@param y number
-local function drawImageTooltipCentered(sprite, spriteScale, text, font, spacing, x, y)
+---@param swapSides boolean?
+local function drawImageTooltipCentered(sprite, spriteScale, text, font, spacing, x, y, swapSides)
   local textWidth = font:getWidth(text)
   local spriteWidth = sprite.width * spriteScale
 
   local totalWidth = (font:getWidth(text) + spriteWidth + spacing)
-  local spriteX = spriteWidth / 2 - totalWidth / 2
-  local textX = totalWidth / 2 - textWidth / 2
+
+  local spriteX, textX
+  if swapSides then
+    spriteX = totalWidth / 2 - spriteWidth / 2
+    textX = textWidth / 2 - totalWidth / 2
+  else
+    spriteX = spriteWidth / 2 - totalWidth / 2
+    textX = totalWidth / 2 - textWidth / 2
+  end
 
   love.graphics.push()
   love.graphics.translate(x, y)
 
-  sprite:draw(spriteX, 0, 1, spriteScale)
   drawTextCentered(text, font, textX, -(sprite.height * spriteScale) / 4)
+  sprite:draw(spriteX, 0, 1, spriteScale)
   love.graphics.pop()
 end
 

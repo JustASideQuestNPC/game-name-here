@@ -37,7 +37,7 @@ local Sprite = utils.class(
           instance.image = love.graphics.newImage(defaultPath)
           spriteImages[defaultPath] = instance.image
           Console.verboseLog("Loaded image for sprite \""..name.."\" from default path \""..
-              defaultPath.."\".")
+              defaultPath.."\"")
         else
           error("The sprite \""..name.."\" has no associated path!")
         end
@@ -52,10 +52,10 @@ local Sprite = utils.class(
         if love.filesystem.getInfo(path) then
           instance.image = love.graphics.newImage(path)
           spriteImages[name] = instance.image
-          Console.verboseLog("Loaded image for sprite \""..name.."\" from path \""..path.."\".")
+          Console.verboseLog("Loaded image for sprite \""..name.."\" from path \""..path.."\"")
         else
           -- throw an error if the image doesn't exist
-          error("The image \""..path.."\" does not exist!")
+          error("The image \""..path.."\" does not exist (or could not be opened)!")
         end
       end
     end
@@ -97,11 +97,11 @@ function Sprite:draw(x, y, transparency, scale)
   scale = scale or 1
 
   love.graphics.push()
-    love.graphics.translate(x, y)
-    love.graphics.scale(scale)
-    -- apparently color affects images for some reason
-    love.graphics.setColor(1, 1, 1, transparency)
-    love.graphics.draw(self.image, self.xOffset, self.yOffset)
+  love.graphics.translate(x, y)
+  love.graphics.scale(scale)
+  -- apparently color affects images for some reason
+  love.graphics.setColor(1, 1, 1, transparency)
+  love.graphics.draw(self.image, self.xOffset, self.yOffset)
   love.graphics.pop()
 end
 

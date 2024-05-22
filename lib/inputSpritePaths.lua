@@ -43,8 +43,8 @@ local gamepadPaths = {
   ["right stick vertical"] = "rs_vertical.png",
   ["right stick"] = "rs.png",
   ["right trigger"] = "rt.png",
-  ["share"] = "select",
-  ["options"] = "start"
+  ["share"] = "select.png",
+  ["options"] = "start.png"
 }
 
 return {

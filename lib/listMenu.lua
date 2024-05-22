@@ -110,6 +110,10 @@ local ListMenu = utils.class(
 
         option.bbox.w = totalWidth
         option.bbox.x = -option.bbox.w / 2
+      elseif option.type == "image" then
+        option.bbox.w = option.bbox.w + option.spacing + option.image.width * option.imageScale
+        option.bbox.x = -option.bbox.w / 2
+        option.bbox.y = option.bbox.y
       end
 
       if option.description == nil then option.description = "" end
@@ -329,6 +333,9 @@ function ListMenu:draw()
       love.graphics.rectangle("fill", -20, -20, 30, 7)
       love.graphics.rectangle("fill", -20, -20, 7, 30)
       love.graphics.pop()
+    elseif option.type == "image" then
+      utils.drawImageTooltipCentered(option.image, option.imageScale, option.text, self.optionsFont,
+          option.spacing, 0, yPos + self.optionLineHeight / 4, true)
     end
   end
 
