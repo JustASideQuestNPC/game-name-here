@@ -36,9 +36,7 @@ function SetGameState(state)
   end
   currentGameState = state
 end
-
-prevMenu = GameState.PAUSE_MENU
-SetGameState(GameState.GRAPHICS_MENU)
+SetGameState(GameState.GAMEPLAY)
 
 DisplayScale = 1
 local function setDisplayScale(width, height)

@@ -74,6 +74,7 @@ end
 ---@field position Vector2
 ---@field velocity Vector2
 ---@field angle number
+---@field aimAngle number
 ---@field remainingDashes integer
 ---@field dashTimer number
 ---@field dashRefreshTimer number
@@ -122,6 +123,7 @@ local Player = utils.class(
     instance.position = Vector2(x, y)
     instance.velocity = Vector2(0, 0)
     instance.angle = 0
+    instance.aimAngle = 0
 
     instance.remainingDashes = instance.MAX_CONSECUTIVE_DASHES
     instance.dashTimer = 0
@@ -155,6 +157,15 @@ function Player:draw()
 
   -- draw aim direction
   if self.currentBulletSpread < INITIAL_BULLET_SPREAD then
+    if input.currentInputType() == "gamepad" and UserSettings.gameplay.aimAssist > 0 and
+       self.aimAngle ~= self.angle then
+      love.graphics.push()
+      love.graphics.rotate((self.aimAngle + math.pi / 2) - (self.angle + math.pi / 2))
+      love.graphics.setColor(love.math.colorFromBytes(95, 161, 231, 128))
+      utils.dottedLine(0, 0, 0, -self.BULLET_RANGE, 5, 20)
+      love.graphics.pop()
+    end
+
     if self.shotChargeTimer <= 0 then
       love.graphics.setColor(love.math.colorFromBytes(133, 218, 235))
       utils.dottedLine(0, 0, 0, -self.BULLET_RANGE, 5, 20)
@@ -183,6 +194,21 @@ function Player:draw()
   end
 
   love.graphics.pop()
+
+  if DEBUG_CONFIG.SHOW_HITBOXES and UserSettings.gameplay.aimAssist > 0 and
+     self.currentBulletSpread < INITIAL_BULLET_SPREAD and input.currentInputType() == "gamepad" then
+    love.graphics.push()
+    love.graphics.translate(self.position:coords())
+    love.graphics.rotate(self.angle + math.pi / 2)
+
+    love.graphics.setColor(love.math.colorFromBytes(255, 93, 204, 128))
+    love.graphics.setLineWidth(3)
+    love.graphics.rotate(-math.rad(UserSettings.gameplay.aimAssist))
+    love.graphics.line(0, 0, 0, -self.BULLET_RANGE)
+    love.graphics.rotate(math.rad(UserSettings.gameplay.aimAssist) * 2)
+    love.graphics.line(0, 0, 0, -self.BULLET_RANGE)
+    love.graphics.pop()
+  end
 end
 
 function Player:update(dt)
@@ -213,8 +239,9 @@ function Player:update(dt)
     if lookVector:magSq() > 0.25 then
       self.isAiming = not self.isMeleeing
       local lookAngle = lookVector:angle()
-      if math.abs(lookAngle - self.angle) > 0.02 then
-        self.angle = lookVector:angle()
+      if math.abs(lookAngle - self.aimAngle) > 0.02 then
+        self.aimAngle = lookVector:angle()
+        self.angle = self.aimAngle
       end
     else
       setAngleFromMovement = true
@@ -225,6 +252,33 @@ function Player:update(dt)
     self.angle = delta:angle()
 
     self.isAiming = (input.isActive("aim") or input.isActive("aim release")) and not self.isMeleeing
+  end
+
+  -- apply aim assist (if any)
+  if UserSettings.gameplay.aimAssist > 0 and self.isAiming then
+    local targets = engine.getTagged(EntityTag.AIM_ASSIST_TARGET)
+    local closest = math.rad(UserSettings.gameplay.aimAssist)
+    for _, target in ipairs(targets) do
+      local targetVector = target.position - self.position
+      if targetVector:mag() > self.BULLET_RANGE then goto continue end
+
+      local targetAngle = targetVector:angle()
+
+      local a = (self.aimAngle - targetAngle) % (math.pi * 2)
+      local b = (targetAngle - self.aimAngle) % (math.pi * 2)
+      local delta
+      if a < b then
+        delta = -a
+      else
+        delta = b
+      end
+      if delta > math.pi * 2 then delta = delta - math.pi * 2 end
+      if math.abs(delta) < closest then
+        closest = math.abs(delta)
+        self.angle = targetAngle
+      end
+      ::continue::
+    end
   end
 
   -- update ranged attack

@@ -1,15 +1,18 @@
 -- Gameplay configs and anything else I don't want players touching. The filename starts with an
 -- underscore so it's always at the top of the list in my editor.
-
+ 
 DEBUG_CONFIG = {
   SHOW_HITBOXES = false, -- displays entity hitboxes and ui bounding boxes
-  FORCE_RESET_USER_SETTINGS = false -- always resets user settings to default on startup
+  FORCE_RESET_USER_SETTINGS = true -- always resets user settings to default on startup
 }
 
 return {
   saveDirectory = "UnnamedLuaShooter",
 
   defaultUserSettings = {
+    gameplay = {
+      aimAssist = 180 -- 0 <= aimAssist <= 180
+    },
     graphics = {
       width = 1280,
       height = 720,

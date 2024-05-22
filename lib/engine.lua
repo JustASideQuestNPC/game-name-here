@@ -84,14 +84,14 @@ end
 
 ---Returns an array containing all entities that a predicate function returns true for.
 ---@param predicate function
----@return table
+---@return GameEntity[]
 local function getIf(predicate)
   return utils.arrayFilter(entities, predicate)
 end
 
 ---Returns an array containing all entities that have a certain tag.
 ---@param tag EntityTag
----@return table
+---@return GameEntity[]
 local function getTagged(tag)
   return utils.arrayFilter(entities, function (entity)
     return entity:hasTag(tag)
