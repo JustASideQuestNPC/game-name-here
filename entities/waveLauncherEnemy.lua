@@ -44,7 +44,7 @@ end
 ---@field angle number
 ---@field trailPoints table[]
 local WaveLauncherProjectile = utils.class(
-  GameEntity, function (instance, position, angle)
+  GameEntity, function(instance, position, angle)
     instance.tags = {EntityTag.ENEMY_PROJECTILE}
     instance.displayLayer = 0
 
@@ -110,7 +110,7 @@ end
 ---@field waveState "idle"|"charging"|"cooldown"
 ---@field waveTimer number
 local WaveLauncherEnemy = utils.class(
-  GameEntity, function (instance, x, y)
+  GameEntity, function(instance, x, y)
     instance.tags = {EntityTag.ENEMY}
     instance.displayLayer = 1
 

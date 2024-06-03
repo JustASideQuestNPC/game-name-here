@@ -12,7 +12,7 @@ local GameEntity, EntityTag = temp.GameEntity, temp.EntityTag
 ---@field height number
 ---@field hitbox table
 local Wall = utils.class(
-  GameEntity, function (instance, x, y, w, h)
+  GameEntity, function(instance, x, y, w, h)
     instance.tags = {EntityTag.WALL, EntityTag.COLLIDES_WITH_ENEMIES}
     instance.displayLayer = 2
 

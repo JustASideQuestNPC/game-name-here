@@ -7,7 +7,9 @@ local utils = require "lib.utils"
 local SPRITE_PATHS = {
   player = "assets/entities/player/player.png",
   waveLauncherEnemyBody = "assets/entities/waveLauncherEnemy/body.png",
-  waveLauncherEnemyProjectile = "assets/entities/waveLauncherEnemy/projectile.png"
+  waveLauncherEnemyProjectile = "assets/entities/waveLauncherEnemy/projectile.png",
+  chaseEnemyBody = "assets/entities/chaseEnemy/body.png",
+  chaseEnemyFlame = "assets/entities/chaseEnemy/flame.png"
 }
 
 ---@type table<string, Image> All currently loaded images.

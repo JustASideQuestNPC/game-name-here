@@ -6,7 +6,7 @@ local GameEntity, EntityTag = temp.GameEntity, temp.EntityTag
 
 ---@class LevelBackground: GameEntity
 local LevelBackground = utils.class(
-  GameEntity, function (instance)
+  GameEntity, function(instance)
     instance.tags = {EntityTag.LEVEL_BACKGROUND}
     instance.displayLayer = -1
   end

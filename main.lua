@@ -12,7 +12,7 @@ local _ = require "console.console"
 local LevelBackground = require "entities.levelBackground"
 local Player = require "entities.player"
 local Wall = require "entities.wall"
-local DebugTarget = require "entities.debugTarget"
+local ChaseEnemy = require "entities.chaseEnemy"
 
 ---@enum Fonts
 Fonts = {
@@ -63,7 +63,7 @@ function SetGameState(state)
   end
   currentGameState = state
 end
-SetGameState(GameState.PAUSE_MENU)
+SetGameState(GameState.GAMEPLAY)
 
 DisplayScale = 1
 local function setDisplayScale(width, height)
@@ -630,10 +630,7 @@ function love.load()
 ---@diagnostic disable-next-line: assign-type-mismatch
   PlayerEntity = engine.addEntity(Player(centerX, centerY)) ---@type Player
 
-  engine.addEntity(DebugTarget(centerX - 300, centerY))
-  engine.addEntity(DebugTarget(centerX + 300, centerY))
-  engine.addEntity(DebugTarget(centerX, centerY - 300))
-  engine.addEntity(DebugTarget(centerX, centerY + 300))
+  engine.addEntity(ChaseEnemy(centerX - 300, centerY))
 end
 
 ---Called once per frame to update the game.

@@ -12,7 +12,7 @@ return {
 
   defaultUserSettings = {
     gameplay = {
-      aimAssist = 180 -- 0 <= aimAssist <= 180
+      aimAssist = 0 -- 0 <= aimAssist <= 180
     },
     graphics = {
       width = 1280,
@@ -144,6 +144,10 @@ return {
 
       projectileMaxVelocity = 1950, -- pixels per second; projectiles spawn with 0 velocity
       projectileAcceleration = 2400, -- pixels per second squared
+    },
+    chaseEnemy = {
+      turnSpeed = 180, -- degrees per second
+      moveSpeed = 600, -- pixels per second
     },
   }
 }

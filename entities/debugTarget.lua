@@ -6,7 +6,7 @@ local GameEntity, EntityTag = temp.GameEntity, temp.EntityTag
 
 ---@class DebugTarget: GameEntity
 local DebugTarget = utils.class(
-  GameEntity, function (instance, x, y)
+  GameEntity, function(instance, x, y)
     instance.tags = {EntityTag.AIM_ASSIST_TARGET}
     instance.displayLayer = 1
 

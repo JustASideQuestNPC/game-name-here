@@ -25,7 +25,7 @@ local UNAIM_SPEED = math.rad(playerConfig.unAimSpeed)
 ---@field distanceTraveled number
 ---@field charged boolean
 local PlayerBullet = utils.class(
-  GameEntity, function (instance, position, velocity, damage, maxDistance, charged)
+  GameEntity, function(instance, position, velocity, damage, maxDistance, charged)
     instance.tags = {EntityTag.PLAYER_BULLET}
     instance.displayLayer = 0
 
@@ -93,7 +93,7 @@ end
 ---@field shotChargeTimer number
 ---@field beginDash fun(self, dashVector: Vector2)
 local Player = utils.class(
-  GameEntity, function (instance, x, y)
+  GameEntity, function(instance, x, y)
     instance.tags = {EntityTag.PLAYER}
     instance.displayLayer = 2
 
