@@ -111,6 +111,11 @@ end
 ---@field waveTimer number
 local WaveLauncherEnemy = utils.class(
   GameEntity, function(instance, x, y)
+    -- add a bit of randomness to prevent issues if two enemies are spawned at exactly the same
+    -- position on exactly the same frame (this happens when using console commands)
+    x = x + utils.randFloat(-10, 10)
+    y = y + utils.randFloat(-10, 10)
+
     instance.tags = {EntityTag.ENEMY}
     instance.displayLayer = 1
 

@@ -17,6 +17,11 @@ local MOVE_SPEED = config.moveSpeed
 ---@field angle number
 local ChaseEnemy = utils.class(
   GameEntity, function(instance, x, y)
+  -- add a bit of randomness to prevent issues if two enemies are spawned at exactly the same
+    -- position on exactly the same frame (this happens when using console commands)
+    x = x + utils.randFloat(-10, 10)
+    y = y + utils.randFloat(-10, 10)
+
     instance.tags = {EntityTag.ENEMY}
     instance.displayLayer = 1
 
@@ -30,7 +35,7 @@ local ChaseEnemy = utils.class(
     )
 
     instance.position = Vector2(x, y)
-    instance.velocity = Vector2(0, config.moveSpeed)
+    instance.velocity = Vector2(0, MOVE_SPEED)
     instance.angle = 0
   end
 )

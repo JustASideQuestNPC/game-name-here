@@ -13,6 +13,8 @@ local LevelBackground = require "entities.levelBackground"
 local Player = require "entities.player"
 local Wall = require "entities.wall"
 local ChaseEnemy = require "entities.chaseEnemy"
+local WaveLauncherEnemy = require "entities.waveLauncherEnemy"
+local EntityTag = require("lib.gameEntity").EntityTag
 
 ---@enum Fonts
 Fonts = {
@@ -629,8 +631,6 @@ function love.load()
   -- global reference to the player
 ---@diagnostic disable-next-line: assign-type-mismatch
   PlayerEntity = engine.addEntity(Player(centerX, centerY)) ---@type Player
-
-  engine.addEntity(ChaseEnemy(centerX - 300, centerY))
 end
 
 ---Called once per frame to update the game.
@@ -755,4 +755,26 @@ end
 Console.COMMAND_HELP.hcf = "Crashes the game, in case you wanted to do that for some reason."
 Console.COMMANDS.hcf = function(_)
   local foo = {} + 1
+end
+
+local SUMMON_ENTITY_NAMES = {
+  waveLauncherEnemy = WaveLauncherEnemy,
+  chaseEnemy = ChaseEnemy
+}
+Console.COMMAND_HELP.summon = "Spawns the named entity at the player's position."
+Console.COMMANDS.summon = function(args)
+  if args[1] == nil then
+    Console.error("Invalid argument: summon requires an entity name.")
+  elseif SUMMON_ENTITY_NAMES[args[1]] == nil then
+    Console.error("Invalid argument: "..args[1].." is not an entity.")
+  else
+    engine.addEntity(SUMMON_ENTITY_NAMES[args[1]](PlayerEntity.position.x, PlayerEntity.position.y))
+  end
+end
+
+Console.COMMAND_HELP.killAllEnemies = "Self-explanatory."
+Console.COMMANDS.killAllEnemies = function(_)
+  engine.removeIf(function(entity)
+    return entity:hasTag(EntityTag.ENEMY) or entity:hasTag(EntityTag.ENEMY_PROJECTILE)
+  end)
 end
