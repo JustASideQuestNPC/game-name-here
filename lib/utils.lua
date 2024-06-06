@@ -17,14 +17,14 @@ local function class(base, init)
     init = base
     base = nil
   elseif type(base) == 'table' then
-    -- our new class is a shallow copy of the base class!
+    -- the new class is a shallow copy of the base class
     for i,v in pairs(base) do
       c[i] = v
     end
     c._base = base
   end
   -- the class will be the metatable for all its objects,
-  -- and they will look up their methods in it.
+  -- and they will look up their methods in it
   c.__index = c
 
   -- expose a constructor which can be called by <classname>(<args>)
@@ -35,7 +35,7 @@ local function class(base, init)
   if init then
     init(obj,...)
   else
-    -- make sure that any stuff from the base class is initialized!
+    -- make sure that everything from the base class is initialized
     if base and base.init then
     base.init(obj, ...)
     end
@@ -59,6 +59,8 @@ end
 ---@param t table
 ---@return boolean
 local function isArray(t)
+  -- Loop through every pair in the table and check if the keys are sequential and start at 0.
+  -- If they are, the table is an array.
   local i = 0
   for _ in pairs(t) do
     i = i + 1
@@ -171,14 +173,15 @@ local function clamp(value, min, max)
 end
 
 ---Returns the *real* arctangent of y/x, because some idiot at Lua headquarters decided that nobody
----actually wanted to aim things at the mouse without writing their own freaking trig functions.
+---actually wanted to aim things at the mouse without having to write their own trig functions.
 ---@param y number
 ---@param x number
 ---@return number
 ---@nodiscard
 local function atan2(y, x)
-  -- Does anyone know who decided that math.atan was a drop-in replacement for atan2? I'd like to
-  -- speak to them using a large blunt object (for legal reasons, this is a joke).
+  -- Does anyone know who decided that math.atan was a drop-in replacement
+  -- for atan2? I'd like to speak to them using a large blunt object (for legal
+  -- reasons, this is a joke and in Minecraft).
   if x > 0 then
     return math.atan(y / x)
   elseif x < 0 and y >= 0 then
