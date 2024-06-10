@@ -15,6 +15,7 @@ local Wall = require "entities.wall"
 local ChaseEnemy = require "entities.chaseEnemy"
 local WaveLauncherEnemy = require "entities.waveLauncherEnemy"
 local EntityTag = require("lib.gameEntity").EntityTag
+local TutorialOverlay = require "entities.tutorialOverlay"
 
 ---@enum Fonts
 Fonts = {
@@ -626,6 +627,7 @@ function love.load()
   engine.addEntity(Wall(0, gameConfig.gameplay.roomHeight, gameConfig.gameplay.roomWidth, 100))
   engine.addEntity(Wall(-100, -100, 100, gameConfig.gameplay.roomHeight + 200))
   engine.addEntity(Wall(gameConfig.gameplay.roomWidth, -100, 100, gameConfig.gameplay.roomHeight + 200))
+  engine.addEntity(TutorialOverlay())
 
   local centerX, centerY = engine.roomCenter()
   -- global reference to the player
